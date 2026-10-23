@@ -1,6 +1,6 @@
 # 현대자동차그룹 차량용 앱 개발 공모전
 
-- 상태: 최종 90/100·ready, 1차 기획서 제출 승인 요청 준비 완료
+- 상태: 팀원 직접 제출 인계 — 최종 90/100·ready, 에이전트 자동 제출 중단·미발송
 - 공식 공고: https://appdevchallenge.auto-hmg.io/landing
 - 마감: 2026-11-15T23:59+09:00
 - 유형·레벨: idea / 로컬 레벨 3, 레지스트리 레벨 2(진행 중 게이트 재기록 CLI 제한)
@@ -28,11 +28,11 @@
 - 공식 DOCX 생성기의 경로 보호·링크 보존·외부 입력 거부 결함을 독립 리뷰로 수정했다. 실제 원본·이전 출력 보존 부정경로 smoke 3건은 제작 워커가 확인했으며 최종 증거를 검수 패키지에 남긴다.
 - 최종 DOCX/PDF 생성과 제작 담당·head·ContestJudge의 16/16쪽 직접 시각 검수를 완료했다. 원본 구성원표·동의절·서명표와 본문 8개 항목의 텍스트 보존을 확인했다. 최종 90/100·ready를 `ach score`에 기록했으며 개인정보 입력·접수는 수행하지 않았다.
 
-## 승인용 파일과 재생성
+## 팀원 전달 파일과 재생성
 
 - 기획서: [`submission/application-review.docx`](submission/application-review.docx)
 - 검수용 PDF: [`submission/application-review.pdf`](submission/application-review.pdf)
-- 제출 조건·승인 후 절차: [`SUBMISSION.md`](SUBMISSION.md)
+- 팀원 제출 절차: [`SUBMISSION.md`](SUBMISSION.md)
 - 점수·검수 범위: [`JUDGE.md`](JUDGE.md), [`RUBRIC.md`](RUBRIC.md)
 - 원고 입력 계약과 문서 도구: [입력 계약](.harness/work-orders/document-interface.md), `tools/build_document.py`
 - 문서 재생성은 `tools/.venv/bin/python tools/build_document.py --replace`로 수행한다. python-docx·LibreOffice·Poppler가 필요하며 최종 파일이 바뀌면 전 페이지 시각 검수를 새로 수행한다. 이 명령은 개인정보를 채우는 기능이 아니며 승인 후 서명한 사본에 적용하지 않는다.
@@ -43,3 +43,11 @@
 - 최종 내부 점수는 차량특화성 23/25, 창의성 23/25, 기술 활용성 23/25, 사업성 21/25로 총 90/100·ready다. 실제 모델·원본 판정은 `.harness/judge/final-1-model.json`, `final-1.json`에 있다.
 - 승인 대상은 개인정보·동의·서명 공란인 공식 DOCX와 대응 PDF다. 승인 후 개인 값·서명으로 파일이 변경되면 전 페이지를 다시 검수해야 한다. 실제 앱·SDK·고객 수요·수익성의 검증 완료를 주장하지 않는다.
 - 최종 파일 해시·관찰 기록·제출 범위는 `JUDGE.md`와 `SUBMISSION.md`를 따른다. 공개되지 않은 공식 배점을 추정한 내부 점수이며 수상 확률이 아니다.
+- `ach check` 0건과 최종 점수 기록·commit/push 후 `awaiting_approval`로 전환했다. 컨트롤 승인 요청은 `.private/note.txt`에 남겼으며 승인·개인정보 입력·발송·접수는 수행하지 않았다.
+
+### 2026-10-23 — 팀원 직접 제출로 전환
+
+- 최신 사용자 지시에 따라 자동 제출을 중단했다. 메일 작성·첨부·업로드·발송·접수 및 `ach submit`은 수행하지 않았다.
+- 팀원은 위 DOCX의 참가자 정보·동의·서명을 작성하여 직접 제출한다. 현재 개인·학생 선택을 실제 참가 구성과 대조하고, 팀 참가라면 전원 기재·동의·서명·CC를 적용한다.
+- 저장소의 기획서와 PDF는 개인정보·서명이 공란인 검수 완료본이다. 중단된 개인정보·서명 사본은 `.private/`에만 보존하며 push하지 않는다.
+- 기존 자동 승인 기록은 최신 지시로 발송 재개에 사용할 수 없다. 자동 승인·제출 재개를 막는 최신 인계 메모를 하네스에 기록한다.
