@@ -22,8 +22,8 @@
 ## 3단계: 승인 전 검수
 
 - [X] T030 [D1] head가 최종 PDF 16/16쪽 이미지를 개별 확인하고 해시·페이지별 관찰을 `.private/visual-review/head-review.md`에 기록했다.
-- [ ] T031 [D1] ContestJudge가 모든 페이지를 직접 읽고 최종 채점한다. 목표 90점 이상·ready까지 내용 및 서식 결함을 수정한다.
-- [ ] T032 [D2] SUBMISSION·JUDGE·README에 실제 점수·해시·검수 범위·승인 후 입력 항목·후속 일정을 정리한다.
+- [X] T031 [D1] ContestJudge가 최종 16/16쪽을 직접 확인하고 90/100·ready를 반환했다. 최종 점수와 실제 모델을 기록했다.
+- [X] T032 [D2] SUBMISSION·JUDGE·README에 해시·검수 범위·승인 후 입력 항목·후속 일정을 정리하고 최종 점수를 기록했다.
 - [ ] T033 [D2] ach check 0건과 커밋·push를 확인한 뒤 awaiting_approval로 전환하고 컨트롤에 승인을 요청한다. 이 세션은 승인 명령·접수를 실행하지 않는다.
 
 ## 후속 단계: 승인과 선정 이후

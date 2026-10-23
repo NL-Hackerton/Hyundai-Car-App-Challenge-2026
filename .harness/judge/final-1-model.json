@@ -1,0 +1,6 @@
+{
+  "agent": "DraftJudge",
+  "checkpoint": "승인용 최종 기획서",
+  "source_session": "DraftJudge.jsonl",
+  "observed_runtime_metadata": "{\n  \"type\": \"model_change\",\n  \"timestamp\": \"2026-10-23T05:45:49.733Z\",\n  \"model\": \"openai-codex/gpt-6.1-sol\",\n  \"resolvedModelIsFallback\": false\n}\n{\n  \"type\": \"message\",\n  \"timestamp\": \"2026-10-23T05:49:44.834Z\",\n  \"provider\": \"openai-codex\",\n  \"model\": \"gpt-6.1-sol\",\n  \"stopReason\": \"stop\"\n}\n{\n  \"type\": \"message\",\n  \"timestamp\": \"2026-10-23T06:16:28.971Z\",\n  \"provider\": \"openai-codex\",\n  \"model\": \"gpt-6.1-sol\",\n  \"stopReason\": \"stop\"\n}"
+}

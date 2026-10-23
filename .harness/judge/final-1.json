@@ -1,0 +1,456 @@
+{
+  "stage": "final",
+  "checkpoint": "승인용 최종 기획서",
+  "target_path": "submission/application-review.docx",
+  "total": 90,
+  "target": 90,
+  "verdict": "ready",
+  "evaluation_basis": {
+    "scope": "개인정보·동의·서명이 공란인 승인용 DOCX와 대응 PDF의 내용·서식을 독립 평가했다. 발송 가능한 서명 완료본이나 실제 앱의 검증 완료 판정은 아니다.",
+    "weights": "gate.json의 차량특화성·창의성·기술 활용성·사업성 각 25점을 적용했다. 공식 세부 배점은 미공개이며 이 배점과 총점은 내부 평가다.",
+    "independence": "plan-5의 예측점수와 제작자·head의 통과 주장을 승계하지 않았다. 수정 원고를 읽고 PDF 16쪽의 이미지를 각각 직접 열어 확인했다.",
+    "verification_executed": [
+      "최종 DOCX·PDF·원고 SHA-256 확인",
+      "페이지 이미지 16개의 SHA-256 확인 및 manifest 대조",
+      "pdfinfo로 16쪽·A4·비암호화·PDF 1.7 확인",
+      "PDF 전체 텍스트 추출·열람",
+      "ach check linkareer-358198 --json 실행: findings 0건",
+      "페이지 1~16 이미지 개별 직접 시각 검수"
+    ],
+    "verification_not_executed": "파일 수정, 재렌더, 빌드, 테스트, 외부 원문 재조회, SDK 실행, 고객 조사, 개인정보 조회, 승인, 접수·업로드는 수행하지 않았다.",
+    "style_review": "문체검수 기록은 지정 Argon 경로의 할당량 오류 후 허용된 자동 폴백으로 실행된 gpt-6.1-sol의 결과로 확인했다. Argon이 검수를 완료했다고 인증하지 않는다.",
+    "ready_meaning": "현재 해시의 비식별 승인용 기획서 패키지를 승인 검토에 제시할 수 있다는 판정이다. 참가자의 승인·동의·서명·권리 보증 또는 발송을 대신하지 않는다.",
+    "hashes": {
+      "docx": "0ca080eb0a862764185d2608b670a961caca5e7fa45175763fcee5f55b745dbd",
+      "pdf": "211fd900ca5188a8cd72c3903a2d270d48a6ae3e26a750a25a03bd5b5cfd7663",
+      "manuscript": "72cdf4c88d2d3bfed2639641e9ac4ee020ab984b2cc71b8c4aaf9bf25dff0688"
+    }
+  },
+  "scores": [
+    {
+      "round": "1차 서류심사",
+      "name": "차량특화성",
+      "weight": 25,
+      "score": 23,
+      "evidence": [
+        "submission/application-review.pdf 2~3쪽: 앞좌석 확인 담당자가 남는 2인 동선과 후석 두 영역 지원을 고객 조건으로 한정한다.",
+        "같은 PDF 3~5쪽: 문 상태·선택 그룹·사용자 완료를 구분하고 수동 선택 우선권, 열린 채 이동, 무관한 개폐, 명시적 일시중지를 설명한다.",
+        "같은 PDF 9쪽: 동일 차량 화면의 연동 유무를 비교하여 화면 크기와 도어 연동 기여를 분리한다."
+      ],
+      "rationale": "왜 차량 안에서 켜는지와 차량 입력이 어느 순간에 기여하는지가 구체적이다. 초안의 하차 감지 오독과 무관한 개폐 처리 모순도 해소됐다. 다만 해당 동선의 실제 빈도와 자동 강조의 편익은 아직 가설이다. 더 강한 입상작이라면 실제 기존 행동과 지원 환경별 편익의 관찰 자료가 있었을 것이다. 현재는 검증 설계의 완성도를 평가하되 실제 효용 확보로 가산하지 않았다."
+    },
+    {
+      "round": "1차 서류심사",
+      "name": "창의성",
+      "weight": 25,
+      "score": 23,
+      "evidence": [
+        "submission/application-review.pdf 4쪽: Reminders·Keep·To Do·종이·구두 방식의 강점을 인정하고 차별 범위를 중단 항목 재탐색으로 좁힌다.",
+        "같은 PDF 8~9쪽: 자연 동선 발견 기준, 공정한 네 조건, 사전 순서 배정, 과제별 짝지은 차이와 조별 집계를 제시한다.",
+        "같은 PDF 9쪽: 스트레스 과제만의 개선을 채택 근거로 인정하지 않고 실패·결측을 보존한다."
+      ],
+      "rationale": "범용 목록을 새 이름으로 포장하지 않고 특정 이동 구간의 맥락 보조로 차별화했다. 수동 대안을 일부러 불편하게 만드는 비교도 배제했다. 초안의 관련성 자동 판별 오독이 사라져 차별 기능의 설명이 일관된다. 남은 감점은 문제의 직접 관찰과 3초 편익의 고객 가치가 미확인이라는 점이다. 입상작 수준을 더 높이려면 자연스러운 중단 사례와 설치·설정 부담을 상쇄하는 사용자 근거가 필요하다."
+    },
+    {
+      "round": "1차 서류심사",
+      "name": "기술 활용성",
+      "weight": 25,
+      "score": 23,
+      "evidence": [
+        "submission/application-review.pdf 5~6쪽: 개발 시작 버전·의존성·권한·capability·조회·구독·해제와 실제 후석 지원의 미확인을 명시한다.",
+        "같은 PDF 5쪽: 하차 전 사용자 일시중지와 Activity 중단·Service 연결 해제를 구분하고 실제 하차·탑승자 존재를 감지하지 않는다고 명시한다.",
+        "같은 PDF 6~7쪽: DO 미선언, 초기 잠금, 현재 제한 확인, 불명 상태 차단, 세대번호·경합·해제·재조회 계약을 제시한다.",
+        "같은 PDF 8쪽: 실제 접근·후석 지원 검증 시한, 실패 시 중단, 본선 시연과 후속 APK 의무를 연결한다."
+      ],
+      "rationale": "모든 핵심 상태 전이가 공개 API 또는 명시적 사용자·수명주기 입력으로 설명된다. 제어·음성·원격 알림을 제외하고 운전석 예제를 후석 실증으로 확대하지 않는다. 초안의 기술 경계 HIGH 문제는 해결됐다. 남은 감점은 SDK 접근 승인·후석 두 영역·UX 차단·버전 조합의 실제 실행 증거가 없다는 점이다. 최초 접수에 앱은 선택이므로 미구현 자체는 규칙 위반이 아니지만 실행 확인을 마친 제안과 같은 확실성은 부여하지 않았다."
+    },
+    {
+      "round": "1차 서류심사",
+      "name": "사업성",
+      "weight": 25,
+      "score": 21,
+      "evidence": [
+        "submission/application-review.pdf 10쪽 표 7: 환경·동선 검사 전 후보 가구 N, 공동 통과율 e, 설치율 i, 첫 행동률 a와 구매 분모를 단일 표로 정의한다.",
+        "같은 PDF 11쪽 표 8: 활성 가구의 민감도, 개인 MAU와 가구 단위의 차이, 재사용 분모·기간·표본 하한을 명시한다.",
+        "같은 PDF 11~12쪽: 동일 조사 집단의 사례비, 유지비, 일회 가격, 공제·전환 가정과 손익 규모를 연결한다.",
+        "같은 PDF 12쪽: 확장 채널도 동일한 후보 가구 단위로 통일하고 실제 유통·비용 미달 시 확대 중단을 제시한다."
+      ],
+      "rationale": "초안의 분모 불일치가 해소됐다. 기본 모집으로는 독립 수익사업이 성립하지 않는다는 한계를 공개하고 무료 파일럿·가격·유통 검증을 구분한다. 다만 유통 도달량, 다중 루틴 지불 의사, 지원 시간과 비용은 여전히 가정이다. 더 강한 입상작이라면 소규모라도 실제 채널 도달과 가격 선택 근거가 있었을 것이다. 산술과 반증 가능한 검증 순서는 평가하지만 지속 수익성을 입증한 것으로 가산하지 않았다."
+    }
+  ],
+  "gated_checks": [
+    {
+      "check": "파일 형식·분량·구성",
+      "passed": true,
+      "evidence": [
+        "submission/application-review.docx는 지정된 공식 DOCX 기반 승인용 파일이다. 최종 DOCX·PDF·원고 해시가 호출자가 지정한 값 및 manifest와 일치했다.",
+        "pdfinfo 결과 대응 PDF는 A4 16쪽, 802021바이트, 비암호화 PDF 1.7이다. 공식 소개자료는 분량 제한이 없다.",
+        "PDF 1쪽의 01 A/B, 2~14쪽의 02 1~8, 15쪽의 03, 16쪽의 04를 직접 확인했다.",
+        ".private/visual-review/preservation.json은 외곽 표 10개, 참가 구성원표·동의절·서명표 보존, 원고와 8개 본문 입력의 텍스트 일치를 기록한다. 시각적으로도 구조와 내용의 누락·잘림을 발견하지 않았다."
+      ]
+    },
+    {
+      "check": "자격·블라인드·개인정보·승인 경계",
+      "passed": true,
+      "evidence": [
+        ".harness/gate.json eligibility·reasons의 비식별 자격 확인 기록을 적용했다. 개인 프로필을 새로 조회하지 않았다.",
+        "PDF 2~14쪽의 심사 본문과 참고자료에 참가자 성명·소속·연락처·계정·서명을 발견하지 않았다.",
+        "PDF 1·16쪽의 개인 값·동의 체크·서명·날짜 공란은 승인용 범위의 보호 절차다. SUBMISSION.md는 이를 발송 가능한 서명 완료본과 구분한다.",
+        "승인 후 개인 값·동의·서명 입력과 변경 파일 전 페이지 재검수·해시 대조를 SUBMISSION.md에서 의무화한다."
+      ]
+    },
+    {
+      "check": "AI 정책·직접 창작·권리 준수",
+      "passed": true,
+      "evidence": [
+        "PDF 13~14쪽 AI 활용 고지는 조사·기획·초안·구간 검토·문체 편집의 실제 사용과 사용자 조사·앱 개발·구동 검증 미실행을 구분한다.",
+        "docs/draft/ai-use.md와 SUBMISSION.md는 AI 명시 조항 미발견을 허용 보장으로 해석하지 않으며 독립 창작·권리·사실 확인 책임을 유지한다.",
+        ".harness/reviews/method.md·editor-model.json·second-pass-model.json은 실제 폴백 모델을 기록한다. Argon 완료로 오기하지 않았다.",
+        "위반을 발견하지 않았다는 판정이지 참가자의 독립 창작·권리 보증을 대신하는 인증은 아니다."
+      ]
+    },
+    {
+      "check": "문서 위생·표·수식·교차참조",
+      "passed": true,
+      "evidence": [
+        "PDF 3·4·5·6·8·9·10·11·12쪽의 표 1~9와 각 캡션이 함께 배치되어 있다.",
+        "본문에 남은 작업용 자리표시자·내부 구획 기호·이미지 수식·깨진 글리프·표 주석의 명백한 불일치를 발견하지 않았다.",
+        "승인 전 공란과 공식 서식의 입력 안내는 작업용 미완성 본문과 구분했다.",
+        "12→13쪽 참고문헌 URL 및 13→14쪽 AI 고지는 연속 내용으로 읽히며 누락은 발견하지 않았다."
+      ]
+    },
+    {
+      "check": "문서 전 페이지 비전 검수",
+      "passed": true,
+      "evidence": {
+        "docx_sha256": "0ca080eb0a862764185d2608b670a961caca5e7fa45175763fcee5f55b745dbd",
+        "pdf_sha256": "211fd900ca5188a8cd72c3903a2d270d48a6ae3e26a750a25a03bd5b5cfd7663",
+        "source_to_pdf_mapping": "manifest.json의 최종 DOCX를 LibreOffice로 변환한 대응 PDF이며 두 파일의 현재 해시를 직접 확인했다.",
+        "render_tool": "LibreOffice 26.8.0.3 → Poppler 26.07.0, 160DPI",
+        "total_pages": 16,
+        "reviewed_pages": 16,
+        "image_hash_check": "16개 이미지의 현재 SHA-256이 manifest의 페이지별 값과 모두 일치했다.",
+        "method": "아래 이미지를 각각 개별 read로 직접 열었다. 제작자·head 기록이나 추출 텍스트만으로 대체하지 않았다. 정확한 줄간격 수치는 이미지에서 추정하지 않았다.",
+        "pages": [
+          {
+            "page": 1,
+            "image": ".private/visual-review/final/page-01.png",
+            "observation": "운영 접수 안내, 참가 선택, 프로젝트명, 구성원표와 주의문이 읽힌다. 개인 정보란은 공란이며 표 선·체크박스·footer·쪽번호가 겹치지 않는다.",
+            "judgment": "통과"
+          },
+          {
+            "page": 2,
+            "image": ".private/visual-review/final/page-02.png",
+            "observation": "심사자료 안내와 한 줄 소개, 기획 배경의 문헌 수치·한계가 읽힌다. 입력박스 폭 안에 본문이 배치되고 마지막 문장은 다음 쪽으로 정상 이어진다.",
+            "judgment": "통과"
+          },
+          {
+            "page": 3,
+            "image": ".private/visual-review/final/page-03.png",
+            "observation": "기획 배경의 연속 문장 뒤 기능 항목이 시작한다. 표 1의 세 열과 다섯 기능행, 캡션이 같은 쪽에 있으며 일시중지·개인정보 설명이 잘리지 않는다.",
+            "judgment": "통과"
+          },
+          {
+            "page": 4,
+            "image": ".private/visual-review/final/page-04.png",
+            "observation": "표 2의 대안 비교와 캡션이 함께 있고 긴 제품명이 읽힌다. 시나리오 제목·안내·도입 문단이 함께 시작해 제목만 고립되지 않는다.",
+            "judgment": "통과"
+          },
+          {
+            "page": 5,
+            "image": ".private/visual-review/final/page-05.png",
+            "observation": "표 3의 여섯 단계와 캡션이 온전하다. 실제 하차 비감지와 명시적 중지가 읽힌다. 개발 계획의 버전·의존성 문단은 다음 쪽과 이어지며 footer 침범이 없다.",
+            "judgment": "통과"
+          },
+          {
+            "page": 6,
+            "image": ".private/visual-review/final/page-06.png",
+            "observation": "표 4의 긴 API·권한·범위 식별자가 열 안에 읽힌다. 캡션, 후석 미확인, 제어 제외와 UX 제한 설명에 잘림·글리프 깨짐이 보이지 않는다.",
+            "judgment": "통과"
+          },
+          {
+            "page": 7,
+            "image": ".private/visual-review/final/page-07.png",
+            "observation": "UX 제한 연속 문단과 처리 순서 1~5가 명확하다. 개발 인수조건 제목과 설명이 함께 있다. 하단 여백은 크지만 내용 없는 빈 쪽은 아니며 다음 일정표의 온전배치와 연결된다.",
+            "judgment": "통과·여백 기록"
+          },
+          {
+            "page": 8,
+            "image": ".private/visual-review/final/page-08.png",
+            "observation": "표 5의 개발·접수·본선·후속 일정과 캡션이 한 쪽에 온전하다. 6항 제목과 발견 조사 문단이 함께 시작하며 하단 본문과 footer가 분리된다.",
+            "judgment": "통과"
+          },
+          {
+            "page": 9,
+            "image": ".private/visual-review/final/page-09.png",
+            "observation": "네 조건 순환 기호와 3·3·2·2 배정이 읽힌다. 표 6의 측정·판단 기준과 캡션이 붙어 있고 짝지은 차이·결측 처리 설명도 잘리지 않는다.",
+            "judgment": "통과"
+          },
+          {
+            "page": 10,
+            "image": ".private/visual-review/final/page-10.png",
+            "observation": "표 7에서 N·공동 통과율 e·설치 i·활성 a·구매 분모를 세 열로 읽을 수 있다. 캡션·가구 중복 제거·다음 계산 정의의 배치와 행간이 읽기를 방해하지 않는다.",
+            "judgment": "통과"
+          },
+          {
+            "page": 11,
+            "image": ".private/visual-review/final/page-11.png",
+            "observation": "표 8의 세 시나리오와 수치·캡션이 온전하다. 개인 MAU, 두 재사용 분모, 사례비·가격 설명이 읽힌다. 하단 여백은 다음 손익표 온전배치에 따른 것으로 수용한다.",
+            "judgment": "통과·여백 기록"
+          },
+          {
+            "page": 12,
+            "image": ".private/visual-review/final/page-12.png",
+            "observation": "표 9의 손익 역산과 캡션이 함께 있고 사업 미성립·확대 중단 조건이 읽힌다. 참고자료가 시작하며 문헌 [1] URL이 api- 뒤에서 다음 쪽으로 이어진다.",
+            "judgment": "통과·URL 연속 기록"
+          },
+          {
+            "page": 13,
+            "image": ".private/visual-review/final/page-13.png",
+            "observation": "위쪽에 문헌 [1] URL의 나머지가 이어진다. 나머지 참고문헌과 긴 URL이 폭 안에 배치되어 읽힌다. AI 고지 제목과 첫 문장 일부가 함께 있고 다음 쪽으로 연속된다.",
+            "judgment": "통과·문단 연속 기록"
+          },
+          {
+            "page": 14,
+            "image": ".private/visual-review/final/page-14.png",
+            "observation": "AI 고지 후반, 숏폼 미제출 입력, 공식 블라인드 안내가 읽힌다. 동의서의 별도 시작 때문에 하단 여백이 크지만 완전한 빈 쪽은 아니다.",
+            "judgment": "통과·섹션 여백 기록"
+          },
+          {
+            "page": 15,
+            "image": ".private/visual-review/final/page-15.png",
+            "observation": "03 동의서의 목적·항목·보유기간·거부권·수탁 안내가 읽힌다. 원문 목록·밑줄·구분선에 겹침이나 페이지 밖 잘림이 보이지 않는다.",
+            "judgment": "통과"
+          },
+          {
+            "page": 16,
+            "image": ".private/visual-review/final/page-16.png",
+            "observation": "04 동의·서명·CC 안내와 5열 서명표가 온전하다. 동의 선택·서명·날짜는 공란이며 프로젝트명과 서식 버전이 표 아래에 읽힌다.",
+            "judgment": "통과"
+          }
+        ]
+      }
+    },
+    {
+      "check": "페르소나 흔적",
+      "passed": true,
+      "evidence": [
+        "ach check linkareer-358198 --json의 findings는 0건이다.",
+        "최종 PDF의 추출 텍스트와 16쪽 이미지에서 설정된 페르소나 흔적 및 부적절한 반말·애교 문체를 발견하지 않았다.",
+        "최종 DOCX 본문과 원고의 8개 항목 일치에 관한 preservation 기록도 대조했다."
+      ]
+    },
+    {
+      "check": "수치 정직성과 단위·분모",
+      "passed": true,
+      "evidence": [
+        "PDF 2쪽: 3,000가구·5,000명 및 29.2%·80.5%·48.8%는 research/sources.json 출처 14와 대응하며 조사 간 곱셈·미준수율 추론을 배제한다.",
+        "PDF 8~9쪽: 10개 조·20명, 6개 조·4개 조, 3초·10초·0회는 가정한 조사·유지 기준이다. 과제별 차이→조별 중앙값→조 간 중앙값 집계가 정의되어 있다.",
+        "PDF 10~12쪽: N은 환경·동선 검사 전 고유 후보 가구, e는 공동 통과율로 통일된다. 같은 필터를 이중 적용하지 않는다.",
+        "PDF 11쪽 표 8의 4→4.8→4.96, 12→16.8→18.72, 27→43.2→52.92는 제시한 식과 일치하며 소수 가구를 기댓값으로 표시한다.",
+        "PDF 11~12쪽: 사례비 40만 원, 월 비용 4만~8만 원, 구매당 3,430원, 구매 12~24가구·활성 240~480가구·후보 N 2,000~4,000의 산술이 제시된 가정과 일치한다."
+      ]
+    },
+    {
+      "check": "최초 접수와 후속 의무",
+      "passed": true,
+      "evidence": [
+        "PDF 12·14쪽: 선택 개발자료·숏폼 미제출을 명시하며 가산점을 계산하지 않는다.",
+        "PDF 8쪽 표 5: 본선 선정 시 12월 3~4일 실제 앱 시연과 최종 선정팀의 2027년 2월 행사·APK 의무가 포함된다.",
+        "PDF 11쪽: 장기 재사용 집단과 발견 조사 집단을 구분하고 본선 전 30일 관찰 완료를 약속하지 않는다."
+      ]
+    }
+  ],
+  "requirement_mapping": [
+    {
+      "id": "FR-001",
+      "status": "covered",
+      "location": "PDF 1~16쪽; preservation.json",
+      "rationale": "공식 01~04 및 02의 1~8과 외곽 표 구조를 보존했다. 자유서술 박스 내부 행 확장은 내용과 순서를 유지한 페이지 흐름 조정이다."
+    },
+    {
+      "id": "FR-002",
+      "status": "covered",
+      "location": "PDF 2쪽 공식 안내; pdfinfo",
+      "rationale": "분량 제한 없음에 따라 16쪽으로 작성했으며 임의 분량 위반은 없다."
+    },
+    {
+      "id": "FR-003",
+      "status": "covered",
+      "location": "PDF 2~14쪽; SUBMISSION.md 접수 조건",
+      "rationale": "심사 본문·참고자료에 참가자 식별 정보가 없다."
+    },
+    {
+      "id": "FR-004",
+      "status": "covered",
+      "location": "PDF 1쪽; gate.json eligibility·reasons",
+      "rationale": "개인·학생 선택과 기존 비식별 자격 기록이 대응한다. 개인 값을 조회하지 않았다."
+    },
+    {
+      "id": "FR-005",
+      "status": "covered",
+      "location": "PDF 15~16쪽; SUBMISSION.md 승인 후 절차",
+      "rationale": "동의서·서명표와 전원 서명·CC 안내를 보존했다. 승인용 공란을 발송 완료로 보지 않으며 실제 동의·서명은 승인 후 의무다."
+    },
+    {
+      "id": "FR-006",
+      "status": "covered",
+      "location": "PDF 1쪽; SUBMISSION.md 접수 조건",
+      "rationale": "마감·수신처·제목·같은 발신자의 최종 수정본 조건이 있다. 실제 발송은 미실행이다."
+    },
+    {
+      "id": "FR-007",
+      "status": "covered",
+      "location": "PDF 13~14쪽; docs/draft/ai-use.md 규정과 책임",
+      "rationale": "출처와 수행 범위를 공개하고 참가자의 독립 창작·권리 확인 책임을 유지한다. 위반을 발견하지 않았으며 참가자 보증을 대신하지 않는다."
+    },
+    {
+      "id": "FR-008",
+      "status": "covered",
+      "location": "PDF 13~14쪽; docs/draft/ai-use.md",
+      "rationale": "실제 AI 활용과 미실행 활동을 공개하며 명시 정책 미발견을 허용 보장으로 해석하지 않는다."
+    },
+    {
+      "id": "FR-009",
+      "status": "covered",
+      "location": "PDF 5~8쪽",
+      "rationale": "공개 SDK·API를 핵심 경험에 연결하고 접근·권한·버전·실제 지원 미확인과 확인 관문을 명시한다. 실제 실행 완료를 뜻하지 않는다."
+    },
+    {
+      "id": "FR-010",
+      "status": "covered",
+      "location": "PDF 12·14쪽",
+      "rationale": "없는 개발자료와 숏폼을 제출하거나 가산점으로 계산하지 않는다."
+    },
+    {
+      "id": "FR-011",
+      "status": "covered",
+      "location": "PDF 8쪽 표 5; SUBMISSION.md 후속 필수 일정",
+      "rationale": "본선 실제 앱·오프라인 시연 및 후속 행사·최종 APK 의무를 추적한다."
+    },
+    {
+      "id": "FR-012",
+      "status": "covered",
+      "location": "PDF 1·16쪽; SUBMISSION.md 승인 후 절차",
+      "rationale": "승인 전 공란과 승인 후 변경 파일 재렌더·전 페이지 검수·발송 해시 대조를 구분한다."
+    },
+    {
+      "id": "FR-013",
+      "status": "covered",
+      "location": "CONTEST.md 최신 근거; docs/form-map.md 본선·권리·승인 경계",
+      "rationale": "자동화 접근·수집 금지와 적용 범위 불확실성을 유지한다. 이번 검수에서 외부 접근·수집·접수 자동화는 하지 않았다."
+    },
+    {
+      "id": "SC-001",
+      "status": "covered",
+      "location": "PDF 2~5·9쪽",
+      "rationale": "고객 위치·문 변화·수동 복구·공정한 대조를 연결했다. 실제 효용은 미확인으로 남긴다."
+    },
+    {
+      "id": "SC-002",
+      "status": "covered",
+      "location": "PDF 4·8~9쪽",
+      "rationale": "세 직접 대안과 기존 방식, 차별 가설·반증·실패 보고를 제시했다. 관찰 근거 부족은 점수에 반영했다."
+    },
+    {
+      "id": "SC-003",
+      "status": "covered",
+      "location": "PDF 5~8쪽",
+      "rationale": "공개 계약·오류 경계·최소 권한·인수조건과 개발 시한이 대응한다."
+    },
+    {
+      "id": "SC-004",
+      "status": "partial",
+      "location": "PDF 10~12쪽",
+      "rationale": "분모·민감도·가격·비용·중단 기준은 연결됐다. 실제 채널 도달과 지불 의사 증거가 없어 사업 성립의 확신은 제한된다."
+    }
+  ],
+  "previous_findings_resolution": [
+    {
+      "id": "D1-01",
+      "status": "resolved",
+      "location": "PDF 3·5쪽",
+      "rationale": "하차 전 사용자 일시중지와 Activity·Service 사건을 구분하고 사람의 실제 하차·탑승자 존재 비감지를 명시했다."
+    },
+    {
+      "id": "D1-02",
+      "status": "resolved",
+      "location": "PDF 3·5·7·9쪽",
+      "rationale": "자동 모드는 관련성을 판별하지 않아 무관한 개폐도 강조할 수 있고 수동 모드는 모든 이벤트에 선택 우선권을 유지한다고 통일했다."
+    },
+    {
+      "id": "D1-03",
+      "status": "resolved",
+      "location": "PDF 10~12쪽 표 7~9",
+      "rationale": "N과 공동 통과율 e를 단일 분모표로 정의하고 초기 모집·손익·확장 채널의 후보 가구 단위를 통일했다."
+    },
+    {
+      "id": "D1-04",
+      "status": "retained_as_limitation",
+      "location": "PDF 2·8~9쪽",
+      "rationale": "직접 고객 관찰은 여전히 없다. 이를 완료로 꾸미지 않고 조사 관문과 가설 기각 조건으로 유지해 감점에 반영했다."
+    },
+    {
+      "id": "D1-05",
+      "status": "partially_resolved",
+      "location": "PDF 11~12쪽",
+      "rationale": "무료 이용자의 유료 확장 선택 이유 조사를 추가했다. 실제 유통·가격·지원 비용 증거는 아직 없으므로 사업성 감점은 남긴다."
+    }
+  ],
+  "findings": [
+    {
+      "id": "F1-01",
+      "severity": "MEDIUM",
+      "criterion": "창의성",
+      "location": "submission/application-review.pdf 2·8~9쪽",
+      "issue": "자연스러운 2인 동선과 반복 중단의 직접 관찰 근거 및 3초 개선의 고객 가치는 미확인이다.",
+      "recommendation": "후속 동의 기반 발견 조사에서 기존 행동과 설정 부담을 실제 관찰한 뒤에만 근거를 추가한다. 발견 기준에 미달하면 원고에 적힌 대로 현재 고객·차량 연동 가설을 중단한다.",
+      "score_impact": "현재 차량특화성·창의성의 만점 미부여 근거다. 미수행 조사를 문장 보강으로 대체하지 않는다."
+    },
+    {
+      "id": "F1-02",
+      "severity": "MEDIUM",
+      "criterion": "사업성",
+      "location": "submission/application-review.pdf 10~12쪽",
+      "issue": "채널 도달·공동 통과율·지불 의사·지원 비용은 가정이며 독립 수익사업의 성립은 입증되지 않았다.",
+      "recommendation": "기재한 파일럿에서 실제 고유 도달·단계별 통과·가격 선택·지원 시간을 기록하고 손익을 재산정한다. 수익 규모를 역산한 채널 목표를 확보된 유통으로 표현하지 않는다.",
+      "score_impact": "사업성 21점의 주된 감점 근거다."
+    },
+    {
+      "id": "F1-03",
+      "severity": "LOW",
+      "criterion": "문서 표현",
+      "location": "submission/application-review.pdf 12→13쪽 및 13→14쪽",
+      "issue": "문헌 [1] URL과 AI 고지가 페이지를 넘어 이어진다. 내용 누락은 없지만 읽는 흐름은 다소 끊긴다.",
+      "recommendation": "현재 배치는 수용 가능하다. 향후 다른 수정으로 재제작할 때 문헌 항목과 짧은 고지 문단의 함께 배치를 검토하되, 공식 구조와 표 온전배치를 훼손하지 않는다. 변경 시 전 페이지를 다시 검수한다.",
+      "score_impact": "관문 실패나 승인용 패키지의 중단 사유는 아니다."
+    }
+  ],
+  "gaps": [
+    {
+      "location": "SUBMISSION.md 승인 후 개인정보·서명 절차",
+      "gap": "개인 값·동의·서명 입력과 실제 발송은 미실행이다. 현재 ready는 승인용 패키지에만 유효하다. 변경된 발송본은 전 페이지 재렌더·재검수와 실제 발송 파일 해시 대조가 필수다."
+    },
+    {
+      "location": "PDF 5~8쪽",
+      "gap": "SDK 접근 승인·후석 두 영역·실제 콜백·UX 화면 차단·버전 조합은 미실증이다. 최초 접수의 필수 구현 누락은 아니며 문서에 명시된 후속 기술 관문이다."
+    },
+    {
+      "location": "PDF 8~12쪽",
+      "gap": "사용자 조사·비교 실험·30일 재사용·채널 도달·지불 의사·매출은 미관측이다. 현재 점수는 이를 실측 성과로 인정하지 않는다."
+    },
+    {
+      "location": ".harness/reviews/method.md·editor-model.json·second-pass-model.json",
+      "gap": "실제 Argon 완료 결과는 없다. 허용된 자동 폴백의 gpt-6.1-sol 검수로 기록되어 있으며 이를 Argon 검수로 재표기하면 안 된다."
+    },
+    {
+      "location": "research/sources.json gaps",
+      "gap": "공식 확인된 이전 수상작·심사평이 없어 수상작과의 직접 비교는 수행하지 못했다."
+    },
+    {
+      "location": ".harness/gate.json refresh_status·reasons",
+      "gap": "로컬 최신 레벨·기준과 레지스트리 과거 기록의 운영 불일치는 남아 있다. 이번 점수는 로컬 최신 네 기준을 적용했으며 레지스트리 상태를 변경하지 않았다."
+    }
+  ],
+  "conclusion": "현 해시의 승인용 DOCX·PDF는 필수 구조·블라인드·수치 정직성·기술 경계와 후속 의무를 충족하고, PDF 16/16쪽의 독립 시각 검수에서도 통과를 막는 잘림·겹침·깨진 글리프·표/캡션 분리·빈 쪽을 발견하지 않았다. 초안 HIGH 문제와 사업 분모 불일치는 해소됐다. 실증 부족은 각 기준의 감점과 MEDIUM 한계로 유지하며, 내부 총점 90점·ready로 판정한다. 이 결과는 제출 승인이나 서명 완료·접수 완료를 뜻하지 않는다."
+}

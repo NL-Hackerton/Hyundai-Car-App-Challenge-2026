@@ -44,6 +44,7 @@
 | 4 | plan | 후보 C 개선 1 | 86 / 90 | revise | plan-4-model.json: gpt-6.1-sol | .harness/judge/plan-4.json |
 | 5 | plan | 후보 C 개선 2 | 90 / 90 | ready | plan-5-model.json: gpt-6.1-sol | .harness/judge/plan-5.json |
 | 6 | draft | 공식 기획서 초안 | 86 / 90 | revise | draft-1-model.json: gpt-6.1-sol | .harness/judge/draft-1.json |
+| 7 | final | 승인용 최종 기획서 16쪽 | 90 / 90 | ready | final-1-model.json: gpt-6.1-sol | .harness/judge/final-1.json |
 
 <p>표 2. 채점 실행 후 결과를 기록하는 이력표.</p>
 
