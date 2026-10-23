@@ -382,6 +382,103 @@
       "uncertainties": [
         "첨부는 바이너리로 반환되었고 문서뷰어 본문이 읽히지 않아 조사 수치를 인용하지 않았다."
       ]
+    },
+    {
+      "id": 22,
+      "url": "https://document.pleos.ai/en/docs/pleos-only/vehicle-app-developer-guide/driving-restriction-development-guide",
+      "title": "Pleos 주행 제한 개발 지침",
+      "publisher": "현대자동차그룹 Pleos Playground",
+      "published_at": null,
+      "checked_at": "2026-10-23",
+      "type": "공식 기술문서",
+      "evidence": ["CarUxRestrictionsManager와 변경 콜백 연동을 직접 안내한다."],
+      "uncertainties": ["대상 환경의 Manager 연결·콜백·화면 차단 동작은 미검증이다."],
+      "provenance": "research/ux-restrictions.md의 공식 원문 확인 기록을 사용했다."
+    },
+    {
+      "id": 23,
+      "url": "https://document.pleos.ai/en/docs/pleos-only/vehicle-app-planning-guide/driving-restiction-policy",
+      "title": "Pleos 지역별 주행 제한 정책",
+      "publisher": "현대자동차그룹 Pleos Playground",
+      "published_at": null,
+      "checked_at": "2026-10-23",
+      "type": "공식 기술정책",
+      "evidence": ["DO 미선언 앱은 Parking 허용·Drive 불허가 기본이다.", "플랫폼 버전·양산차별 차이 가능성을 명시한다."],
+      "uncertainties": ["대상 환경의 실제 정책과 Activity 심사 조건은 확인 전이다."],
+      "provenance": "research/ux-restrictions.md의 공식 원문 확인 기록을 사용했다."
+    },
+    {
+      "id": 24,
+      "url": "https://developer.android.com/reference/android/car/drivingstate/CarUxRestrictionsManager",
+      "title": "CarUxRestrictionsManager API",
+      "publisher": "Google Android Developers",
+      "published_at": null,
+      "updated_at": "2025-10-09",
+      "checked_at": "2026-10-23",
+      "type": "공식 API 명세",
+      "evidence": ["getCurrentCarUxRestrictions, registerListener, unregisterListener의 현재값 조회·구독·해제 계약을 설명한다."],
+      "uncertainties": ["실제 Pleos 대상 환경에서 호출하지 않았다."],
+      "provenance": "research/ux-restrictions.md의 공식 원문 확인 기록을 사용했다."
+    },
+    {
+      "id": 25,
+      "url": "https://developer.android.com/reference/android/car/drivingstate/CarUxRestrictions",
+      "title": "CarUxRestrictions API",
+      "publisher": "Google Android Developers",
+      "published_at": null,
+      "checked_at": "2026-10-23",
+      "type": "공식 API 명세",
+      "evidence": ["isRequiresDistractionOptimization이 false일 때 비-DO Activity를 표시할 수 있다.", "BASELINE == 0만으로 비-DO 화면 표시를 허용할 수 없다."],
+      "uncertainties": ["UX 허용 상태는 물리적 주차 완료·안전한 하차의 증거가 아니다."],
+      "provenance": "research/ux-restrictions.md의 공식 원문 확인 기록을 사용했다."
+    },
+    {
+      "id": 26,
+      "url": "https://support.apple.com/guide/iphone/work-with-templates-iph3735c6147/ios",
+      "title": "Work with templates in Reminders on iPhone",
+      "publisher": "Apple",
+      "published_at": null,
+      "checked_at": "2026-10-23",
+      "type": "공식 직접 대안",
+      "evidence": ["목록 템플릿의 저장·재사용·공유 기능을 설명한다."],
+      "uncertainties": ["공식 문서의 실시간 차량 문 연동 미설명을 모든 버전의 기능 부재로 확대하지 않는다.", "차량 연동 대비 사용자 편익은 아직 비교하지 않았다."],
+      "provenance": "research/selected-plan.md의 2026-10-23 공식 원문 확인 기록을 사용했다."
+    },
+    {
+      "id": 27,
+      "url": "https://support.google.com/keep/answer/6395451?hl=en",
+      "title": "Make a list",
+      "publisher": "Google",
+      "published_at": null,
+      "checked_at": "2026-10-23",
+      "type": "공식 직접 대안",
+      "evidence": ["체크박스·항목 재정렬·들여쓰기를 제공한다."],
+      "uncertainties": ["비교 실험에서 수동 전환을 강제하지 않고 중단 항목 재탐색을 측정한다.", "공식 문서의 미설명을 모든 버전의 기능 부재로 확대하지 않는다."],
+      "provenance": "research/selected-plan.md의 2026-10-23 공식 원문 확인 기록을 사용했다."
+    },
+    {
+      "id": 28,
+      "url": "https://support.microsoft.com/en-us/accessibility/todo/use-a-screen-reader-to-add-steps-and-set-importance-to-a-task-in-to-do",
+      "title": "Use a screen reader to add steps and set importance to a task in To Do",
+      "publisher": "Microsoft",
+      "published_at": null,
+      "checked_at": "2026-10-23",
+      "type": "공식 직접 대안",
+      "evidence": ["과제를 세부 단계로 나누고 완료·중요도 상태를 관리한다."],
+      "uncertainties": ["단계·완료·중요도 기능을 본 기획의 발명으로 주장하지 않는다.", "차량 문 맥락의 사용자 편익은 아직 비교하지 않았다."],
+      "provenance": "research/selected-plan.md의 2026-10-23 공식 원문 확인 기록을 사용했다."
+    },
+    {
+      "id": 29,
+      "url": "https://appdevchallenge.auto-hmg.io/notice/c0a1a000-2026-4923-8000-000000000006",
+      "title": "본선 실제 동작 앱 시연 및 최종 선정팀 후속 의무 공지",
+      "publisher": "현대자동차그룹 차량용 앱 개발 공모전",
+      "published_at": null,
+      "checked_at": "2026-10-23",
+      "type": "공식 공지",
+      "evidence": ["1차 합격 20팀은 2026-12-03~04 오프라인 PT에서 실제 동작 앱을 시연해야 한다.", "최종 10팀은 2027년 2월 행사 참석·APK 제출 의무가 있다."],
+      "uncertainties": ["실제 선정·개발·참석을 완료했다는 기록이 아니다."],
+      "provenance": "CONTEST.md와 docs/form-map.md의 head 공식 열람 기록을 사용했다."
     }
   ],
   "gaps": [

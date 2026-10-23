@@ -1,0 +1,6 @@
+{
+  "agent": "PlanJudgeC",
+  "checkpoint": "후보 C 개선 1",
+  "source_session": "PlanJudgeC.jsonl",
+  "observed_runtime_metadata": "{\n  \"type\": \"model_change\",\n  \"timestamp\": \"2026-10-23T05:14:59.042Z\",\n  \"model\": \"openai-codex/gpt-6.1-sol\",\n  \"resolvedModelIsFallback\": false\n}\n{\n  \"type\": \"message\",\n  \"timestamp\": \"2026-10-23T05:17:51.846Z\",\n  \"provider\": \"openai-codex\",\n  \"model\": \"gpt-6.1-sol\",\n  \"stopReason\": \"stop\"\n}\n{\n  \"type\": \"message\",\n  \"timestamp\": \"2026-10-23T05:27:14.241Z\",\n  \"provider\": \"openai-codex\",\n  \"model\": \"gpt-6.1-sol\",\n  \"stopReason\": \"stop\"\n}"
+}

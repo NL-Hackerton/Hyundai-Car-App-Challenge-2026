@@ -9,19 +9,19 @@
 - [X] T002 공식 공고·심사·FAQ·규정·약관·DOCX를 재확인하고 AI 명시 조항 미발견 및 본선 실제 앱 의무를 구분했다.
 - [X] T003 공식 DOCX 원본과 서식 지도를 확보했다. (`docs/form/`, `docs/form-map.md`)
 - [X] T004 점수표와 산출물 명세·기획 절차를 정의했다. (`RUBRIC.md`, `SPEC.md`, `PLAN.md`)
-- [ ] T005 DomainResearcher의 공개 API·고객 문제·기존 대안 근거를 조사 기록과 source ledger에 정리한다. (`research/`)
-- [ ] T006 후보 3개를 독립 채점하고 최고안의 기획 변경을 반영한다. 실제 모델과 Judge 원본을 보존하고 모든 점수를 ach score에 기록한다. (`.harness/judge/`, `RUBRIC.md`)
+- [X] T005 DomainResearcher의 공개 API·고객 문제·기존 대안 근거를 조사 기록과 source ledger에 정리했다. 보완 출처는 작성 워커가 추가한다. (`research/`)
+- [X] T006 후보 3개를 독립 채점하고 C를 73→86→90점으로 개선했다. 실제 모델과 Judge 원본을 보존하고 5개 plan 점수를 ach score에 기록했다. (`.harness/judge/`, `RUBRIC.md`)
 
 ## 2단계: 작성·교정
 
-- [ ] T020 [D1] 작성 워커가 공식 02의 1~8항목에 맞춰 본문을 작성한다. (`docs/draft/`)
-- [ ] T021 [D1] 초안 ContestJudge와 cs-report 문장·논리 리뷰를 수행하고 사실·수치·API 경계를 보완한다.
-- [ ] T022 [D1] ContestEditor가 본문 파일을 직접 편집하고 실제 모델·수정 내역·잔여 내용 문제를 기록한다.
-- [ ] T023 [D1] 제작 워커가 공식 DOCX 원형을 보존해 승인용 DOCX/PDF와 전 페이지 렌더를 생성한다. (`submission/`, `.private/visual-review/`)
+- [X] T020 [D1] 작성 워커가 공식 02의 1~8항목에 맞춰 본문을 작성했다. (`docs/draft/`)
+- [X] T021 [D1] 초안 86점 채점과 두 구간 cs-report 검수를 기록하고, 하차 비감지·개폐 관련성·가구 분모·비교 집계를 보완했다.
+- [X] T022 [D1] ContestEditor가 원고를 직접 편집하고 2차 구간 검수의 두 문장까지 반영했다. 429 이후 gpt-6.1-sol 자동 폴백과 실제 모델·수정 내역을 기록했다.
+- [X] T023 [D1] 제작 워커가 승인용 DOCX/PDF, 16쪽 전체 이미지·manifest·원본 보존 증거와 부정경로 smoke 3/3을 생성했다.
 
 ## 3단계: 승인 전 검수
 
-- [ ] T030 [D1] head가 최종 파일의 모든 페이지 이미지를 직접 확인하고 파일 해시·페이지별 관찰을 기록한다.
+- [X] T030 [D1] head가 최종 PDF 16/16쪽 이미지를 개별 확인하고 해시·페이지별 관찰을 `.private/visual-review/head-review.md`에 기록했다.
 - [ ] T031 [D1] ContestJudge가 모든 페이지를 직접 읽고 최종 채점한다. 목표 90점 이상·ready까지 내용 및 서식 결함을 수정한다.
 - [ ] T032 [D2] SUBMISSION·JUDGE·README에 실제 점수·해시·검수 범위·승인 후 입력 항목·후속 일정을 정리한다.
 - [ ] T033 [D2] ach check 0건과 커밋·push를 확인한 뒤 awaiting_approval로 전환하고 컨트롤에 승인을 요청한다. 이 세션은 승인 명령·접수를 실행하지 않는다.

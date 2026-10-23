@@ -32,7 +32,7 @@
 
 후보별 개요와 조사를 완성한 뒤 각 후보를 독립 채점한다. 가장 높은 후보를 고르고 기준별 `plan_changes`를 반영한다. 선택안 예측 점수가 90점 이상이 되거나 개선 3회를 마친 뒤 집필한다. 결과는 `.harness/judge/plan-<n>.json`과 `ach score`에 남긴다.
 
-최초 예측점수는 A 50점, B 49점, C 73점이었다. 가장 높은 C를 선택했으며, 차량 안 화면 접근 동선·직접 대안 비교·기술 인수표·유입과 수익 계산을 `research/selected-plan.md`에서 보완했다. 아직 목표 점수에 도달했다고 주장하지 않는다.
+최초 예측점수는 A 50점, B 49점, C 73점이었다. C 개선 1은 86점, 개선 2는 90점·ready로 기획 목표를 충족했다. 동일 정보량의 공정한 대조군, 중단 후 정확한 항목 탐색시간, 고유 가구 단위 사업 계산, 조건부 유통 검증이 핵심 보완이다. 이 점수는 집필 진행 판단이며 실제 앱·사용자 수요·최종 문서 통과를 뜻하지 않는다.
 
 ## 4. 단계별 총점 추이
 
@@ -41,6 +41,9 @@
 | 1 | plan | 후보 A | 50 / 90 | revise | plan-1-model.json: gpt-6.1-sol | .harness/judge/plan-1.json |
 | 2 | plan | 후보 B | 49 / 90 | revise | plan-2-model.json: gpt-6.1-sol | .harness/judge/plan-2.json |
 | 3 | plan | 후보 C | 73 / 90 | revise | plan-3-model.json: gpt-6.1-sol | .harness/judge/plan-3.json |
+| 4 | plan | 후보 C 개선 1 | 86 / 90 | revise | plan-4-model.json: gpt-6.1-sol | .harness/judge/plan-4.json |
+| 5 | plan | 후보 C 개선 2 | 90 / 90 | ready | plan-5-model.json: gpt-6.1-sol | .harness/judge/plan-5.json |
+| 6 | draft | 공식 기획서 초안 | 86 / 90 | revise | draft-1-model.json: gpt-6.1-sol | .harness/judge/draft-1.json |
 
 <p>표 2. 채점 실행 후 결과를 기록하는 이력표.</p>
 

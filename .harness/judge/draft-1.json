@@ -1,0 +1,387 @@
+{
+  "stage": "draft",
+  "checkpoint": "D1 공식 기획서 초안",
+  "target_path": "docs/draft/proposal.md",
+  "total": 86,
+  "target": 90,
+  "verdict": "revise",
+  "evaluation_basis": {
+    "scope": "공식 02의 1~8항목에 대응하는 마크다운 원고와 AI 활용 기록을 평가했다. SPEC.md, RUBRIC.md, .harness/gate.json, CONTEST.md, JUDGE.md, SUBMISSION.md, 공식 DOCX 추출 내용, docs/form-map.md, research/sources.json, research/selected-plan.md 및 research/ux-restrictions.md를 대조했다.",
+    "score_type": "현재 원고에 실제 기재된 내용의 독립 평가다. plan-5의 예측 90점을 승계하지 않았다.",
+    "weights": "각 25점은 공식 세부 배점이 아닌 내부 비교용 가정이다. 배점 합계가 100이므로 별도 환산하지 않았다.",
+    "submission_scope": "1차는 기획서 필수·개발자료 선택이다. 사용자 조사·SDK 실행·APK 미제작 자체를 규칙 위반으로 처리하지 않았으며 선택 개발자료 가산점도 합산하지 않았다.",
+    "verification_boundary": "파일을 수정하지 않았다. ach check와 원고 SHA-256 확인을 실행했다. 외부 원문 재조회, 개인정보 조회, 접수, 업로드, 렌더, 빌드, 테스트, 린트, 포매터는 실행하지 않았다.",
+    "style_review_boundary": "cs-report 작성 기준과 승인 기준본을 읽고 문장·표·단위의 정합성을 보조 점검했다. 이 결과는 지정 모델 ContestEditor의 문체검수 결과를 대신하지 않으며, 해당 모델의 검수 완료를 인증하지 않는다.",
+    "draft_format_boundary": "페이지 형식이 없는 초안이므로 최종 DOCX·PDF·서명본 검사는 적용 시점 전으로 분리했다. 미검수를 통과로 처리하지 않았고, 초안이라는 이유만으로 최종 제출물 누락 위반을 부과하지 않았다.",
+    "target_hashes": {
+      "docs/draft/proposal.md": "585d3b971529826604052ed67ae23d02510d748a201eec1fcfcb238947e523ca",
+      "docs/draft/ai-use.md": "09ab8ae8e0823029ad0d127ddb184163ce3599209d0a851b4dc8fdba09671232"
+    }
+  },
+  "scores": [
+    {
+      "round": "1차 서류심사",
+      "name": "차량특화성",
+      "weight": 25,
+      "score": 22,
+      "evidence": [
+        "docs/draft/proposal.md:15-19: 앞좌석 확인 담당자가 남는 2인 동반 외출로 고객과 화면 접근 조건을 한정한다.",
+        "docs/draft/proposal.md:33-47: 문 상태·사용자 선택·항목 완료를 구분하고 고정 목록, 수동 우선권, 양문 개방과 열린 채 이동의 한계를 설명한다.",
+        "docs/draft/proposal.md:70-85: 실제 문 변화와 중단·복귀를 연결하며 자동 실행·안전 허가를 배제한다.",
+        "docs/draft/proposal.md:152-165: 동일 차량 화면의 연동 유무를 비교하여 화면 크기와 문 연동의 기여를 분리한다."
+      ],
+      "rationale": "차량 입력을 단순 상태 조회가 아니라 중단 항목의 재탐색 보조로 연결했고, 화면을 사용할 사람이 차량 안에 남아야 한다는 조건도 명확하다. 다만 41행과 83행의 담당자 하차 시 중지는 지원되지 않은 사람 감지로 읽힐 여지가 있다. 입상작이라면 앱이 실제로 관측하는 중지 신호와 사용자의 책임을 모호하지 않게 구분했을 것이다. 자연스러운 고객 동선의 빈도와 문 연동 편익도 아직 조사 계획이므로 확인된 장점으로 가산하지 않았다."
+    },
+    {
+      "round": "1차 서류심사",
+      "name": "창의성",
+      "weight": 25,
+      "score": 22,
+      "evidence": [
+        "docs/draft/proposal.md:51-64: Reminders·Keep·To Do·종이·구두 협의의 기존 강점을 인정하고 차별 가설을 문 맥락의 재탐색 보조로 좁힌다.",
+        "docs/draft/proposal.md:146-152: 자연스러운 고객 동선이 발견되지 않으면 인위적으로 역할을 만든 비교 실험으로 넘어가지 않는다.",
+        "docs/draft/proposal.md:148-165: 3초 기준의 잠정성, 설치·설정 부담, 공정한 대조군과 실패·결측 보고를 명시한다."
+      ],
+      "rationale": "범용 목록 기능을 발명으로 주장하지 않으며, 자동화에 유리한 대조군을 만드는 문제를 상당히 방지했다. 그러나 핵심 불편의 직접 관찰 근거는 없고, 83행은 무관한 개폐를 앱이 판별하는 것처럼 읽힐 수 있다. 입상작이라면 수동 선택 상태와 자동 강조 상태를 구분한 일관된 화면 규칙으로 차별 기능을 설명하고, 실제 고객의 중단·복귀 사례를 제시했을 것이다. 간접 반려동물 통계만으로 좁은 문제의 실재성을 입증한 것으로 보지 않았다."
+    },
+    {
+      "round": "1차 서류심사",
+      "name": "기술 활용성",
+      "weight": 25,
+      "score": 22,
+      "evidence": [
+        "docs/draft/proposal.md:91-108: 개발 시작 버전, 의존성, 읽기 권한, capability·현재값·구독·해제 API와 후석 미지원 경계를 명시한다.",
+        "docs/draft/proposal.md:112-122: DO 미선언, 현재 UX 제한 확인, 불명 상태 차단, 화면 세대번호와 조회·알림 경합 처리를 설명한다.",
+        "docs/draft/proposal.md:126-140: 접근 조건과 후석 두 영역의 검증 시한, 실패 시 채택 중단, 본선 시연·후속 APK 의무와 오류 인수조건을 제시한다.",
+        "research/sources.json: 출처 1·3·4·6·9·22~25: 문서상 계약과 실제 환경 미검증을 구분한다."
+      ],
+      "rationale": "공개 API를 사용자 경험과 실패 경계에 연결한 설명은 구체적이다. 문 제어·음성·원격 알림을 제외하고 후석 지원을 운전석 예제로 대신하지 않는 점도 적절하다. 다만 담당자 하차를 세션 중지 조건으로 쓰면서 이를 감지할 입력이나 명시적 사용자 조작이 정의되지 않았다. 입상작이라면 모든 자동 상태 전이의 관측 가능한 입력을 명시했을 것이다. 실제 접근 승인·후석 영역·UX 차단·버전 조합은 미검증이므로 실행 증거가 있는 기획과 동일한 확실성을 부여하지 않았다."
+    },
+    {
+      "round": "1차 서류심사",
+      "name": "사업성",
+      "weight": 25,
+      "score": 20,
+      "evidence": [
+        "docs/draft/proposal.md:169-191: 채널 단계, 고유 가구·개인·설치 단위, 조건부 활성 계산과 재사용 분모를 구분한다.",
+        "docs/draft/proposal.md:195-206: 연구비·유지비·일회 가격·공제율·전환율·손익 규모를 연결한다.",
+        "docs/draft/proposal.md:208-212: 기준 모집으로 독립 수익사업이 성립하지 않음을 공개하고 유통·비용·재사용 실패 시 확대 중단을 명시한다."
+      ],
+      "rationale": "계산을 성과로 포장하지 않고 작은 파일럿과 수익사업의 규모 차이를 공개했다. 다만 채널의 적격 노출, N의 자연 동선 조건, 지원 환경 통과 단계가 서로 다른 순서로 설명되어 동일 분모인지 재구성이 필요하다. 확장 채널의 모집 후보 도달량도 손익표가 요구하는 N과 직접 같다고 볼 수 없다. 입상작이라면 채널의 원시 도달에서 N과 신규 활성으로 이어지는 단일 분모표를 제시하고 실제 도달·지불 의사 근거를 보탰을 것이다. 현재의 유통·가격·비용은 모두 가정이며 사업 성립 증거는 아니다."
+    }
+  ],
+  "gated_checks": [
+    {
+      "check": "초안 범위와 최종 서식 준비 주장",
+      "passed": true,
+      "evidence": [
+        "SUBMISSION.md의 현재 범위·제작 검수 현황: DOCX·PDF·전 페이지 검수·개인정보·서명·접수의 미실행을 명시한다.",
+        "JUDGE.md의 판정 범위·미실행 검수: plan-5를 실제 문서나 제품의 준비 완료로 사용하지 않는다.",
+        "docs/draft/ai-use.md의 수행하지 않은 활동: 사용자 조사·SDK 실행·문서 변환·전 페이지 검수 미실행을 공개한다."
+      ]
+    },
+    {
+      "check": "공식 항목과 초안 구성",
+      "passed": true,
+      "evidence": [
+        "docs/draft/proposal.md:7-247: 공식 02의 1~8항목에 대응하는 본문이 있다.",
+        "docs/form/contest-application-consent.docx의 02: 추출 내용을 직접 읽어 항목 순서와 분량 제한 없음, 선택 개발자료와 숏폼의 구분을 대조했다.",
+        "SUBMISSION.md의 현재 범위: 원고는 공식 DOCX 완성본이 아니며 내부 기록을 별도 제출자료로 오인하지 않는다."
+      ]
+    },
+    {
+      "check": "최종 파일 형식·파일명·분량·필수 동의서 구성",
+      "passed": false,
+      "applicable": false,
+      "status": "최종 파일 단계 미검수",
+      "evidence": [
+        "SPEC.md D1과 SUBMISSION.md의 현재 범위·제작 검수 현황: 승인용 DOCX·PDF는 생성 예정이며 최종 형식·쪽수·01~04 보존은 확인되지 않았다.",
+        "현재 대상은 마크다운 초안이므로 최종 서식 준수나 서명 완료를 인증하지 않는다."
+      ]
+    },
+    {
+      "check": "문서 전 페이지 비전 검수",
+      "passed": false,
+      "applicable": false,
+      "status": "페이지 형식이 없는 초안으로 미실행",
+      "evidence": {
+        "target_file": "docs/draft/proposal.md",
+        "target_sha256": "585d3b971529826604052ed67ae23d02510d748a201eec1fcfcb238947e523ca",
+        "render_tool": null,
+        "source_to_pdf_mapping": null,
+        "total_pages": null,
+        "reviewed_pages": 0,
+        "page_observations": [],
+        "reason": "SUBMISSION.md의 제작·검수 현황에 최종 DOCX·PDF·전체 페이지 렌더·시각 검수 미실행이 명시되어 있으며 대응 이미지와 검수 manifest를 받지 않았다. 최종 서식 통과로 인정하지 않는다."
+      }
+    },
+    {
+      "check": "블라인드·개인정보·승인 경계",
+      "passed": true,
+      "evidence": [
+        "docs/draft/proposal.md 전체: 참가자의 성명·소속·연락처·계정·서명이 본문에 기재되어 있지 않다.",
+        "SUBMISSION.md의 승인 후 개인정보·서명 절차: 승인 후 비공개 사본 입력, 변경 후 전 페이지 재검수와 해시 대조를 명시한다.",
+        ".harness/gate.json eligibility·reasons: 비식별 자격 확인 기록을 사용했다. 이번 검수에서 개인 프로필을 조회하거나 자격을 새로 인증하지 않았다."
+      ]
+    },
+    {
+      "check": "AI 정책·직접 창작·권리 준수의 표현",
+      "passed": true,
+      "evidence": [
+        "docs/draft/proposal.md:241-243 및 docs/draft/ai-use.md의 규정과 책임: 실제 AI 활용을 공개하며 명시 규정 미발견을 허용 보장으로 해석하지 않는다.",
+        "docs/draft/ai-use.md의 수행하지 않은 활동: 사람의 검토·개발·권리 확인이 완료되었다고 주장하지 않는다.",
+        "독립 창작과 권리 준수에 관한 참가자의 실제 확인은 제출 전 의무로 남아 있으며, 이번 검수가 그 보증을 대신하지 않는다."
+      ]
+    },
+    {
+      "check": "문서 위생과 표·수식의 텍스트 정합성",
+      "passed": true,
+      "evidence": [
+        "docs/draft/proposal.md:43·60·81·104·138·161·187·206: 표 1~8의 캡션이 각각 표 아래에 있다.",
+        "docs/draft 대상 검색에서 내부 구획 기호·미완성 자리표시자·이미지 삽입 표식을 발견하지 않았다.",
+        "본문의 계산식은 편집 가능한 텍스트이며 이미지 수식이 아니다. 글리프·캡션 분리·표 넘침의 실제 렌더 판정은 미실행이다."
+      ]
+    },
+    {
+      "check": "페르소나 흔적",
+      "passed": true,
+      "evidence": [
+        "CONTEST.md에 기재된 하네스 id로 ach check linkareer-358198 --json을 실행했다. findings는 빈 배열이었다.",
+        "docs/draft/proposal.md와 docs/draft/ai-use.md를 읽은 범위에서 결과물에 부적절한 반말·애교 말투를 발견하지 않았다.",
+        "최종 DOCX·PDF 안쪽의 텍스트 검사는 최종 파일 생성 후 별도로 필요하다."
+      ]
+    },
+    {
+      "check": "수치의 출처·가정·계산 구분",
+      "passed": true,
+      "evidence": [
+        "docs/draft/proposal.md:23-27과 research/sources.json 출처 14: 표본 3,000가구·5,000명과 29.2%·80.5%·48.8%의 조사·분모가 일치하며 조사 간 곱셈이나 미준수율 추론을 배제한다.",
+        "docs/draft/proposal.md:146-165: 10개 조·20명, 6개 조·4개 조, 3초·10초·0회는 설계·유지 기준이며 측정 성과가 아니다.",
+        "docs/draft/proposal.md:177-189: U와 M1~M3의 제시값은 식과 일치한다. 소수 가구는 조건부 기댓값으로 표시하며 개인 MAU와 구분한다.",
+        "docs/draft/proposal.md:195-206: 사례비 40만 원, 유지비 4만~8만 원, 구매당 3,430원, 구매 12~24가구, 활성 240~480가구, 적격 노출 2,000~4,000가구의 산술은 제시된 가정과 일치한다.",
+        "수치 조작은 발견하지 않았다. 적격 노출의 정의·단계 간 연결 문제는 별도 MEDIUM 발견 사항으로 기록했다."
+      ]
+    },
+    {
+      "check": "1차 선택 개발자료와 후속 필수 의무 구분",
+      "passed": true,
+      "evidence": [
+        "docs/draft/proposal.md:218·247: 개발자료와 숏폼을 미제출로 명시한다.",
+        "docs/draft/proposal.md:129-136 및 research/sources.json 출처 29: 본선 선정 시 12월 3~4일 실제 동작 앱 시연과 최종 선정팀의 2027년 2월 행사·APK 의무를 포함한다.",
+        "docs/draft/proposal.md:191: 30일 관찰을 본선 전에 완료한다고 약속하지 않는다."
+      ]
+    }
+  ],
+  "requirement_mapping": [
+    {
+      "id": "FR-001",
+      "status": "partial",
+      "location": "docs/draft/proposal.md:7-247; SUBMISSION.md 현재 범위",
+      "rationale": "02의 1~8 원고는 있다. 공식 DOCX의 01~04 구조와 표 보존은 최종 파일에서 확인해야 한다."
+    },
+    {
+      "id": "FR-002",
+      "status": "covered",
+      "location": "docs/form/contest-application-consent.docx 02; SPEC.md D1·FR-002",
+      "rationale": "분량 제한 없음과 확장 가능한 작성란을 적용하며 임의 분량 제한을 만들지 않았다."
+    },
+    {
+      "id": "FR-003",
+      "status": "covered",
+      "location": "docs/draft/proposal.md 전체; SUBMISSION.md 접수 조건",
+      "rationale": "현재 심사 본문에 참가자 신원을 기재하지 않았다. 최종 파일의 메타데이터·첨부·링크는 별도 확인 대상이다."
+    },
+    {
+      "id": "FR-004",
+      "status": "covered",
+      "location": "docs/draft/proposal.md:1-5; .harness/gate.json eligibility·reasons; SUBMISSION.md 현재 범위",
+      "rationale": "개인·학생 선택과 개인정보 미입력 경계를 유지한다. 제품의 2인 사용 조건을 참가팀 인원과 혼동하지 않는다."
+    },
+    {
+      "id": "FR-005",
+      "status": "partial",
+      "location": "SUBMISSION.md 승인 후 개인정보·서명 절차; docs/form/contest-application-consent.docx 03·04",
+      "rationale": "동의·서명 절차는 정의되어 있으나 승인 전이므로 입력하지 않았다. 보호 절차이며 현재 초안의 위반으로 보지 않는다."
+    },
+    {
+      "id": "FR-006",
+      "status": "covered",
+      "location": "SUBMISSION.md 접수 조건; docs/draft/proposal.md 표 5",
+      "rationale": "마감·지정 이메일·제목·최종 수정본 조건을 기록했다. 실제 발송은 미실행이다."
+    },
+    {
+      "id": "FR-007",
+      "status": "partial",
+      "location": "docs/draft/proposal.md:243; docs/draft/ai-use.md 규정과 책임; SUBMISSION.md AI·권리 확인 범위",
+      "rationale": "허위 수행과 권리 확인 완료 주장은 없다. 참가자의 독립 기획·권리·기 수상작 여부 확인은 제출 전 남아 있다."
+    },
+    {
+      "id": "FR-008",
+      "status": "covered",
+      "location": "docs/draft/proposal.md:241-243; docs/draft/ai-use.md",
+      "rationale": "실제 AI 활용과 미실행 검증을 공개하고 정책 미발견을 허용으로 단정하지 않는다."
+    },
+    {
+      "id": "FR-009",
+      "status": "partial",
+      "location": "docs/draft/proposal.md:91-140; research/sources.json 출처 1·3·4·6·9·22~25",
+      "rationale": "문서상 계약·권한·버전·인수조건은 구체적이다. 실제 지원은 미확인이고 담당자 하차 중지의 관측 입력은 불명확하다."
+    },
+    {
+      "id": "FR-010",
+      "status": "covered",
+      "location": "docs/draft/proposal.md:218·247; SUBMISSION.md 현재 범위",
+      "rationale": "없는 영상·저장소·APK·숏폼을 제출하거나 가산점을 계산하지 않는다."
+    },
+    {
+      "id": "FR-011",
+      "status": "covered",
+      "location": "docs/draft/proposal.md 표 5; SUBMISSION.md 후속 필수 일정",
+      "rationale": "선정 시 실제 앱 시연과 후속 행사·APK 의무를 계획에 포함한다. 이행 완료 판정은 아니다."
+    },
+    {
+      "id": "FR-012",
+      "status": "covered",
+      "location": "SUBMISSION.md 승인 후 개인정보·서명 절차",
+      "rationale": "승인 전 개인 값·서명을 입력하지 않으며 변경 후 재렌더·전 페이지 재검수·해시 대조를 요구한다."
+    },
+    {
+      "id": "FR-013",
+      "status": "covered",
+      "location": "CONTEST.md 최신 근거와 변경 기록; docs/form-map.md 본선·권리·승인 경계",
+      "rationale": "자동화 접근·수집 금지와 적용 범위 미확정을 기록한다. 이번 채점은 외부 접근·수집·접수 자동화를 수행하지 않았다."
+    },
+    {
+      "id": "SC-001",
+      "status": "partial",
+      "location": "docs/draft/proposal.md:15-19·33-47·70-85·152-165",
+      "rationale": "차량 입력과 고객 동선은 연결되지만 사람 하차와 무관한 개폐 처리의 표현을 관측 가능한 규칙으로 정리해야 한다."
+    },
+    {
+      "id": "SC-002",
+      "status": "partial",
+      "location": "docs/draft/proposal.md:23-27·51-64·146-165",
+      "rationale": "직접 대안·반증 계획은 있다. 핵심 불편의 직접 관찰과 실용 편익은 아직 없다."
+    },
+    {
+      "id": "SC-003",
+      "status": "partial",
+      "location": "docs/draft/proposal.md:41·83·91-140",
+      "rationale": "기술 계약과 인수조건은 있으나 담당자 하차 시 중지의 입력 정의가 빠져 있다. 실행 실증은 후속 의무다."
+    },
+    {
+      "id": "SC-004",
+      "status": "partial",
+      "location": "docs/draft/proposal.md:169-212",
+      "rationale": "가구 단위 계산·가격·중단 기준은 있으나 채널 도달에서 N까지의 단일 분모 연결과 실제 유통·지불 의사 증거가 부족하다."
+    }
+  ],
+  "findings": [
+    {
+      "id": "D1-01",
+      "severity": "HIGH",
+      "criterion": "기술 활용성",
+      "location": "docs/draft/proposal.md:41·83; research/selected-plan.md 2항",
+      "issue": "담당자가 하차하면 세션을 일시 중지한다고 서술하지만 최소 입력은 Door 읽기와 UX 제한뿐이다. 사람의 하차는 이 입력으로 확인할 수 없으므로 자동 탑승자 감지 기능으로 오해될 수 있다.",
+      "recommendation": "담당자는 하차 전에 화면의 일시 중지 또는 종료를 직접 선택한다고 명시한다. 자동 중지는 앱의 화면 이탈·백그라운드 전환 등 명시한 수명주기 사건, 연결 실패, UX 제한 변경에 연결한다. 하차 자체는 앱이 감지하지 않는다고 밝히고 기능표·시나리오·선택 기획의 관련 문장을 함께 맞춘다.",
+      "expected_score_gain": "기술 활용성 1점, 차량특화성 최대 1점의 회복 여지가 있다. 실제 반영 범위에 따라 재채점한다."
+    },
+    {
+      "id": "D1-02",
+      "severity": "MEDIUM",
+      "criterion": "차량특화성",
+      "location": "docs/draft/proposal.md:38-45·83·121",
+      "issue": "자동 강조 상태에서는 관측된 문 변화로 그룹을 강조하지만, 83행은 무관한 개폐가 있으면 문 상태만 갱신한다고 조건 없이 서술한다. 앱이 그 개폐의 작업 관련성을 판별하는 입력은 없다.",
+      "recommendation": "수동 선택 우선 상태에서는 모든 문 이벤트가 문 상태만 갱신한다고 한정한다. 자동 강조 상태에서는 관측된 개방을 반영하되 관련성은 판별하지 못하며 원치 않은 강조가 발생할 수 있다고 설명한다. 이를 표 6의 불필요한 개입 측정과 연결한다.",
+      "expected_score_gain": "차량특화성·창의성 합계 최대 1점의 회복 여지가 있다. D1-01과 중복 가산하지 않는다."
+    },
+    {
+      "id": "D1-03",
+      "severity": "MEDIUM",
+      "criterion": "사업성",
+      "location": "docs/draft/proposal.md:169-179·204·208-210",
+      "issue": "채널의 고유 적격 노출 100가구, 자연스러운 2인 동선을 전제로 한 N, 지원 환경을 먼저 확인하는 관측 순서가 혼재한다. 특히 10개 채널의 모집 후보 도달 2,000~4,000가구가 손익표에서 필요한 N과 같은 모집단인지 바로 확인되지 않는다.",
+      "recommendation": "원시 고유 도달, 자연 동선 적격 가구 N, 그중 환경 통과 가구, 설치, 첫 활성, 구매를 하나의 분모표로 연결한다. N을 동선 적격·환경 확인 전으로 유지한다면 e도 그 N을 분모로 하는 조건부 비율로 고정한다. 원시 도달에서 N까지의 통과율은 미확인으로 남기고, 확장 채널 수치가 N인지 원시 후보 도달인지 통일한다. 지원·동선의 중복 공제나 누락을 막는다.",
+      "expected_score_gain": "사업성 최대 1점의 회복 여지가 있다. 채널 실증을 확보한 것으로 추가 가산하지 않는다."
+    },
+    {
+      "id": "D1-04",
+      "severity": "MEDIUM",
+      "criterion": "창의성",
+      "location": "docs/draft/proposal.md:15-27·146-165; RUBRIC.md 기준별 창의성 만점 조건",
+      "issue": "직접 대안 비교와 검증 설계는 충실하지만, 자연스러운 2인 역할과 문 사이 중단이 실제로 반복된다는 직접 근거는 아직 없다. 간접 통계는 이 불편의 빈도나 설치 가치를 입증하지 않는다.",
+      "recommendation": "현재의 미검증 표시를 유지한다. 동의 기반 발견 조사를 실제 수행한 뒤에만 자연 동선·중단 사례·설정 부담의 관찰 결과를 추가한다. 실측이 없는 현재 단계에서는 계획 설명을 늘리거나 관찰 사례를 만들어 점수를 보충하지 않는다.",
+      "expected_score_gain": "실제 관찰 근거 확보 시 창의성·차량특화성의 추가 평가가 가능하다. 현재 원고 편집만으로 보장되는 가산점은 없다."
+    },
+    {
+      "id": "D1-05",
+      "severity": "MEDIUM",
+      "criterion": "사업성",
+      "location": "docs/draft/proposal.md:195-212; RUBRIC.md 기준별 사업성 만점 조건",
+      "issue": "일회 구매 가격, 다중 루틴의 추가 가치, 채널 공급량과 지원 비용은 모두 가정이다. 손익 규모를 역산한 것은 유통·지불 의사 확보와 다르므로 사업성의 남은 감점이 크다.",
+      "recommendation": "후속 파일럿에서 채널의 실제 고유 도달·적격 통과·지원 시간과 가격 선택 이유를 확인한다. 기본 루틴을 이미 무료로 쓰는 고객이 왜 다중 루틴에 지불하는지 조사 항목에 명시하고, 실제 결과가 생기기 전에는 수요·계약·매출로 표현하지 않는다.",
+      "expected_score_gain": "실제 채널·가격 근거 확보 시 사업성 추가 평가가 가능하다. 가정의 재서술만으로 점수를 올리지 않는다."
+    }
+  ],
+  "numeric_review": [
+    {
+      "location": "docs/draft/proposal.md:23-27",
+      "result": "문헌 수치와 조사별 표본·분모가 출처 장부와 일치한다. 차량 이용률·앱 수요·미준수율로 확대하지 않았다."
+    },
+    {
+      "location": "docs/draft/proposal.md:33·146-165",
+      "result": "항목 수·조 수·사람 수·초·회 단위가 구분된다. 3초 기준은 잠정 실용 기준이며 고객 가치가 검증된 임계값으로 표현하지 않았다."
+    },
+    {
+      "location": "docs/draft/proposal.md:177-189",
+      "result": "낮음 4→4.8→4.96, 기준 12→16.8→18.72, 높음 27→43.2→52.92는 제시된 재귀식과 일치한다. 활성 가구와 개인 MAU는 구분했다. N의 모집단 연결은 D1-03 보완이 필요하다."
+    },
+    {
+      "location": "docs/draft/proposal.md:191",
+      "result": "30일 전체 재사용과 상황 재사용의 분모·표본 하한·기준을 구분하고 발견 조사 집단을 장기 관찰 집단과 같다고 간주하지 않는다."
+    },
+    {
+      "location": "docs/draft/proposal.md:195-206",
+      "result": "20명×2만 원=40만 원, 월 2~4시간×2만 원=4만~8만 원, 4,900원×70%=3,430원의 산술이 맞다. 월 비용 회수에 필요한 구매 수 올림과 후속 활성·노출 역산도 제시된 가정 아래 일치한다."
+    },
+    {
+      "location": "docs/draft/proposal.md:91-140",
+      "result": "버전·권한·상태값은 문헌 기준이며 실제 설치 결과와 구분한다. 공식 운전석 예제의 0·1을 후석 전체에 적용하지 않는다. 본선과 후속 행사 날짜는 출처 29의 기록과 연결된다."
+    }
+  ],
+  "gaps": [
+    {
+      "location": "SUBMISSION.md 제작·검수 현황; SPEC.md D1",
+      "gap": "최종 DOCX·PDF의 형식·파일명·전체 페이지 수·01~04 구조 보존은 미검수다. 현재 원고를 최종 서식 준비 완료로 인정하지 않는다."
+    },
+    {
+      "location": "SUBMISSION.md 제작·검수 현황; .private/visual-review/",
+      "gap": "최종 전 페이지 비전 검수는 미실행이다. 최종 대상 해시, 렌더 도구, 원본·파생 PDF 대응, 전체 페이지 수, 페이지별 이미지와 관찰 기록이 제공되지 않았다. 확인 페이지는 0쪽이며 미검수 범위는 표지부터 부록·동의서까지 최종 문서 전체다."
+    },
+    {
+      "location": "SUBMISSION.md 승인 후 개인정보·서명 절차",
+      "gap": "개인정보·동의·서명은 승인 전 보호 절차로 미입력 상태다. 승인 후 입력·재저장·변환한 최종 파일은 이전 검수를 재사용하지 않고 전 페이지를 새로 확인해야 한다."
+    },
+    {
+      "location": "docs/draft/ai-use.md 수행하지 않은 활동; SUBMISSION.md 제작·검수 현황",
+      "gap": "지정 모델 ContestEditor의 실제 실행 모델 증거와 구간별 문체검수 결과는 이번 채점에서 확인하지 않았다. 본 Judge 결과를 해당 검수 완료 기록으로 사용하지 않는다."
+    },
+    {
+      "location": "docs/draft/proposal.md:91-140; research/sources.json 출처 1·3·4·6·9·22~25",
+      "gap": "실제 SDK 접근·후석 두 영역·구독·수명주기·UX 차단·버전 조합은 미실증이다. 1차의 규칙 위반은 아니며 후속 기술 관문이다."
+    },
+    {
+      "location": "docs/draft/proposal.md:146-212",
+      "gap": "고객 동선·사용성 편익·30일 재사용·채널 도달·가격·유료 전환은 미관측이다. 계획의 정교함을 실제 수요·효과·수익 증거로 대체하지 않았다."
+    },
+    {
+      "location": "research/sources.json gaps",
+      "gap": "공식 확인된 이전 수상작·심사평이 없어 수상작과의 직접 비교는 수행하지 못했다."
+    },
+    {
+      "location": ".harness/gate.json refresh_status·reasons; SPEC.md 서두",
+      "gap": "로컬 최신 기준은 네 항목·레벨 3이지만 레지스트리의 과거 게이트·레벨과 불일치한다는 기록이 있다. 이번 점수는 로컬 최신 기준을 사용했으며 운영 불일치를 해소했다고 주장하지 않는다."
+    }
+  ],
+  "conclusion": "초안은 공식 항목, 단위·수치 정직성, AI 활용 경계, 1차 선택 개발자료와 후속 실제 앱 의무를 대체로 충족한다. 그러나 담당자 하차를 관측 가능한 중지 입력으로 바꾸는 HIGH 보완이 필요하고, 무관한 개폐 처리와 적격 노출 분모도 정리해야 한다. 총점 86점으로 목표에 미달하므로 revise다. 최종 서식·전 페이지 시각 검수·개인정보·서명·발송 준비는 통과로 판정하지 않았다."
+}
