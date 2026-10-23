@@ -1,0 +1,70 @@
+{
+  "decision": "pass",
+  "checked_at": "2026-10-23",
+  "official_url": "https://appdevchallenge.auto-hmg.io/landing",
+  "title": "현대자동차그룹 차량용 앱 개발 공모전",
+  "folder": "Hyundai-Car-App-Challenge-2026",
+  "organizer": "현대자동차그룹",
+  "deadline": "2026-11-15T23:59+09:00",
+  "type": "idea",
+  "level": 3,
+  "priority": 77,
+  "eligibility": {
+    "individual_ok": true,
+    "team_ok": true,
+    "student_only": false,
+    "region": null,
+    "age": null,
+    "fee": 0,
+    "offline_required": true,
+    "ai_policy": "명시 허용·금지·표기 조항 미발견. 허용으로 해석하지 않고 실제 AI 도구 활용과 검토 범위를 투명하게 기록한다.",
+    "original_work_oath": "순수 창작·표절 금지·사실 기재. 독립 기획·개발 및 구성요소 권리·오픈소스 출처·라이선스 준수"
+  },
+  "deliverables": [
+    {"name": "접수양식(기획서)", "format": "공식 DOCX: docs/form/contest-application-consent.docx", "limits": "필수. 소개자료 분량 제한 없음. 01 A/B → 02 1~8 → 03 → 04와 표 구조 보존. 02 및 참고 링크·첨부 블라인드. 개인 값·동의·서명은 승인 후 작성"},
+    {"name": "시연 영상·GitHub 저장소·APK", "format": "파일 또는 링크", "limits": "최초 접수 시 선택·가산점 대상, 배점 미공개. 숏폼 링크는 선택이며 본상 가산점 없음"},
+    {"name": "본선 실제 동작 앱", "format": "에뮬레이터 또는 기기 시연", "limits": "1차 합격 20팀은 2026-12-03~04 오프라인 PT에서 필수. 최종 10팀은 2027년 2월 행사 참석 및 APK 제출 의무"}
+  ],
+  "criteria": [
+    {"stage": "1차 서류심사", "name": "차량특화성", "weight": 25},
+    {"stage": "1차 서류심사", "name": "창의성", "weight": 25},
+    {"stage": "1차 서류심사", "name": "기술 활용성", "weight": 25},
+    {"stage": "1차 서류심사", "name": "사업성", "weight": 25}
+  ],
+  "criteria_basis": "[가정] 네 기준별 25점은 공식 세부 배점 미공개에 따른 내부 균등 배분이다. 과거 단계별 50/50은 최신 공식 배점이 아니다. 선택 개발자료 가산점은 별도 관찰한다.",
+  "submission": {
+    "method": "메일",
+    "where": "appdevchallenge@hyundai-partners.com",
+    "files": ["작성·서명한 공식 접수양식", "선택 참고 파일 또는 링크"],
+    "notes": "기획서만으로 최초 접수 가능. DOCX 마감 2026-11-15 23:59(시간대 기호 없음, 운영 KST). 같은 발신자가 마감 전 최종 발송한 수정본으로 심사. 메일 제목 [차량용 앱 개발 공모전] 팀명(개인은 성명)_대표자명. 팀은 전원 CC 및 각자 동의·본인 서명 필요."
+  },
+  "prize": "기존 게이트 기록: 총상금 5,100만 원. 대상 1,000만 원(부문별 1팀), 최우수상 600만 원(부문별 1팀), 우수상 400만 원(부문별 2팀), 아이디어 특별상 150만 원(통합 2팀). 별도 숏폼 50만 원.",
+  "reasons": [
+    "로컬 재판정 제안이며 하네스에 적용하지 않았다. 기존 접수 개시 전 hold 사유는 실제 DOCX 확보 및 head의 2026-10-23 공개 접수 안내 열람 기록으로 해소를 제안한다.",
+    "최초 접수 구현 선택과 본선 구현 필수를 구분한다. 실제 동작 앱 및 후속 APK 의무 때문에 level=2에서 level=3으로 재분류를 제안한다.",
+    "원본 1회 다운로드 HTTP 200, 55208바이트, SHA-256 07be893d58b0e96ab7788f0d189d6829f0e59a2cee4bc18cb90ec37eeda2f5fd. 원본은 수정하지 않았다. 렌더·시각 검수는 수행하지 않았다.",
+    "[가정] 개인 참가 기본값. PT 참석 사용자 인지·진행 지시는 공통 계약에 기록되어 있으며 미확인 질문을 반복하지 않는다. 참가 부문은 제출 전 비식별 자격 근거로 확정한다. 이번 작업에서 프로필·서명·개인 값은 읽지 않았다.",
+    "AI 명시 조항 미발견은 허용이 아니다. 순수 창작 및 독립 기획·개발 규정과 구분하여 실제 도구 활용 범위를 기록한다.",
+    "약관 제9조 3항 자동화 접근·자료 수집 금지를 기록한다. 이번 공개 파일 1회 확인 이외의 대량 수집·반복 크롤링·접수 자동화를 하지 않았으며 적용 범위를 허용으로 단정하지 않는다.",
+    "기존 근거·과거 50/50·우선순위 77점 산정은 .harness/gate.json의 historical_reasons 및 historical_criteria에 보존했다. 우선순위는 이번 작업에서 재산정하지 않은 이전 값이다."
+  ],
+  "questions": [],
+  "refresh_status": "proposal_only_not_applied",
+  "participation_default": "individual",
+  "offline_attendance": "2026-12-03~04, 현대자동차 강남대로사옥 1층 UX스튜디오 서울; 공통 계약의 사용자 인지·진행 지시 확인",
+  "evidence": {
+    "direct": {"url": "https://appdevchallenge.auto-hmg.io/downloads/contest-application-consent.docx", "file": "docs/form/contest-application-consent.docx", "form_map": "docs/form-map.md", "sha256": "07be893d58b0e96ab7788f0d189d6829f0e59a2cee4bc18cb90ec37eeda2f5fd"},
+    "head_record": {
+      "record": ".harness/work-orders/research-and-form.md:10-16",
+      "checked_at": "2026-10-23",
+      "not_refetched_by_worker": true,
+      "urls": [
+        "https://appdevchallenge.auto-hmg.io/guide/submission",
+        "https://appdevchallenge.auto-hmg.io/guide/judging-awards",
+        "https://appdevchallenge.auto-hmg.io/notice/c0a1a000-2026-4923-8000-000000000006",
+        "https://appdevchallenge.auto-hmg.io/notice/c0a1a000-2026-4923-8000-000000000001",
+        "https://appdevchallenge.auto-hmg.io/terms"
+      ]
+    }
+  }
+}
