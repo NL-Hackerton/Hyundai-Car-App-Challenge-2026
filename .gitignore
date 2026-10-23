@@ -1,0 +1,8 @@
+.DS_Store
+.venv/
+__pycache__/
+.private/
+.harness/*-preset.*
+.harness/launch-prompt.md
+.harness/session.log
+.harness/contest.json
