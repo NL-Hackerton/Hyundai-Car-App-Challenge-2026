@@ -1,0 +1,5 @@
+{
+  "agent": "PlanJudgeB",
+  "source_session": "PlanJudgeB.jsonl",
+  "observed_runtime_metadata": "{\n  \"type\": \"model_change\",\n  \"timestamp\": \"2026-10-23T05:14:59.044Z\",\n  \"model\": \"openai-codex/gpt-6.1-sol\",\n  \"resolvedModelIsFallback\": false\n}\n{\n  \"type\": \"message\",\n  \"timestamp\": \"2026-10-23T05:17:36.907Z\",\n  \"provider\": \"openai-codex\",\n  \"model\": \"gpt-6.1-sol\",\n  \"stopReason\": \"stop\"\n}"
+}

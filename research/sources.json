@@ -1,0 +1,397 @@
+{
+  "checked_at": "2026-10-23",
+  "scope": "현대자동차 차량용 앱 공모전 후보 A·B·C의 비논문 근거 조사",
+  "recommendation": {
+    "ranking": [
+      "C",
+      "A",
+      "B"
+    ],
+    "selected": "C",
+    "description": "사용자 지정 준비 항목과 지원되는 도어 상태를 결합하는 주차 후 하차 준비 확인",
+    "status": "문서 근거에 따른 기획 추천이며 실환경 동작은 미검증"
+  },
+  "sources": [
+    {
+      "id": 1,
+      "url": "https://document.pleos.ai/api-reference/connect-sdk-pleos",
+      "title": "Pleos Connect SDK 개요 및 API 정책",
+      "publisher": "현대자동차그룹 Pleos Playground",
+      "published_at": null,
+      "checked_at": "2026-10-23",
+      "type": "공식 기술문서",
+      "evidence": [
+        "Vehicle API 사용 권한은 사전 협의 및 승인 범위 내에서 사용할 수 있다.",
+        "차량 기능 지원은 도메인 capability API로 확인한다."
+      ],
+      "uncertainties": [
+        "개별 프로젝트의 권한 승인 여부는 확인하지 않았다."
+      ]
+    },
+    {
+      "id": 2,
+      "url": "https://document.pleos.ai/en/api-reference/connect-sdk-pleos/Vehicle/intro",
+      "title": "Vehicle SDK 소개",
+      "publisher": "현대자동차그룹 Pleos Playground",
+      "published_at": null,
+      "checked_at": "2026-10-23",
+      "type": "공식 기술문서",
+      "evidence": [
+        "Vehicle SDK 2.3.2 및 Vehicle Service 2.3.21 기준이다.",
+        "Vehicle 진입점과 도메인 객체, 비동기 완료·실패 콜백을 설명한다.",
+        "Brake는 주차 브레이크 상태, EvBattery는 충전 상태와 전비 정보를 다루는 도메인이다."
+      ],
+      "uncertainties": [
+        "도메인 소개만으로 개별 기능의 접근 권한과 반환형을 확정할 수 없다."
+      ]
+    },
+    {
+      "id": 3,
+      "url": "https://document.pleos.ai/docs/connect/guide/getting-started/application-development/setup-connect-sdk-emulator",
+      "title": "Pleos Connect Emulator 설치 및 실행",
+      "publisher": "현대자동차그룹 Pleos Playground",
+      "published_at": null,
+      "checked_at": "2026-10-23",
+      "type": "공식 기술문서",
+      "evidence": [
+        "Emulator 2.1.0, Android API 34 이미지, 제품 앱 minSDK 28 이상, Gradle 8.0 이상을 안내한다."
+      ],
+      "uncertainties": [
+        "설치·실행하지 않았다."
+      ]
+    },
+    {
+      "id": 4,
+      "url": "https://document.pleos.ai/docs/pleos-only/connect-sdk-pleos/Vehicle/check-capability",
+      "title": "Capability",
+      "publisher": "현대자동차그룹 Pleos Playground",
+      "published_at": null,
+      "checked_at": "2026-10-23",
+      "type": "공식 기술문서",
+      "evidence": [
+        "AccessType 값은 NONE, READ, WRITE, READ_WRITE다.",
+        "영역별 허용 범위는 AreaBounds의 minValue와 maxValue로 확인한다."
+      ],
+      "uncertainties": [
+        "차종별 실제 반환 결과는 미확인이다."
+      ]
+    },
+    {
+      "id": 5,
+      "url": "https://document.pleos.ai/en/docs/pleos-only/create-my-project",
+      "title": "프로젝트 생성 및 SDK 접근 요청",
+      "publisher": "현대자동차그룹 Pleos Playground",
+      "published_at": null,
+      "checked_at": "2026-10-23",
+      "type": "공식 이용 안내",
+      "evidence": [
+        "Vehicle State와 NaviHelper는 Ready to Use로 안내한다.",
+        "FusedLocation, TextToSpeech, SpeechToText, Vehicle Control은 Not Available Yet로 안내한다.",
+        "일부 기능은 제휴 계약이 필요할 수 있다."
+      ],
+      "uncertainties": [
+        "개별 Workspace의 실제 상태를 확인하지 않았다."
+      ]
+    },
+    {
+      "id": 6,
+      "url": "https://document.pleos.ai/en/docs/pleos-only/tutorial/vehicle-sdk-sample-app",
+      "title": "Vehicle SDK Sample App 안내",
+      "publisher": "현대자동차그룹 Pleos Playground",
+      "published_at": null,
+      "checked_at": "2026-10-23",
+      "type": "공식 튜토리얼",
+      "evidence": [
+        "기준 환경은 Vehicle SDK 2.3.2, Service 2.3.22다.",
+        "Door Position의 capability·조회·구독·해제 API 호출명을 설명한다.",
+        "조회·구독은 CAR_DOORS, 변경은 CONTROL_CAR_DOORS 권한이 필요하다.",
+        "ROW_1_LEFT 예제 상태는 Closed 0, Open 1이며 실제 허용 범위를 확인하도록 안내한다.",
+        "구독 등록과 실제 알림 수신, 변경 요청 완료와 실제 상태 변경은 다르다."
+      ],
+      "uncertainties": [
+        "실제 후석·트렁크 지원과 앱 생명주기 동작은 미확인이다."
+      ]
+    },
+    {
+      "id": 7,
+      "url": "https://document.pleos.ai/en/docs/pleos-only/connect-sdk-pleos/Vehicle/vehicle/ai.pleos.playground.vehicle.api/ev-battery/entry",
+      "title": "EvBattery API 목록",
+      "publisher": "현대자동차그룹 Pleos Playground",
+      "published_at": null,
+      "checked_at": "2026-10-23",
+      "type": "공식 API 목록",
+      "evidence": [
+        "HTML 탐색 목록에서 getEvBatteryStateOfCharge, registerEvBatteryStateOfCharge, unregisterEvBatteryStateOfCharge, checkEvBatteryStateOfChargeCapabilities, getEvChargeSwitchState를 확인했다."
+      ],
+      "uncertainties": [
+        "개별 API 상세 페이지는 제목만 읽혀 반환형·단위·상태값·annotation을 확인하지 못했다."
+      ]
+    },
+    {
+      "id": 8,
+      "url": "https://document.pleos.ai/en/docs/pleos-only/release-note/sdk-261015",
+      "title": "Pleos Connect SDK 릴리스 노트",
+      "publisher": "현대자동차그룹 Pleos Playground",
+      "published_at": "2026-10-19",
+      "checked_at": "2026-10-23",
+      "type": "공식 릴리스 노트",
+      "evidence": [
+        "Vehicle 2.3.1, NaviHelper 3.0.5, TextToSpeech·SpeechToText 3.3.1, FusedLocation 1.1.2를 기재한다.",
+        "VehicleSpeedListener와 onSpeedUpdated 제거를 명시한다.",
+        "registerEvBatteryStateOfCharge를 신규 읽기·구독 API 예로 제시한다."
+      ],
+      "uncertainties": [
+        "현재 2.3.2 안내와의 차이를 실제 배포 아티팩트로 대조하지 않았다."
+      ]
+    },
+    {
+      "id": 9,
+      "url": "https://document.pleos.ai/en/docs/pleos-only/connect-sdk-pleos/Vehicle/project-setup",
+      "title": "Vehicle SDK 의존성 설정",
+      "publisher": "현대자동차그룹 Pleos Playground",
+      "published_at": null,
+      "checked_at": "2026-10-23",
+      "type": "공식 기술문서",
+      "evidence": [
+        "의존성 ai.pleos.playground:Vehicle:2.3.2를 안내한다."
+      ],
+      "uncertainties": [
+        "다운로드·빌드하지 않았다."
+      ]
+    },
+    {
+      "id": 10,
+      "url": "https://document.pleos.ai/en/docs/pleos-only/vehicle-app-planning-guide/api-compatibility-availability",
+      "title": "API 호환성과 가용성",
+      "publisher": "현대자동차그룹 Pleos Playground",
+      "published_at": null,
+      "checked_at": "2026-10-23",
+      "type": "공식 기술정책",
+      "evidence": [
+        "Vehicle SDK 지원은 차종별로 다를 수 있다.",
+        "NaviHelper는 내비게이션 탑재 차량에서 호환된다.",
+        "AAOS 속성 지원과 접근성은 차종·속성별로 확인해야 한다.",
+        "Pleos SDK에 없는 특수 속성 직접 구현은 기술지원 검토를 먼저 요청하도록 안내한다."
+      ],
+      "uncertainties": [
+        "대상 차종의 실제 지원·접근성은 미확인이다."
+      ]
+    },
+    {
+      "id": 11,
+      "url": "https://www.hyundai.com/au/en/owning/bluelink",
+      "title": "Hyundai Bluelink 공식 서비스 소개",
+      "publisher": "현대자동차 호주",
+      "published_at": null,
+      "checked_at": "2026-10-23",
+      "type": "공식 선행 서비스",
+      "evidence": [
+        "충전 상태·주행 가능 거리·도어 및 트렁크 상태·차량 찾기·충전 예약 기능을 설명한다."
+      ],
+      "uncertainties": [
+        "호주 서비스 설명이며 한국 또는 Pleos 차종의 동일 제공을 보장하지 않는다."
+      ]
+    },
+    {
+      "id": 12,
+      "url": "https://support.apple.com/ko-kr/guide/iphone/iph55564cb22/ios",
+      "title": "차량에 타고 있는 동안 iPhone을 더 편안하게 사용하기",
+      "publisher": "Apple",
+      "published_at": null,
+      "checked_at": "2026-10-23",
+      "type": "공식 선행 기능",
+      "evidence": [
+        "차량 모션큐는 동승자의 화면에 움직이는 점으로 차량 움직임을 표시한다.",
+        "운전 중 또는 안전상 집중이 필요한 상황에서는 사용하지 말라고 명시한다."
+      ],
+      "uncertainties": [
+        "기능 설명이며 후보 B의 의료 효능 근거로 사용할 수 없다."
+      ]
+    },
+    {
+      "id": 13,
+      "url": "https://www.hyundaiusa.com/us/en/vehicles/2025-santa-fe/se",
+      "resolved_url": "https://www.hyundaiusa.com/us/en/vehicles/santa-fe/se",
+      "title": "현재 Santa Fe SE 공식 사양 및 안전 기능 설명",
+      "publisher": "현대자동차 미국",
+      "published_at": null,
+      "checked_at": "2026-10-23",
+      "type": "공식 선행 차량 기능",
+      "evidence": [
+        "현재 페이지에서 AROA의 실내 움직임 감지·알림 설명을 확인했다.",
+        "SEA의 후방 접근 차량 경고와 조건부 차일드록 기능을 확인했다.",
+        "어린이·반려동물을 차량에 방치하지 말라고 안내한다."
+      ],
+      "uncertainties": [
+        "요청한 과거 연식 주소가 현재 2027년형 페이지로 이동했다.",
+        "한국 판매 차종과 동일 사양임을 검증하지 않았다."
+      ]
+    },
+    {
+      "id": 14,
+      "url": "https://www.mafra.go.kr/bbs/home/792/594753/download.do",
+      "title": "이웃집 3곳 중 1곳, 반려동물과 함께 살아",
+      "publisher": "농림축산식품부",
+      "published_at": "2026-02-12",
+      "checked_at": "2026-10-23",
+      "type": "공식 조사 결과",
+      "evidence": [
+        {
+          "survey": "2025년 반려동물 양육현황조사",
+          "base_year": 2025,
+          "sample": "3000가구",
+          "method": "가구방문 면접",
+          "metric": "반려동물 양육가구 비율",
+          "value": 29.2,
+          "unit": "%"
+        },
+        {
+          "survey": "2025년 반려동물 양육현황조사",
+          "base_year": 2025,
+          "denominator": "반려동물 양육가구",
+          "metric": "개 양육 비율",
+          "value": 80.5,
+          "unit": "%"
+        },
+        {
+          "survey": "2025년 동물복지에 대한 국민의식조사",
+          "base_year": 2025,
+          "sample": "5000명",
+          "method": "온라인 조사",
+          "metric": "반려견 외출 준수사항을 잘 지킨다는 긍정 응답",
+          "value": 48.8,
+          "unit": "%"
+        }
+      ],
+      "uncertainties": [
+        "두 조사는 모집단·방법이 달라 비교할 수 없다고 명시한다.",
+        "차량 동반 이동률·하차 누락률·앱 이용 의사 조사가 아니다."
+      ]
+    },
+    {
+      "id": 15,
+      "url": "https://document.pleos.ai/en/docs/pleos-only/connect-sdk-pleos/NaviHelper/intro",
+      "title": "NaviHelper SDK 소개",
+      "publisher": "현대자동차그룹 Pleos Playground",
+      "published_at": null,
+      "checked_at": "2026-10-23",
+      "type": "공식 기술문서",
+      "evidence": [
+        "3.0.5 기준 진입점·initialize·addListener·removeListener·release 흐름을 안내한다.",
+        "이벤트 전달은 Navigation 앱의 구현과 상태에 따라 달라질 수 있다."
+      ],
+      "uncertainties": [
+        "도착 상태값·권한·백그라운드 전달은 이번 조사에서 검증하지 못했다."
+      ]
+    },
+    {
+      "id": 16,
+      "url": "https://developer.android.com/reference/android/car/VehiclePropertyIds",
+      "title": "AAOS VehiclePropertyIds 공식 API 명세",
+      "publisher": "Google Android Developers",
+      "published_at": null,
+      "checked_at": "2026-10-23",
+      "type": "공식 표준 API 명세",
+      "evidence": [
+        "EV_CHARGE_TIME_REMAINING은 Integer·초 단위·읽기·CONTINUOUS이며 충전 중이 아니면 0이다.",
+        "EV_CHARGE_STATE는 실제 충전 상태를 나타내는 Integer·읽기·ONCHANGE 속성이다.",
+        "EV_CHARGE_SWITCH는 사용자가 원하는 충전 시작·중지 설정이다.",
+        "충전 상태·잔여시간 읽기 권한은 Car.PERMISSION_ENERGY다."
+      ],
+      "uncertainties": [
+        "Google 표준 정의이며 Pleos 대상 환경의 지원·권한 승인을 보장하지 않는다.",
+        "전체 문서 중 요약과 충전 속성 상세 구간을 읽었다."
+      ]
+    },
+    {
+      "id": 17,
+      "url": "https://document.pleos.ai/en/docs/pleos-only/release-note/emulator-261015",
+      "title": "Pleos Connect Emulator 공식 릴리스",
+      "publisher": "현대자동차그룹 Pleos Playground",
+      "published_at": "2026-10-19",
+      "checked_at": "2026-10-23",
+      "type": "공식 릴리스 노트",
+      "evidence": [
+        "Emulator 2.1.0과 Virtual Console 추가를 안내한다.",
+        "LLM SDK 지원 종료를 명시한다."
+      ],
+      "uncertainties": [
+        "실제 설치 상태는 확인하지 않았다."
+      ]
+    },
+    {
+      "id": 18,
+      "url": "https://document.pleos.ai/en/docs/pleos-only/connect-sdk-pleos/FusedLocation/intro",
+      "title": "FusedLocation SDK 소개",
+      "publisher": "현대자동차그룹 Pleos Playground",
+      "published_at": null,
+      "checked_at": "2026-10-23",
+      "type": "공식 기술문서",
+      "evidence": [
+        "1.1.2 기준이며 FUSED_LOCATION 권한을 요구한다.",
+        "getLastKnownLocation은 새 위치를 계산하지 않고 null을 반환할 수 있다.",
+        "일반 Android 위치·백그라운드 접근 정책을 별도로 보장하지 않는다."
+      ],
+      "uncertainties": [
+        "개별 프로젝트의 SDK 접근 가능 상태와 실차 동작은 미확인이다."
+      ]
+    },
+    {
+      "id": 19,
+      "url": "https://document.pleos.ai/en/docs/pleos-only/connect-sdk-pleos/TextToSpeech/intro",
+      "title": "TextToSpeech SDK 소개",
+      "publisher": "현대자동차그룹 Pleos Playground",
+      "published_at": null,
+      "checked_at": "2026-10-23",
+      "type": "공식 기술문서",
+      "evidence": [
+        "3.3.1 기준이다.",
+        "ON_DEVICE만 사용하면 네트워크·앱 등록은 필요하지 않다고 안내한다.",
+        "기본 모드는 HYBRID다."
+      ],
+      "uncertainties": [
+        "SDK 접근 상태 안내에는 Not Available Yet가 별도로 기재되어 있다."
+      ]
+    },
+    {
+      "id": 20,
+      "url": "https://document.pleos.ai/en/docs/pleos-only/connect-sdk-pleos/TextToSpeech/declaring-permissions",
+      "title": "TextToSpeech 권한 선언",
+      "publisher": "현대자동차그룹 Pleos Playground",
+      "published_at": null,
+      "checked_at": "2026-10-23",
+      "type": "공식 기술문서",
+      "evidence": [
+        "초기화·이벤트 등록·합성 요청 등에 pleos.car.permission.TTS_SERVICE 권한을 요구한다."
+      ],
+      "uncertainties": [
+        "대상 환경에서의 권한 부여를 확인하지 않았다."
+      ]
+    },
+    {
+      "id": 21,
+      "url": "https://www.kca.go.kr/smartconsumer/sub.do?menukey=7301&mode=view&no=1003983378",
+      "title": "전기차 충전요금 표시 실태조사",
+      "publisher": "한국소비자원",
+      "published_at": "2025-11-30",
+      "checked_at": "2026-10-23",
+      "type": "공식 조사 서지",
+      "evidence": [
+        "발간일과 26쪽이라는 서지정보 및 공식 첨부 링크를 확인했다."
+      ],
+      "uncertainties": [
+        "첨부는 바이너리로 반환되었고 문서뷰어 본문이 읽히지 않아 조사 수치를 인용하지 않았다."
+      ]
+    }
+  ],
+  "gaps": [
+    "현재 유효한 Pleos 주행·주차 판정 API의 상세 계약",
+    "SOC 반환형·단위·개별 annotation",
+    "대상 환경의 실제 충전 상태 및 충전 잔여시간 지원·접근 권한",
+    "후석·트렁크 도어 영역의 실제 지원",
+    "전원 종료·백그라운드·앱 종료 이후 이벤트 동작",
+    "후보별 직접 불편 발생률·이용 의사·지불 의사",
+    "공식 확인된 이전 수상작·심사평",
+    "실환경 API 호출 및 사용자 비교 검증"
+  ]
+}

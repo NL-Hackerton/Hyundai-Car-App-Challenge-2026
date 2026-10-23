@@ -1,0 +1,345 @@
+{
+  "stage": "plan",
+  "checkpoint": "후보 B 동승자 휴식 요청",
+  "candidate": "B",
+  "total": 49,
+  "target": 90,
+  "verdict": "revise",
+  "evaluation_basis": {
+    "scope": "research/candidates.md의 후보 B와 공통 보완만 평가했다. 다른 후보의 상세 기능·사업 시나리오·개발 일정은 후보 B의 장점으로 합산하지 않았다.",
+    "score_type": "현재 계획을 그대로 완성했을 때의 내부 예측점수",
+    "weights": "네 기준 각 25점은 .harness/gate.json 및 RUBRIC.md의 내부 가정이다. 공식 배점·합격 확률을 뜻하지 않는다.",
+    "summary": "주차 전용 UX의 문서상 계약과 보수적인 잠금 설계는 구체화되었다. 그러나 주행 중 새로 생긴 휴식 요구를 다루지 않는 흐름에서 말로 요청하는 방식보다 나은 이유가 약하다. 현재 핵심은 출발 전 메모와 주차 후 목록 확인에 가까우며, 가족 고객의 반복 수요와 유료화 논리도 입증되지 않았다.",
+    "locations": [
+      "research/candidates.md:24-39",
+      "research/candidates.md의 '공통 보완: 주차 전용 UX 계약 확인'",
+      "research/ux-restrictions.md:1-30",
+      "RUBRIC.md의 '1. 기준별 풀이'"
+    ]
+  },
+  "scores": [
+    {
+      "name": "차량특화성",
+      "round": "1차 서류심사",
+      "weight": 25,
+      "score": 12,
+      "rationale": "후보 B는 출발 전 휴식 유형 선택과 주차 후 확인을 구분하고, 공통 보완은 Pleos UX 제한 조회·구독 및 불명 상태 잠금을 제시한다. 다만 차량 상태는 화면을 제한하는 역할에 머물며, 요청 내용이나 처리 우선순위를 차량 맥락이 실질적으로 바꾸지는 않는다. 말로 요청하거나 스마트폰 메모를 주차 후 확인하는 대안보다 좋은 장면이 없다. 입상권 기획이라면 차량 공용 화면이 반복적인 준비 누락·중복 전달을 어떤 조건에서 줄이는지와 대안별 조작·시간 차이가 있었을 것이다.",
+      "evidence": [
+        "research/candidates.md:27-36",
+        "research/candidates.md의 '공통 보완: 주차 전용 UX 계약 확인'",
+        "research/ux-restrictions.md:7-30",
+        "RUBRIC.md의 '차량특화성' 행"
+      ]
+    },
+    {
+      "name": "창의성",
+      "round": "1차 서류심사",
+      "weight": 25,
+      "score": 9,
+      "rationale": "의료 효능을 주장하지 않고 휴식 요청 정리로 범위를 좁힌 것은 적절하다. 그러나 문제 발생률·대표적인 실패 장면·기존 해결 방식의 미충족 조건이 없다. Apple 차량 모션큐는 시각 경험을 다루므로 요청 전달·준비 정리의 직접 대안 비교를 대신하지 못한다. 입상권 기획이라면 구두 요청, 스마트폰 메모·체크리스트, 가족 메시지 등 최소 세 직접 대안과 비교해 왜 별도 차량 앱이 필요한지 보여주었을 것이다.",
+      "evidence": [
+        "research/candidates.md:29-36",
+        "research/research.md:101-115",
+        "research/research.md:119-131",
+        "RUBRIC.md의 '창의성' 행"
+      ]
+    },
+    {
+      "name": "기술 활용성",
+      "round": "1차 서류심사",
+      "weight": 25,
+      "score": 18,
+      "rationale": "공통 보완으로 CarUxRestrictionsManager와 CarUxRestrictions의 Pleos 공식 문서상 연동 근거가 확보되었다. 초기 잠금, 명시적 비-DO 허용 확인, 제한 전환·연결 해제·조회 실패 시 화면 이탈, 재진입 시 재조회 및 비트마스크 단독 판정 금지는 구체적이다. 제거된 속도 리스너와 이용 가능성이 불명인 음성을 필수 의존성에서 제외했다. 다만 B 전용 상태 저장·요청 수정·확인 처리·세션 종료 계약, Activity 설정, 대상 환경 검증표와 본선 개발 일정·인수조건이 부족하다. 입상권 기획이라면 요청의 전체 수명주기와 앱 시연까지의 개발 관문이 명시되어 있었을 것이다. 미구현 자체를 감점한 것이 아니라 계획의 연결 부족을 감점했다.",
+      "evidence": [
+        "research/candidates.md:32-36",
+        "research/candidates.md의 '공통 보완: 주차 전용 UX 계약 확인'",
+        "research/ux-restrictions.md:7-30",
+        "research/ux-restrictions.md의 '남은 미확인'",
+        "SPEC.md:30-32",
+        "RUBRIC.md의 '기술 활용성' 행"
+      ]
+    },
+    {
+      "name": "사업성",
+      "round": "1차 서류심사",
+      "weight": 25,
+      "score": 10,
+      "rationale": "가족 이동 커뮤니티라는 모집 경로, 초기 무료, 재이용 기회 구분, 처리 시간·확인 횟수 증가 시 폐기 기준은 있다. 월 노출 100명·설치 20명·사용 10명을 모집 가정으로 구분한 점도 적절하다. 그러나 가족 이동이 잦다는 조건만으로는 요청 정리의 반복 수요를 설명하지 못한다. 지원 환경 통과율, 실제 유입 가능성, 기간이 정해진 활성 지표, 재사용률 산식, 유료 편집 기능의 구매 이유와 지불주체가 없다. 입상권 기획이라면 무료인 구두 요청·메모 대비 절감 가치와 좁은 고객군의 반복 사용·지불 가설을 연결했을 것이다.",
+      "evidence": [
+        "research/candidates.md:29-39",
+        "research/research.md:167-183",
+        "docs/form-map.md의 '02 / 6. 기대효과 및 발전 가능성' 행",
+        "RUBRIC.md의 '사업성' 행"
+      ]
+    }
+  ],
+  "gated_checks": [
+    {
+      "check": "기획의 공고·필수 제출물·자격·AI 정책·창작 서약 충돌",
+      "passed": true,
+      "evidence": "계획에서 명백한 충돌을 발견하지 않았다. 공식 기획서만을 이번 범위로 두고 선택 개발자료 가산점을 합산하지 않으며 본선 실제 앱 의무를 인정한다. AI 활용을 숨기거나 미실행 조사를 수행한 것으로 기재하지 않는다고 명시한다. 이는 최종 제출 적합성 또는 독창성 입증 완료를 뜻하지 않는다.",
+      "locations": [
+        "research/candidates.md:1-5",
+        "research/candidates.md:29-39",
+        "SPEC.md:15-32",
+        "SPEC.md:38-50",
+        ".harness/gate.json의 eligibility·deliverables·submission"
+      ]
+    },
+    {
+      "check": "페르소나 흔적",
+      "passed": true,
+      "evidence": "ach check linkareer-358198 --json을 실행했으며 findings는 빈 배열이었다. 최종 바이너리 제출물 내부 검사는 이번 기획 채점 범위가 아니다.",
+      "locations": [
+        "CONTEST.md의 공모전 개요 표 '하네스 id'",
+        "research/candidates.md"
+      ]
+    },
+    {
+      "check": "계획 수치와 문헌·실행 결과의 구분",
+      "passed": true,
+      "evidence": "후보 B의 모집 수치는 가정으로 표시되어 있고, 문제 발생률 미확보 및 말로 전달하는 방식 대비 효용 검증 필요를 명시한다. 공통 UX 보완도 문서 계약과 실환경 작동을 구분한다. 수요 또는 성능 실측으로 인정하지 않았다.",
+      "locations": [
+        "research/candidates.md:1-5",
+        "research/candidates.md:30-39",
+        "research/ux-restrictions.md:1-30"
+      ]
+    }
+  ],
+  "requirement_mapping": [
+    {
+      "id": "FR-001",
+      "status": "covered",
+      "location": "SPEC.md:15-22; docs/form-map.md의 '항목과 표 구조'",
+      "rationale": "공식 01~04 및 02의 1~8 구조 보존을 공통 작성 계약에 포함한다."
+    },
+    {
+      "id": "FR-002",
+      "status": "covered",
+      "location": "SPEC.md:21; docs/form-map.md의 '02 앱 프로젝트 소개 / 심사 자료 — 공통'",
+      "rationale": "소개자료 분량 제한 없음과 별지 허용이 계획 기준에 반영되어 있다."
+    },
+    {
+      "id": "FR-003",
+      "status": "covered",
+      "location": "SPEC.md:20; docs/form-map.md의 '02 앱 프로젝트 소개 / 심사 자료 — 공통'",
+      "rationale": "본문·참고자료 블라인드 원칙이 공통 작성 계약에 있다."
+    },
+    {
+      "id": "FR-004",
+      "status": "covered",
+      "location": "CONTEST.md의 '작업 기본값과 승인 경계'; SPEC.md:41",
+      "rationale": "개인 참가 기본값과 승인 후 개인정보 입력을 명시한다. 개인 정보는 조회하지 않았다."
+    },
+    {
+      "id": "FR-005",
+      "status": "covered",
+      "location": "docs/form-map.md의 '03 개인정보 수집·이용 동의서' 및 '04 대표자·팀원 별 동의 확인 및 서명'",
+      "rationale": "동의 문구 보존과 본인 서명을 계획에 포함한다. 실제 동의·서명 완료 판정은 아니다."
+    },
+    {
+      "id": "FR-006",
+      "status": "covered",
+      "location": "docs/form-map.md의 '제출·수정 조건'",
+      "rationale": "마감·지정 메일·제목·수정 제출 조건이 공통 절차에 있다."
+    },
+    {
+      "id": "FR-007",
+      "status": "covered",
+      "location": "research/candidates.md:5; SPEC.md:44; CONTEST.md의 '최신 근거와 변경 기록'",
+      "rationale": "허위 경험·검증 기재 금지와 창작·권리 준수 원칙을 명시한다. 독창성 및 구성요소 이용권의 최종 확인은 남아 있다."
+    },
+    {
+      "id": "FR-008",
+      "status": "covered",
+      "location": "research/candidates.md:5; SPEC.md:45; docs/form-map.md의 '본선·권리·승인 경계'",
+      "rationale": "AI 명시 조항 미발견을 허용 보장으로 해석하지 않고 활용 범위를 투명하게 기록하는 원칙이 있다."
+    },
+    {
+      "id": "FR-009",
+      "status": "partial",
+      "location": "research/candidates.md:35-36 및 '공통 보완: 주차 전용 UX 계약 확인'; research/ux-restrictions.md:7-30",
+      "rationale": "UX 제한 API와 핵심 화면의 연결은 확보했으나 대상 환경·Activity 설정·의존성 확정과 실제 검증 인수조건이 미완성이다.",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "FR-010",
+      "status": "covered",
+      "location": "research/candidates.md:5; SPEC.md:47",
+      "rationale": "1차 개발자료 선택 및 미제출 가산점 제외가 명시되어 있다."
+    },
+    {
+      "id": "FR-011",
+      "status": "partial",
+      "location": "research/candidates.md:5,35-36; SPEC.md:30-32",
+      "rationale": "본선 앱·최종 APK 의무는 인지하고 있으나 후보 B의 개발 일정·담당 작업·시연 인수조건으로 구체화하지 않았다. 후보 C의 일정은 B에 전용하지 않았다.",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "FR-012",
+      "status": "covered",
+      "location": "research/candidates.md:5; SPEC.md:22,49; docs/form-map.md의 마지막 문단",
+      "rationale": "승인 후 개인정보·서명 입력과 변경 후 전 페이지 재검수 원칙이 있다."
+    },
+    {
+      "id": "FR-013",
+      "status": "covered",
+      "location": "SPEC.md:50; docs/form-map.md의 '본선·권리·승인 경계'",
+      "rationale": "접근 제한 우회·대량 수집·접수 자동화 금지를 공통 절차에 포함한다."
+    },
+    {
+      "id": "SC-001",
+      "status": "partial",
+      "location": "research/candidates.md:27-36 및 공통 보완",
+      "rationale": "상태별 UX 경계는 있으나 스마트폰·구두 대안보다 유리한 차량 전용 효용은 미확립이다.",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "SC-002",
+      "status": "partial",
+      "location": "research/candidates.md:29-36",
+      "rationale": "좁힌 기능과 제외 범위는 있지만 직접 문제 근거와 세 직접 대안 비교가 없다.",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "SC-003",
+      "status": "partial",
+      "location": "research/candidates.md:35-36 및 공통 보완; research/ux-restrictions.md:7-30",
+      "rationale": "공식 제한 계약은 확보했으나 요청 수명주기·저장·오류 복구·본선 인수조건이 부족하다.",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "SC-004",
+      "status": "partial",
+      "location": "research/candidates.md:38-39; research/research.md:167-183",
+      "rationale": "모집·재사용 관점과 폐기 기준은 있으나 고객 획득 마찰·지불주체·지표 산식·민감도가 부족하다.",
+      "severity": "MEDIUM"
+    }
+  ],
+  "findings": [
+    {
+      "severity": "HIGH",
+      "location": "research/candidates.md:27-33",
+      "issue": "휴식 요청이라는 문제와 주차 전용 처리 시점 사이의 핵심 가치 연결이 약하다.",
+      "fix": "출발 전 합의한 준비를 주차 후 실행하는 용도와 주행 중 새로 발생한 휴식 필요를 분리한다. 후자는 구두 전달을 대체하지 않는다고 명시하고, 전자에서 차량 화면이 줄이는 구체적인 누락·중복 확인 한 장면을 제시한다."
+    },
+    {
+      "severity": "HIGH",
+      "location": "research/candidates.md:29-39; RUBRIC.md의 '창의성' 행",
+      "issue": "무료·즉시 가능한 구두 요청보다 추가 앱 조작이 필요한 이유를 입증할 설계가 없다.",
+      "fix": "구두 요청·스마트폰 체크리스트·가족 메시지를 직접 비교한다. 말하기부터 실제 휴식 준비 완료까지 전체 시간, 잊은 준비 항목, 운전자 확인 횟수를 같은 과제로 측정하도록 설계하고, 앱 입력 시간을 제외하지 않는다."
+    },
+    {
+      "severity": "HIGH",
+      "location": "research/candidates.md:38-39; RUBRIC.md의 '사업성' 행",
+      "issue": "가족 이동 고객군과 루틴 편집 유료화 사이에 반복 수요·구매 이유가 연결되지 않는다.",
+      "fix": "어떤 가족 이동에서 여러 준비 요구가 반복 충돌하는지 초기 고객 조건을 좁힌다. 해당 집단의 모집 경로·환경 통과율·재사용 기회·지불주체·유료 기능의 절감 가치를 연결하고 검증 실패 시 무료 유지 또는 후보 폐기를 명시한다."
+    },
+    {
+      "severity": "MEDIUM",
+      "location": "research/candidates.md:33,36 및 공통 보완; research/ux-restrictions.md:7-30",
+      "issue": "본문의 '정차 후'라는 표현이 공통 보완의 비-DO 표시 허용 조건보다 넓게 읽힐 수 있다.",
+      "fix": "신호 대기·속도 0에서 사용 가능한 것처럼 읽히지 않도록 '플랫폼이 비-DO 화면 표시를 명시적으로 허용한 상태'로 조건을 통일한다. UX 허용값을 물리적 주차 완료나 안전 판단으로 해석하지 않는다."
+    },
+    {
+      "severity": "MEDIUM",
+      "location": "research/candidates.md:32-36; SPEC.md:30-32",
+      "issue": "누가 요청을 만들고 수정·취소하며 언제 완료·초기화하는지와 본선 앱 완료 조건이 빠져 있다.",
+      "fix": "B 전용으로 출발 전 선택·잠금·재진입·주차 후 확인·완료·다음 이동 초기화 상태를 정의한다. 저장 범위와 오류 경계를 정하고 12월 PT 전 실제 앱 인수조건을 작업별 일정에 연결한다."
+    }
+  ],
+  "plan_changes": [
+    {
+      "priority": 1,
+      "criteria": [
+        "차량특화성",
+        "창의성"
+      ],
+      "location": "research/candidates.md:26-36",
+      "change": "핵심 약속을 '주행 중 휴식 요청 전달'이 아니라 '출발 전 합의한 여러 휴식 준비를 주차 후 빠짐없이 확인'으로 명확히 한다. 주행 중 새 요구는 구두로 즉시 전달하고 앱은 관여하지 않는 경계를 둔다. 같은 이동 장면에서 구두 전달만으로 충분한 경우와 차량 공용 화면이 이로운 경우를 나란히 제시한다. 후자가 성립하지 않으면 후보를 폐기한다.",
+      "expected_gain": {
+        "차량특화성": 4,
+        "창의성": 3,
+        "total": 7
+      },
+      "gain_basis": "가점은 차량 화면의 고유 이점과 시간적 문제 해결 연결이 구체화될 때의 조건부 추정이다. 단순 명칭 변경에는 부여하지 않는다."
+    },
+    {
+      "priority": 2,
+      "criteria": [
+        "창의성",
+        "사업성"
+      ],
+      "location": "research/candidates.md:29-39; research/research.md:101-115",
+      "change": "구두 요청·스마트폰 체크리스트·가족 메시지의 기능 단위 비교표를 추가한다. 다중 준비 요구가 반복되는 가족을 대상으로 실제 불편 장면을 확인할 조사와 순서 균형 비교 과제를 계획한다. 전체 처리 시간·준비 누락·확인 횟수·주행 중 앱 사용 시도를 측정하고, 기존 방식보다 부담이 늘면 폐기하는 기준을 사전에 고정한다.",
+      "expected_gain": {
+        "창의성": 4,
+        "사업성": 2,
+        "total": 6
+      },
+      "gain_basis": "조사를 이미 수행한 것처럼 쓰지 않고 문제 가설·직접 대안·반증 설계를 구체화했을 때의 예상 가점이다."
+    },
+    {
+      "priority": 3,
+      "criteria": [
+        "사업성"
+      ],
+      "location": "research/candidates.md:38-39; research/research.md:177-183",
+      "change": "월 모집 가정을 적격 노출×지원 환경 통과율×설치율×기간 내 핵심행동률로 분해하고 낮음·기준·높음 민감도를 제시한다. 고유 이용자와 차량·설치를 구분하며 30일 관찰 완료자 기준 재사용률과 동승 이동 재발자 기준 재사용률을 각각 정의한다. 가족 루틴 편집의 구매자·구매 상황·운영비·지불 의사 확인 후 중단 기준을 추가한다.",
+      "expected_gain": {
+        "사업성": 5,
+        "total": 5
+      },
+      "gain_basis": "근거 없는 시장 규모나 매출을 추가하지 않고 유입·재사용·지불 가설의 검증 가능성을 높이는 조건부 추정이다."
+    },
+    {
+      "priority": 4,
+      "criteria": [
+        "기술 활용성"
+      ],
+      "location": "research/candidates.md:32-36 및 공통 보완; research/ux-restrictions.md:7-30; SPEC.md:30-32",
+      "change": "공통 UX 계약을 B의 상태표·Activity 설정 확인 항목·수명주기·로컬 저장 범위에 연결한다. 초기 잠금, 제한 전환, 연결 실패, 화면 재진입, 수정·취소, 완료·다음 이동 초기화를 검증표로 만들고 PT 전 실제 앱 시연과 최종 APK 후속 의무까지 B 전용 개발 일정·인수조건을 배치한다.",
+      "expected_gain": {
+        "기술 활용성": 4,
+        "total": 4
+      },
+      "gain_basis": "계획의 완결성에 대한 예상 가점이며 설치·호출·시연 성공 점수는 포함하지 않는다."
+    }
+  ],
+  "gaps": [
+    {
+      "location": "research/candidates.md:29-39; research/research.md:101-115",
+      "gap": "휴식 요청 전달·준비 정리 불편의 직접 수요 근거와 구두 요청 대비 우월성은 미확인이다. 차량 모션큐의 존재로 이를 입증할 수 없다."
+    },
+    {
+      "location": "research/ux-restrictions.md의 '남은 미확인'; research/candidates.md의 공통 보완",
+      "gap": "Pleos 공식 문서상 UX 제한 근거는 확보되었지만 대상 에뮬레이터·양산차에서 Manager 연결·콜백·실제 화면 차단·Activity 설정 적용은 미검증이다."
+    },
+    {
+      "location": "research/candidates.md:38-39; research/research.md:177-183",
+      "gap": "모집 수치는 관측 MAU가 아니다. 지원 설치 기반·재사용률·지불 의사·채널 확보·제휴 실적은 확인되지 않았다."
+    },
+    {
+      "location": "research/candidates.md:35-39; SPEC.md:30-32",
+      "gap": "후보 B 고유의 본선 개발 일정과 요청 수명주기별 인수조건이 없다. 공통 후속 의무 인지만으로 완료 가능성을 높게 예측하지 않았다."
+    },
+    {
+      "location": "research/research.md:198-210",
+      "gap": "이전 수상작·공식 심사평 근거가 없어 수상작 실물과의 비교는 수행하지 않았다."
+    },
+    {
+      "location": "SPEC.md:24-27; 공모전 폴더 루트 목록",
+      "gap": "JUDGE.md와 SUBMISSION.md는 현재 루트 목록에서 확인되지 않았다. 이전 판정·제출 준비 완료 또는 의도된 표현의 예외를 가정하지 않았다."
+    },
+    {
+      "location": "SPEC.md:15-22; docs/form-map.md의 '확보와 근거 경계'",
+      "gap": "이번은 기획 단계이므로 파일 분량·형식 측정 및 문서 전 페이지 비전 검수 대상이 아니다. 이를 최종 서식 검수 통과로 기록하지 않았다."
+    },
+    {
+      "location": ".harness/gate.json의 refresh_status 및 reasons",
+      "gap": "최신 로컬 네 기준과 레지스트리의 과거 배정 상태 불일치가 기록되어 있다. 이번 채점은 지시대로 최신 로컬 네 기준을 사용했으며 레지스트리를 수정하지 않았다."
+    }
+  ],
+  "improvement_outlook": "제시한 가점은 내부 조건부 추정이며 서로 중복될 수 있어 단순 합산을 보장하지 않는다. 현재 보완안만으로 목표 90점 도달을 예측하지 않는다. 말로 요청하는 방식보다 나은 차량 전용 가치가 확인되지 않으면 점수 보정보다 후보 폐기가 타당하다.",
+  "read_only": true
+}

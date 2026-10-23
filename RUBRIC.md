@@ -32,12 +32,15 @@
 
 후보별 개요와 조사를 완성한 뒤 각 후보를 독립 채점한다. 가장 높은 후보를 고르고 기준별 `plan_changes`를 반영한다. 선택안 예측 점수가 90점 이상이 되거나 개선 3회를 마친 뒤 집필한다. 결과는 `.harness/judge/plan-<n>.json`과 `ach score`에 남긴다.
 
-아직 기획 채점은 수행하지 않았다. 점수는 실행 결과가 나온 뒤에만 기록한다.
+최초 예측점수는 A 50점, B 49점, C 73점이었다. 가장 높은 C를 선택했으며, 차량 안 화면 접근 동선·직접 대안 비교·기술 인수표·유입과 수익 계산을 `research/selected-plan.md`에서 보완했다. 아직 목표 점수에 도달했다고 주장하지 않는다.
 
 ## 4. 단계별 총점 추이
 
 | 회차 | 단계 | 대상 | 총점 / 목표 | 판정 | 실제 모델 증거 | Judge 원본 |
 |---|---|---|---|---|---|---|
+| 1 | plan | 후보 A | 50 / 90 | revise | plan-1-model.json: gpt-6.1-sol | .harness/judge/plan-1.json |
+| 2 | plan | 후보 B | 49 / 90 | revise | plan-2-model.json: gpt-6.1-sol | .harness/judge/plan-2.json |
+| 3 | plan | 후보 C | 73 / 90 | revise | plan-3-model.json: gpt-6.1-sol | .harness/judge/plan-3.json |
 
 <p>표 2. 채점 실행 후 결과를 기록하는 이력표.</p>
 

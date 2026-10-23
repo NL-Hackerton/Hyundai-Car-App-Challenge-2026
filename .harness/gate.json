@@ -1,9 +1,9 @@
 {
-  "decision": "hold",
+  "decision": "pass",
   "checked_at": "2026-10-23",
   "official_url": "https://appdevchallenge.auto-hmg.io/landing",
   "title": "현대자동차그룹 차량용 앱 개발 공모전",
-  "folder": "HMG-Vehicle-App-2026",
+  "folder": "Hyundai-Car-App-Challenge-2026",
   "organizer": "현대자동차그룹",
   "deadline": "2026-11-15T23:59+09:00",
   "type": "idea",
@@ -58,8 +58,8 @@
     "[문헌: head 열람 기록] 공지 000006의 본선 실제 동작 앱 시연 및 최종 10팀의 행사 참석·APK 제출 의무에 따라 레벨 3을 로컬 재분류 제안한다. 공지 000001의 PT 장소는 서울 강남대로사옥 1층 UX스튜디오다.",
     "[문헌: head 열람 기록] terms 제7조의 독립 기획·개발과 권리 준수, 순수 창작·표절 금지·사실 기재를 적용한다. AI 조항 미발견은 허용이 아니다.",
     "[문헌: head 열람 기록] terms 제9조 3항의 자동화 접근·수집 금지를 기록한다. 이번 공개 파일 1회 확인 외 대량 수집·반복 크롤링·접수 자동화는 하지 않았으며 조항 적용 범위는 단정하지 않는다.",
-    "[가정] 개인 참가 기본값. PT 참석 인지·진행 지시는 공통 계약에서 확인되어 미확인 질문을 해소한다. 참가 부문은 제출 전 비식별 자격 근거로 확정한다.",
-    "로컬 근거 갱신만 수행했다. 기존 decision=hold는 하네스 반영 전 보존값이며 현행 접수 불가 판정이 아니다. .harness/gate-refresh.json은 pass·level=3 재분류 제안이다. ach gate·상태 전이·승인·접수·commit/push 미수행."
+    "개인·대학(원)생 부문으로 준비한다. 2026-10-23 ach profile eligibility 비식별 자격 조회에서 학생·개인 참가 조건을 확인했다. 개인정보 값은 기록하지 않는다. PT 참석 인지·진행 지시는 사용자 후속 지시로 확인했다.",
+    "최신 공고에 따른 로컬 판정은 pass·level=3이다. ach gate 재기록은 running 상태에서 금지되어 거절되었으므로 레지스트리의 과거 gate와 level=2는 남아 있다. 레지스트리를 직접 수정하거나 상태를 되돌려 우회하지 않는다. 최신 네 기준으로 채점하고 이 운영 불일치를 기록한다."
   ],
   "historical_checked_at": "2026-10-20T22:57+09:00",
   "historical_criteria": [
@@ -84,8 +84,8 @@
     "일정 여유 20점: 마감까지 26일(2026-10-20 기준)로 레벨 2 최소치 5일의 2배 이상이다."
   ],
   "questions": [],
-  "refresh_status": "local_proposal_not_applied",
-  "participation_default": "individual",
+  "refresh_status": "local_current_registry_refresh_rejected_running",
+  "participation_default": "individual_student",
   "offline_attendance": "2026-12-03~04 서울 PT 참석 사용자 인지·진행 지시 확인(공통 계약)",
   "source_boundary": {
     "direct": "실제 DOCX 다운로드·추출 텍스트·word/document.xml 구조·SHA-256",

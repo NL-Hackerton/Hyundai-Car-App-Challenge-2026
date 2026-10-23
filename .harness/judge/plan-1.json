@@ -1,0 +1,345 @@
+{
+  "stage": "plan",
+  "checkpoint": "후보 A 충전 틈새 활동",
+  "candidate": "A",
+  "total": 50,
+  "target": 90,
+  "verdict": "revise",
+  "score_type": "기획 내용대로 완성했을 때의 예측점수",
+  "evaluation_scope": {
+    "target": "research/candidates.md의 후보 A와 공통 보완",
+    "basis": "공식 1차 심사 네 항목을 사용하되 각 25점은 내부 비교용 가정이다. 실제 공식 배점이나 수상 확률을 뜻하지 않는다.",
+    "excluded": [
+      "후보 B·C의 기능·고객 근거·사업 민감도표·구체적 개발 일정은 A의 성과나 계획으로 합산하지 않았다.",
+      "최초 접수에 선택인 앱·영상·APK의 부재는 필수 제출물 위반으로 보지 않았으며 가산점도 부여하지 않았다.",
+      "기획 단계이므로 파일 형식·분량 측정, 페이지 렌더 및 전 페이지 비전 검수는 수행하지 않았다."
+    ],
+    "common_supplement_boundary": "공통 보완에서 Pleos의 UX 제한 API 문서 근거는 확인된다. 그러나 candidates.md의 구체적 적용 설계는 B·C를 대상으로 명시되어 있으므로 A가 동일 계약을 이미 채택했다고 간주하지 않았다."
+  },
+  "gated_checks": [
+    {
+      "check": "공고·자격·필수 제출물과 기획의 충돌",
+      "passed": true,
+      "evidence": [
+        "CONTEST.md 「제출물」 및 SPEC.md 「D1」: 최초 접수는 공식 기획서가 필수이며 구현 자료는 선택이다.",
+        "research/candidates.md 도입부: 공식 DOCX 제출, 선택 개발자료 미제출, 승인 후 개인정보·동의·서명 입력을 명시한다.",
+        ".harness/gate.json eligibility 및 reasons: 개인·학생 참가 조건과 오프라인 참석 인지 기록이 있다. 이번 채점에서는 개인 정보를 조회하거나 자격을 재검증하지 않았다."
+      ]
+    },
+    {
+      "check": "AI 정책·독립 창작·권리 준수와 기획의 충돌",
+      "passed": true,
+      "evidence": [
+        "CONTEST.md 「최신 근거와 변경 기록」 및 SPEC.md FR-007·FR-008: AI 명시 조항 미발견을 허용으로 해석하지 않으며 독립 기획·권리 준수와 구분한다.",
+        "research/candidates.md 도입부: AI 활용 은폐와 미실행 경험·인터뷰·실험의 허위 기재를 금지한다."
+      ],
+      "limitation": "실제 활동 콘텐츠의 출처·이용권과 최종 AI 활용 기록은 아직 제시되지 않았다. 현 단계에서 위반을 발견하지 않았다는 뜻이며 권리 확보 완료 판정은 아니다."
+    },
+    {
+      "check": "본선 의무와 기획의 충돌",
+      "passed": true,
+      "evidence": [
+        "research/candidates.md 도입부: 2차 PT 전 실제 앱 구현 필요를 인정한다.",
+        "SPEC.md 「후속 필수 결과물 — 본선 앱 및 전시」: 2026-12-03~04 실제 앱 시연 및 최종 선정팀의 2027년 2월 참석·APK 제출 의무를 명시한다."
+      ],
+      "limitation": "의무를 부정하지는 않지만 A 전용 개발 일정·인수조건은 부족하다. 이는 기술 활용성 감점과 HIGH 발견 사항에 반영했다."
+    },
+    {
+      "check": "기획의 수치·기능 주장 정직성",
+      "passed": true,
+      "evidence": [
+        "research/candidates.md A 「개발 계획」: 충전 스위치를 실제 충전 진행 상태로 읽지 않으며 핵심 속성 지원 미확인 시 후보를 채택하지 않는다고 명시한다.",
+        "research/candidates.md A 「사업성과 반증」: 월 적격 노출 100명·설치 20명·실행 12명을 가정인 모집 시나리오로 표시하고 MAU 예측과 구분한다.",
+        "research/research.md 「공식 API 계약표」: AAOS 표준 존재와 Pleos 대상 환경 지원을 구분한다."
+      ],
+      "limitation": "수치를 실제 성과로 오인시키지는 않았지만 사업성 검증에 필요한 지원 환경 필터·민감도·비용은 빠져 있다."
+    }
+  ],
+  "scores": [
+    {
+      "name": "차량특화성",
+      "round": "1차 서류심사",
+      "weight": 25,
+      "score": 17,
+      "rationale": "A의 핵심은 차량의 실제 충전 상태와 잔여시간 변화가 활동 선택·중단 시점을 바꾸는 것이다. 단순 충전 조회나 수동 타이머와 구분되는 차량 맥락은 명확하다. 차 밖 알림과 완료시각 보장도 제외하여 과장을 줄였다. 다만 이 차별성을 만드는 두 핵심 입력이 Pleos에서 미확인이고, 예측이 늘거나 줄 때 무엇을 어떻게 바꾸는지 구체적 규칙이 없다. 입상권 기획이라면 같은 충전 세션에서 내장 화면·휴대전화·차량 앱의 조작 차이와 충전 중단·상태 불명·화면 복귀별 입출력이 제시되어야 한다.",
+      "evidence": [
+        "research/candidates.md A 「한 줄 개요」·「문제와 대안」·「핵심 기능·시나리오」·「개발 계획」",
+        "research/research.md 「공식 API 계약표」의 실제 충전 상태·잔여시간 항목",
+        "RUBRIC.md 표 1 차량특화성"
+      ]
+    },
+    {
+      "name": "창의성",
+      "round": "1차 서류심사",
+      "weight": 25,
+      "score": 13,
+      "rationale": "충전 정보 조회 대신 시간 변화에 맞춘 활동 전환을 제안한 점은 구별된다. 그러나 직접 불편 발생률이나 사용자 행동 근거가 없고, 활동 예시도 읽기·스트레칭 수준이다. Bluelink·내장 충전 화면·휴대전화 타이머를 언급하지만 세 직접 대안의 실제 기능을 확인한 비교표는 없다. 조사에 있는 다른 후보의 대안은 A의 직접 대안으로 셀 수 없다. 입상권 기획이라면 기존 충전 조회와 일반 활동 앱을 함께 사용해도 남는 특정 불편, 그 불편을 해결하는 단 하나의 전환 규칙, 이를 반증할 비교 과제가 있어야 한다.",
+      "evidence": [
+        "research/candidates.md A 「문제와 대안」·「핵심 기능·시나리오」",
+        "research/research.md 「문제 근거와 선행 서비스」·「근거의 빈칸」",
+        "RUBRIC.md 표 1 창의성"
+      ]
+    },
+    {
+      "name": "기술 활용성",
+      "round": "1차 서류심사",
+      "weight": 25,
+      "score": 9,
+      "rationale": "충전 스위치·SOC·실제 충전 상태의 의미를 구분하고 미지원이면 채택하지 않는 경계는 적절하다. 하지만 핵심 경험의 클래스·접근 경로·권한·단위·상태값·지원 환경이 확정되지 않아 실행 가능한 API 계약으로 보기 어렵다. 공통 UX 조사는 사용할 수 있는 근거이나 A의 초기 잠금·제한 변경·연결 해제·재진입 처리로 아직 연결되지 않았다. 본선 구현 필요도 선언 수준이며 A 전용 개발 일정과 시연 인수조건이 없다. 입상권 기획이라면 핵심 API 확인을 선행 결정 관문으로 두고, 그 결과에 종속된 최소 앱과 실제 동작 시연의 완료 조건까지 제시해야 한다.",
+      "evidence": [
+        "research/candidates.md A 「개발 계획」 및 「공통 보완: 주차 전용 UX 계약 확인」",
+        "research/ux-restrictions.md 「parked-only 화면 제한 계약」·「fail-closed UX 설계 제안」",
+        "research/research.md 「버전 및 접근 조건」·「검증 수준을 구분한 계약」",
+        "SPEC.md 「후속 필수 결과물 — 본선 앱 및 전시」",
+        "RUBRIC.md 표 1 기술 활용성"
+      ]
+    },
+    {
+      "name": "사업성",
+      "round": "1차 서류심사",
+      "weight": 25,
+      "score": 11,
+      "rationale": "공용 급속충전 중 차 안 대기라는 초기 상황, EV 커뮤니티·앱 마켓 유입, 상황 재발을 고려한 재사용률, 수동 타이머 대비 폐기 기준은 제시되어 있다. 모집 수치를 실측 MAU로 포장하지 않은 점도 적절하다. 그러나 지원 차량·권한 조건을 통과하는 고객 비율, 채널 접근 가능성, 활동 수요, 지불주체가 미확인이다. 무료 이후 콘텐츠 제휴라는 문구만으로 수익성과 운영 지속성을 설명하지 못한다. 입상권 기획이라면 지원 환경을 반영한 모집 퍼널·낮음/기준/높음 민감도·운영비·지불 의사 확인 방법과 유료화 중단 조건이 있어야 한다.",
+      "evidence": [
+        "research/candidates.md A 「사업성과 반증」",
+        "research/research.md 「사업성과 검증 설계」의 채널 및 이용자 지표 정의",
+        "docs/form-map.md 표 1의 「02 / 6. 기대효과 및 발전 가능성」",
+        "RUBRIC.md 표 1 사업성"
+      ]
+    }
+  ],
+  "requirements_mapping": [
+    {
+      "id": "FR-001",
+      "status": "covered",
+      "location": "SPEC.md D1 및 research/candidates.md 도입부",
+      "assessment": "공식 DOCX와 01~04·02의 1~8 구조 보존을 계획한다. 실제 작성 완료 판정은 아니다."
+    },
+    {
+      "id": "FR-002",
+      "status": "covered",
+      "location": "SPEC.md D1 및 docs/form-map.md 「항목과 표 구조」",
+      "assessment": "분량 제한 없음과 별지 허용을 반영한다."
+    },
+    {
+      "id": "FR-003",
+      "status": "covered",
+      "location": "SPEC.md D1 및 docs/form-map.md 「02 앱 프로젝트 소개」",
+      "assessment": "본문·참고 링크·첨부의 블라인드 조건을 공통 작성계약으로 둔다."
+    },
+    {
+      "id": "FR-004",
+      "status": "covered",
+      "location": "SPEC.md FR-004·「가정과 경계」",
+      "assessment": "개인 참가 기본값과 승인 후 개인정보 입력 경계를 명시한다."
+    },
+    {
+      "id": "FR-005",
+      "status": "covered",
+      "location": "SPEC.md FR-005 및 docs/form-map.md 「03」·「04」",
+      "assessment": "동의서 원문 유지와 본인 서명을 계획한다. 승인 전 서명 부재를 누락으로 보지 않는다."
+    },
+    {
+      "id": "FR-006",
+      "status": "covered",
+      "location": "SPEC.md FR-006 및 docs/form-map.md 「제출·수정 조건」",
+      "assessment": "마감·이메일·제목 형식·수정 제출 절차가 공통 계획에 있다."
+    },
+    {
+      "id": "FR-007",
+      "status": "partial",
+      "severity": "MEDIUM",
+      "location": "SPEC.md FR-007 및 research/candidates.md A 「핵심 기능·시나리오」",
+      "assessment": "독립 창작·권리 준수 원칙은 있으나 읽기·스트레칭 콘텐츠의 자체 제작 또는 이용권 확보 방식은 없다."
+    },
+    {
+      "id": "FR-008",
+      "status": "covered",
+      "location": "SPEC.md FR-008 및 research/candidates.md 도입부",
+      "assessment": "AI 정책 미발견과 허용 보장을 구분하고 실제 기여·검증 범위의 정직한 기록을 계획한다."
+    },
+    {
+      "id": "FR-009",
+      "status": "partial",
+      "severity": "HIGH",
+      "location": "research/candidates.md A 「개발 계획」 및 research/research.md 「공식 API 계약표」",
+      "assessment": "공개 API 연결 의도와 미확인 경계는 있지만 핵심 충전 상태·잔여시간의 Pleos 제공·접근 계약이 없다. 미확인을 허위 지원 주장으로 간주하지는 않았다."
+    },
+    {
+      "id": "FR-010",
+      "status": "covered",
+      "location": "research/candidates.md 도입부 및 SPEC.md 「가정과 경계」",
+      "assessment": "1차 개발자료 선택과 가산점 미합산을 명시한다."
+    },
+    {
+      "id": "FR-011",
+      "status": "partial",
+      "severity": "MEDIUM",
+      "location": "research/candidates.md 도입부·A 「개발 계획」 및 SPEC.md 「후속 필수 결과물」",
+      "assessment": "본선 시연·후속 APK 의무는 공통 계획에 있으나 A 전용 일정·개발 인수조건·지원 확인 기한이 없다."
+    },
+    {
+      "id": "FR-012",
+      "status": "covered",
+      "location": "research/candidates.md 도입부 및 SPEC.md D1·FR-012",
+      "assessment": "승인 후 개인정보·서명 입력과 변경 후 전 페이지 재검수를 계획한다."
+    },
+    {
+      "id": "FR-013",
+      "status": "covered",
+      "location": "SPEC.md FR-013 및 CONTEST.md 「최신 근거와 변경 기록」",
+      "assessment": "대량 크롤링·우회·접수 자동화를 계획하지 않는다."
+    },
+    {
+      "id": "SC-001",
+      "status": "partial",
+      "severity": "MEDIUM",
+      "location": "research/candidates.md A 「문제와 대안」·「핵심 기능·시나리오」·「개발 계획」",
+      "assessment": "車両状態で活動を変える仮説はあるが、대안 대비 조작 차이와 상태별 입출력표가 없다."
+    },
+    {
+      "id": "SC-002",
+      "status": "partial",
+      "severity": "MEDIUM",
+      "location": "research/candidates.md A 「문제와 대안」",
+      "assessment": "차별 가설은 있으나 직접 수요 근거와 검증된 세 직접 대안 비교가 없다."
+    },
+    {
+      "id": "SC-003",
+      "status": "partial",
+      "severity": "MEDIUM",
+      "location": "research/candidates.md A 「개발 계획」",
+      "assessment": "기술 경계는 정직하지만 핵심 API 계약·오류 복구·본선 인수조건이 부족하다."
+    },
+    {
+      "id": "SC-004",
+      "status": "partial",
+      "severity": "MEDIUM",
+      "location": "research/candidates.md A 「사업성과 반증」",
+      "assessment": "타깃·유입·상황 재사용 정의는 있으나 지원 환경을 반영한 수요 민감도와 지불·운영 검증이 없다."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "HIGH",
+      "location": "research/candidates.md A 「한 줄 개요」·「개발 계획」",
+      "issue": "제품 정의 자체가 아직 접근 가능한지 모르는 충전 상태·잔여시간에 의존한다.",
+      "fix": "채택 전에 대상 Pleos 환경의 실제 충전 상태·잔여시간 접근 경로와 권한·단위·지원 범위를 확인하는 결정 관문을 둔다. 확인되지 않으면 A를 채택하지 않는 현재 원칙을 실행하며 SOC·충전 스위치·수동 타이머로 핵심을 대체하지 않는다."
+    },
+    {
+      "severity": "HIGH",
+      "location": "research/candidates.md A 「문제와 대안」 및 research/research.md 「공식 선행 기능 4건」",
+      "issue": "Bluelink·내장 화면·휴대전화만으로 충분하지 않다는 직접 근거가 없다.",
+      "fix": "A의 직접 대안 세 가지 이상을 동일 충전 세션 과제로 비교하고 잔여시간 변동 시 재설정 조작·화면 전환·불필요 안내의 차이를 확인하는 계획을 작성한다. 실제 확인 전 경쟁 서비스에 기능이 없다고 단정하지 않는다."
+    },
+    {
+      "severity": "HIGH",
+      "location": "research/candidates.md A 「핵심 기능·시나리오」·「개발 계획」 및 「공통 보완」",
+      "issue": "시간 변화에 따른 활동 중단 규칙과 A에 적용되는 주차 전용 화면 계약이 구체화되지 않았다.",
+      "fix": "충전 중·중단·완료·잔여시간 불명과 UX 허용·제한·연결 불명 상태를 조합한 처리표를 작성한다. 기존 공통 조사에 근거해 초기 잠금·현재 제한 조회·변경 구독·재진입 재확인을 A의 설계로 명시한다."
+    },
+    {
+      "severity": "HIGH",
+      "location": "research/candidates.md 도입부·A 「개발 계획」 및 SPEC.md 「후속 필수 결과물」",
+      "issue": "본선 의무는 인정하지만 A를 실제 앱으로 완성할 일정과 완료 기준이 없다.",
+      "fix": "핵심 API 확인 기한, SDK·Service 버전 확정, 최소 기능 구현, 상태 변화·권한 실패·재연결 시연, 12월 PT용 실제 앱, 최종 선정 시 2월 APK 안정화까지 A 전용 마일스톤과 인수조건을 적는다."
+    },
+    {
+      "severity": "HIGH",
+      "location": "research/candidates.md A 「사업성과 반증」",
+      "issue": "모집 시나리오는 있지만 지원 환경·유입 마찰·운영비·지불주체가 빠져 사업 지속성을 판단하기 어렵다.",
+      "fix": "노출에서 환경 통과·설치·충전 세션 발생·핵심 행동으로 이어지는 퍼널과 민감도를 작성하고 콘텐츠 제작·갱신 비용, 지불 의사 확인 대상, 유료화 또는 제휴 검토 중단 조건을 명시한다."
+    },
+    {
+      "severity": "MEDIUM",
+      "location": "research/candidates.md A 「핵심 기능·시나리오」",
+      "issue": "짧은 활동의 길이·중단 가능 지점·콘텐츠 이용권이 정의되지 않았다.",
+      "fix": "초기 활동 유형을 좁히고 각 활동의 예상 소요 범위·중단 지점·시간값 불명 시 처리·제작 주체와 출처를 기록한다. 건강 효과나 정확한 종료시각은 보장하지 않는다."
+    }
+  ],
+  "plan_changes": [
+    {
+      "priority": 1,
+      "criterion": "기술 활용성",
+      "location": "research/candidates.md A 「개발 계획」",
+      "change": "핵심 API 확인을 후보 채택의 선행 관문으로 격상한다. 실제 충전 상태·잔여시간 각각의 Pleos 접근 경로, 클래스 또는 속성, 권한 승인 조건, 단위·상태 의미, 지원 버전·환경, 조회·구독·누락 처리를 한 표에 작성한다.",
+      "expected_gain": 7,
+      "gain_basis": "현재 가장 큰 감점인 핵심 경험의 구현 가능성 공백을 줄인다.",
+      "condition": "실제 문서·접근 조건 근거를 확보했을 때만 가산 가능하다. 확인 계획만 추가하거나 AAOS 표준을 재인용하는 것으로는 가산하지 않는다. 미지원이면 A를 채택하지 않는다."
+    },
+    {
+      "priority": 2,
+      "criterion": "사업성",
+      "location": "research/candidates.md A 「사업성과 반증」",
+      "change": "기존 모집 수치를 지원 환경 통과율·설치율·적격 충전 기회·활성률로 분해하고 낮음/기준/높음 민감도를 추가한다. 계정 없는 제품에서 고유 이용자를 어떻게 구분할지, 30일 관찰 완료자와 상황 재발자의 분모를 어떻게 관리할지도 명시한다. 콘텐츠 비용과 지불 의사 검증 대상·중단 조건을 연결한다.",
+      "expected_gain": 5,
+      "gain_basis": "채널 이름과 무료 정책 수준의 설명을 검증 가능한 초기 운영 가설로 바꾼다.",
+      "condition": "새 수치는 모두 가정·계산으로 표시하며 제휴·입점·실측 수요로 표현하지 않는다."
+    },
+    {
+      "priority": 3,
+      "criterion": "창의성",
+      "location": "research/candidates.md A 「문제와 대안」·「핵심 기능·시나리오」",
+      "change": "Bluelink·차량 내장 충전 화면·휴대전화 타이머 또는 활동 앱 중 최소 세 직접 대안을 실제 기능 근거로 비교한다. 비교 결과 남는 한 가지 불편에 맞춰 A의 활동 전환 규칙을 좁히고, 주차된 환경의 동일 과제로 재설정·화면 전환·불필요 안내를 비교하는 계획을 적는다.",
+      "expected_gain": 5,
+      "gain_basis": "일반적인 시간 활용 추천에서 검증 가능한 미충족 구간의 해결로 바꾼다.",
+      "condition": "다른 후보의 기능이나 조사 수치를 가져오지 않는다. 직접 수요 조사 미실행 상태는 유지해 표시한다."
+    },
+    {
+      "priority": 4,
+      "criterion": "차량특화성",
+      "location": "research/candidates.md A 「핵심 기능·시나리오」·「개발 계획」 및 research/ux-restrictions.md",
+      "change": "충전 잔여시간의 증가·감소·불명, 충전 중단·완료, UX 제한 전환에 따른 활동 선택·중단·표시 규칙을 작성한다. A에도 공식 UX 제한 조회·구독과 초기 잠금·재확인을 명시하고 같은 상황의 휴대전화 조작 흐름을 나란히 제시한다.",
+      "expected_gain": 4,
+      "gain_basis": "차량 데이터가 행동을 바꾸는 지점을 구체화하고 단순 타이머와의 차이를 드러낸다.",
+      "condition": "핵심 충전 데이터 접근 확인이 전제다. UX 표시 허용을 물리적 주차 완료 또는 안전 보장으로 해석하지 않는다."
+    },
+    {
+      "priority": 5,
+      "criterion": "기술 활용성",
+      "location": "research/candidates.md A 「개발 계획」 및 SPEC.md 「후속 필수 결과물」",
+      "change": "A 전용으로 API 채택 결정부터 최소 앱·오류 경계 시연·12월 PT·최종 선정 시 2월 APK까지 일정과 인수조건을 작성한다. 초기 콘텐츠의 자체 제작·이용권, 로컬 저장 범위와 불필요한 권한 미사용도 명시한다.",
+      "expected_gain": 3,
+      "gain_basis": "본선 의무의 단순 인지와 실제 이행 가능한 계획 사이의 공백을 줄인다.",
+      "condition": "일정은 계획이며 구현·검증 완료로 표시하지 않는다. 후보 C의 개발표를 A의 기존 계획으로 소급하지 않는다."
+    }
+  ],
+  "gaps": [
+    {
+      "location": "research/candidates.md A 「개발 계획」 및 research/research.md 「공식 API 계약표」",
+      "status": "미확인",
+      "detail": "실제 충전 상태·잔여시간의 Pleos 대상 환경 지원, 접근 권한, 상태값·단위·갱신 방식이 확인되지 않았다. AAOS 표준 속성의 존재만 확인되어 있다."
+    },
+    {
+      "location": "research/candidates.md A 「문제와 대안」 및 research/research.md 「근거의 빈칸」",
+      "status": "미확인",
+      "detail": "충전 중 시간 활용 불편의 직접 발생 근거, 기존 앱으로 해결되지 않는 빈틈, 활동 전환의 실제 선호·효용이 없다."
+    },
+    {
+      "location": "research/candidates.md 「공통 보완」 및 research/ux-restrictions.md 「남은 미확인」",
+      "status": "문서 근거 확보·A 적용 설계와 실환경 미검증",
+      "detail": "Pleos UX 제한 계약의 공식 근거는 있으나 A 전용 적용 설계가 명시되지 않았고 Manager 연결·콜백·플랫폼 화면 차단 실제 동작은 검증되지 않았다."
+    },
+    {
+      "location": "research/candidates.md A 「사업성과 반증」",
+      "status": "가정",
+      "detail": "모집 수치와 초기 무료·콘텐츠 제휴는 제안이다. 채널 접근·지원 고객 기반·유입비·콘텐츠 운영비·지불 의사는 확인되지 않았다."
+    },
+    {
+      "location": "research/candidates.md A 「개발 계획」 및 SPEC.md 「후속 필수 결과물」",
+      "status": "계획 구체성 부족",
+      "detail": "본선 의무는 명시되어 있으나 A의 API 확인 기한·개발 일정·실제 앱 시연 인수조건은 없다."
+    },
+    {
+      "location": "research/research.md 「미확인 사항과 기획서 표현 제한」 제8항",
+      "status": "자료 없음",
+      "detail": "공식 이전 수상작·심사평이 조사 근거에 없어 실제 입상작과의 비교는 수행하지 못했다."
+    },
+    {
+      "location": "SPEC.md D2의 JUDGE.md·SUBMISSION.md",
+      "status": "파일 없음",
+      "detail": "현재 폴더에 두 파일이 없어 이전 판정과 제출 예외 사유를 대조하지 못했다. 기획 후보 채점의 자동 탈락 사유로 보지는 않았다."
+    }
+  ],
+  "summary": "예측 총점은 50점이다. 차량 충전 변화에 맞춘 활동 전환이라는 중심 가설은 있으나 그 가치를 만드는 핵심 API가 미확인이다. 기존 앱 대비 필요성과 사업 가정도 아직 검증 설계가 얕다. 현재 문서에 명시된 규칙 위반은 없어 reject는 아니지만, HIGH 발견 사항이 남아 있고 목표에 미달하므로 revise다. 제시한 예상 가산점은 보완이 실제 근거와 함께 충족될 때의 조건부 추정이며 단순 합산이나 목표 점수 보장이 아니다. 파일 수정·개인정보 조회·접수·승인·빌드·테스트·린트·포맷터 실행은 하지 않았다."
+}
