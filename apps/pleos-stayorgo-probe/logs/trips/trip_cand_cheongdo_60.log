@@ -1,0 +1,92 @@
+--------- beginning of main
+11-06 05:20:30.544 I/StayOrGoProbe(25584): 05:20:30.542 === StayOrGo Probe start ===
+11-06 05:20:30.545 I/StayOrGoProbe(25584): 05:20:30.544 package=ai.probe.staygo uid=1010175 targetSdk=34
+11-06 05:20:30.546 I/StayOrGoProbe(25584): 05:20:30.546 isSystemApp=false
+11-06 05:20:30.550 I/StayOrGoProbe(25584): 05:20:30.549 PERM check: pleos.car.permission.CAR_ENERGY => GRANTED
+11-06 05:20:30.551 I/StayOrGoProbe(25584): 05:20:30.550 PERM check: pleos.car.permission.CAR_INFO => GRANTED
+11-06 05:20:30.552 I/StayOrGoProbe(25584): 05:20:30.552 PERM check: android.car.permission.CAR_ENERGY => GRANTED
+11-06 05:20:30.553 I/StayOrGoProbe(25584): 05:20:30.553 PERM check: android.car.permission.CAR_INFO => GRANTED
+11-06 05:20:30.554 I/StayOrGoProbe(25584): 05:20:30.554 PERM check: android.permission.ACCESS_FINE_LOCATION => GRANTED
+11-06 05:20:30.555 I/StayOrGoProbe(25584): 05:20:30.555 PERM check: android.permission.ACCESS_COARSE_LOCATION => GRANTED
+11-06 05:20:30.556 I/StayOrGoProbe(25584): 05:20:30.556 --- Pleos Vehicle SOC ---
+11-06 05:20:30.574 I/StayOrGoProbe(25584): 05:20:30.573 Pleos Vehicle.initialize OK
+11-06 05:20:30.975 I/StayOrGoProbe(25584): 05:20:30.974 SOC registerEvBatteryStateOfCharge OK
+11-06 05:20:30.979 I/StayOrGoProbe(25584): 05:20:30.975 --- AAOS CarPropertyManager ---
+11-06 05:20:30.985 I/StayOrGoProbe(25584): 05:20:30.985 Car.createCar isConnected=true
+11-06 05:20:30.987 I/StayOrGoProbe(25584): 05:20:30.986 Car.createCar + PROPERTY_SERVICE OK class=android.car.hardware.property.CarPropertyManager
+11-06 05:20:30.993 I/StayOrGoProbe(25584): 05:20:30.992 AAOS get EV_BATTERY_LEVEL(291504905) => 60000.0
+11-06 05:20:30.994 I/StayOrGoProbe(25584): 05:20:30.994 AAOS get EV_CHARGE_STATE(289410881) => 2
+11-06 05:20:30.995 I/StayOrGoProbe(25584): 05:20:30.995 AAOS get EV_CHARGE_TIME_REMAINING(289410883) => 0
+11-06 05:20:30.997 I/StayOrGoProbe(25584): 05:20:30.996 AAOS get EV_BATTERY_INSTANTANEOUS_CHARGE_RATE(291504908) => 0.0
+11-06 05:20:31.001 I/StayOrGoProbe(25584): 05:20:31.001 AAOS get INFO_EV_BATTERY_CAPACITY(291504390) => 77400.0
+11-06 05:20:31.003 I/StayOrGoProbe(25584): 05:20:31.002 AAOS get GEAR_SELECTION FAIL: SecurityException: requires android.car.permission.CAR_POWERTRAIN
+11-06 05:20:31.003 I/StayOrGoProbe(25584): 05:20:31.003 AAOS get PERF_VEHICLE_SPEED FAIL: SecurityException: requires android.car.permission.CAR_SPEED
+11-06 05:20:31.009 I/StayOrGoProbe(25584): 05:20:31.008 AAOS registerCallback EV_CHARGE_TIME_REMAINING@1.0 Hz => true
+11-06 05:20:31.013 I/StayOrGoProbe(25584): 05:20:31.013 AAOS registerCallback EV_BATTERY_INSTANTANEOUS_CHARGE_RATE@1.0 Hz => true
+11-06 05:20:31.016 I/StayOrGoProbe(25584): 05:20:31.016 AAOS registerCallback EV_CHARGE_STATE@1.0 Hz => true
+11-06 05:20:31.020 I/StayOrGoProbe(25584): 05:20:31.017 AAOS registerCallback EV_BATTERY_LEVEL@1.0 Hz => true
+11-06 05:20:31.020 I/StayOrGoProbe(25584): 05:20:31.020 --- NaviHelper DrivingInfo/TripInfo ---
+11-06 05:20:31.036 I/StayOrGoProbe(25584): 05:20:31.036 --- CarUxRestrictions ---
+11-06 05:20:31.038 I/StayOrGoProbe(25584): 05:20:31.038 UX current requiresDO=false active=0
+11-06 05:20:31.041 I/StayOrGoProbe(25584): 05:20:31.040 UX registerListener OK
+11-06 05:20:31.062 I/StayOrGoProbe(25584): 05:20:31.061 AAOS callback#1 propId=289410883 value=0
+11-06 05:20:31.063 I/StayOrGoProbe(25584): 05:20:31.062 AAOS callback#2 propId=291504908 value=0.0
+11-06 05:20:31.064 I/StayOrGoProbe(25584): 05:20:31.063 AAOS callback#3 propId=289410881 value=2
+11-06 05:20:31.069 I/StayOrGoProbe(25584): 05:20:31.069 AAOS callback#4 propId=291504905 value=60000.0
+11-06 05:20:31.071 I/StayOrGoProbe(25584): 05:20:31.071 NaviHelper.initialize OK
+11-06 05:20:31.074 I/StayOrGoProbe(25584): 05:20:31.073 NAV getRouteStateInfo requested
+11-06 05:20:31.079 I/StayOrGoProbe(25584): 05:20:31.075 NAV getDestinationInfo requested
+11-06 05:20:31.080 I/StayOrGoProbe(25584): 05:20:31.079 NAV getCurrentLocationInfo requested
+11-06 05:20:31.098 I/StayOrGoProbe(25584): 05:20:31.097 NAV requestTrip sent lat=35.5967726 lng=128.7682314
+11-06 05:20:31.129 I/StayOrGoProbe(25584): 05:20:31.129 NAV onCurrentLocationInfo lat=37.4127212 lng=127.094681 routeId=27658315-d9e4-11f1-9066-72e3ec72fa29
+11-06 05:20:31.243 I/StayOrGoProbe(25584): 05:20:31.242 NAV onRouteStateInfo routing=false mode=ROUTE_GUIDING remainChg=7740
+11-06 05:20:31.341 I/StayOrGoProbe(25584): 05:20:31.341 SOC capability: CapabilityConfig(accessType=READ)
+11-06 05:20:31.360 I/StayOrGoProbe(25584): 05:20:31.359 SOC getEvBatteryStateOfCharge => 78 (Integer)
+11-06 05:20:31.378 I/StayOrGoProbe(25584): 05:20:31.378 SOC callback#1 value=78 dtMs=-1
+11-06 05:20:31.383 I/StayOrGoProbe(25584): 05:20:31.382 SOC callback#2 value=78 dtMs=4
+11-06 05:20:31.638 I/StayOrGoProbe(25584): 05:20:31.638 NAV onTripInfo distance=308479 eta=11738 estSoc=19 energy=45028.63671875 points=1
+11-06 05:20:31.669 I/StayOrGoProbe(25584): 05:20:31.647 NAV   point#0 type=NORMAL kind=DESTINATION ratio=100.0 name=ProbeDest lat=35.5967725 lng=128.7682314
+11-06 05:20:32.094 I/StayOrGoProbe(25584): 05:20:32.093 NAV onDestinationInfo name=ProbeDest remainDist=375000
+11-06 05:20:32.895 I/StayOrGoProbe(25584): 05:20:32.895 AAOS callback#5 propId=291504905 value=60000.0
+11-06 05:20:32.921 I/StayOrGoProbe(25584): 05:20:32.921 AAOS callback#6 propId=289410883 value=0
+11-06 05:20:32.923 I/StayOrGoProbe(25584): 05:20:32.922 AAOS callback#7 propId=291504908 value=0.0
+11-06 05:20:34.884 I/StayOrGoProbe(25584): 05:20:34.883 AAOS callback#8 propId=289410883 value=0
+11-06 05:20:34.886 I/StayOrGoProbe(25584): 05:20:34.885 AAOS callback#9 propId=291504908 value=0.0
+11-06 05:20:34.888 I/StayOrGoProbe(25584): 05:20:34.887 AAOS callback#10 propId=291504905 value=60000.0
+11-06 05:20:35.885 I/StayOrGoProbe(25584): 05:20:35.885 AAOS callback#11 propId=291504905 value=60000.0
+11-06 05:20:35.902 I/StayOrGoProbe(25584): 05:20:35.901 AAOS callback#12 propId=289410883 value=0
+11-06 05:20:35.904 I/StayOrGoProbe(25584): 05:20:35.903 AAOS callback#13 propId=291504908 value=0.0
+11-06 05:20:37.413 I/StayOrGoProbe(25584): 05:20:37.413 NAV onDrivingInfo dest=name=ProbeDest dist=375000 dur=14640 remainChg=7740 charging=false recommended=false maxPower=0 targetSoc=10 chargers=0 plan=null waypoints=1
+11-06 05:20:37.414 I/StayOrGoProbe(25584): 05:20:37.413 NAV   waypoint#0 name=여주휴게소 (강릉) 전기차충전소 dist=59000 dur=2760 remainChg=51558 charging=true recommended=false maxPower=350 targetSoc=10 chargers=6 plan=null
+11-06 05:20:37.883 I/StayOrGoProbe(25584): 05:20:37.882 AAOS callback#14 propId=289410883 value=0
+11-06 05:20:37.901 I/StayOrGoProbe(25584): 05:20:37.900 AAOS callback#15 propId=291504908 value=0.0
+11-06 05:20:37.905 I/StayOrGoProbe(25584): 05:20:37.905 AAOS callback#16 propId=291504905 value=60000.0
+11-06 05:20:37.907 I/StayOrGoProbe(25584): 05:20:37.907 POWER estimate from EV_BATTERY_LEVEL: 0.0 kW over 6.8 s
+11-06 05:20:39.882 I/StayOrGoProbe(25584): 05:20:39.881 AAOS callback#17 propId=291504908 value=0.0
+11-06 05:20:39.901 I/StayOrGoProbe(25584): 05:20:39.901 AAOS callback#18 propId=291504905 value=60000.0
+11-06 05:20:39.903 I/StayOrGoProbe(25584): 05:20:39.903 POWER estimate from EV_BATTERY_LEVEL: 0.0 kW over 8.8 s
+11-06 05:20:39.905 I/StayOrGoProbe(25584): 05:20:39.905 AAOS callback#19 propId=289410883 value=0
+11-06 05:20:40.883 I/StayOrGoProbe(25584): 05:20:40.882 AAOS callback#20 propId=291504908 value=0.0
+11-06 05:20:41.883 I/StayOrGoProbe(25584): 05:20:41.882 AAOS callback#21 propId=291504905 value=60000.0
+11-06 05:20:41.885 I/StayOrGoProbe(25584): 05:20:41.885 POWER estimate from EV_BATTERY_LEVEL: 0.0 kW over 9.0 s
+11-06 05:20:41.887 I/StayOrGoProbe(25584): 05:20:41.886 AAOS callback#22 propId=289410883 value=0
+11-06 05:20:41.888 I/StayOrGoProbe(25584): 05:20:41.887 AAOS callback#23 propId=291504908 value=0.0
+11-06 05:20:43.886 I/StayOrGoProbe(25584): 05:20:43.885 AAOS callback#24 propId=289410883 value=0
+11-06 05:20:43.900 I/StayOrGoProbe(25584): 05:20:43.900 AAOS callback#25 propId=291504908 value=0.0
+11-06 05:20:43.902 I/StayOrGoProbe(25584): 05:20:43.902 AAOS callback#26 propId=291504905 value=60000.0
+11-06 05:20:43.904 I/StayOrGoProbe(25584): 05:20:43.904 POWER estimate from EV_BATTERY_LEVEL: 0.0 kW over 9.0 s
+11-06 05:20:45.883 I/StayOrGoProbe(25584): 05:20:45.882 AAOS callback#27 propId=291504908 value=0.0
+11-06 05:20:45.884 I/StayOrGoProbe(25584): 05:20:45.884 AAOS callback#28 propId=291504905 value=60000.0
+11-06 05:20:45.885 I/StayOrGoProbe(25584): 05:20:45.885 POWER estimate from EV_BATTERY_LEVEL: 0.0 kW over 10.0 s
+11-06 05:20:45.887 I/StayOrGoProbe(25584): 05:20:45.886 AAOS callback#29 propId=289410883 value=0
+11-06 05:20:46.884 I/StayOrGoProbe(25584): 05:20:46.883 AAOS callback#30 propId=291504908 value=0.0
+11-06 05:20:46.900 I/StayOrGoProbe(25584): 05:20:46.900 AAOS callback#31 propId=291504905 value=60000.0
+11-06 05:20:46.902 I/StayOrGoProbe(25584): 05:20:46.902 POWER estimate from EV_BATTERY_LEVEL: 0.0 kW over 9.0 s
+11-06 05:20:47.884 I/StayOrGoProbe(25584): 05:20:47.883 AAOS callback#32 propId=291504905 value=60000.0
+11-06 05:20:47.886 I/StayOrGoProbe(25584): 05:20:47.886 POWER estimate from EV_BATTERY_LEVEL: 0.0 kW over 10.0 s
+11-06 05:20:47.888 I/StayOrGoProbe(25584): 05:20:47.887 AAOS callback#33 propId=289410883 value=0
+11-06 05:20:47.889 I/StayOrGoProbe(25584): 05:20:47.888 AAOS callback#34 propId=291504908 value=0.0
+11-06 05:20:49.888 I/StayOrGoProbe(25584): 05:20:49.887 AAOS callback#35 propId=289410883 value=0
+11-06 05:20:49.901 I/StayOrGoProbe(25584): 05:20:49.900 AAOS callback#36 propId=291504908 value=0.0
+11-06 05:20:49.905 I/StayOrGoProbe(25584): 05:20:49.904 AAOS callback#37 propId=291504905 value=60000.0
+11-06 05:20:49.911 I/StayOrGoProbe(25584): 05:20:49.909 POWER estimate from EV_BATTERY_LEVEL: 0.0 kW over 8.0 s

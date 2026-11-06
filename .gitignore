@@ -6,3 +6,13 @@ __pycache__/
 .harness/launch-prompt.md
 .harness/session.log
 .harness/contest.json
+
+# Stay-or-Go probe import: never commit build output, IDE state, or secrets
+apps/pleos-stayorgo-probe/**/.gradle/
+apps/pleos-stayorgo-probe/**/build/
+apps/pleos-stayorgo-probe/.idea/
+apps/pleos-stayorgo-probe/**/local.properties
+apps/pleos-stayorgo-probe/**/*.jks
+apps/pleos-stayorgo-probe/**/*.keystore
+apps/pleos-stayorgo-probe/**/.env
+apps/pleos-stayorgo-probe/**/.env.*

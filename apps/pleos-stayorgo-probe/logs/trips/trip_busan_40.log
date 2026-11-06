@@ -1,0 +1,97 @@
+--------- beginning of main
+11-06 05:17:59.730 I/StayOrGoProbe(28142): 05:17:59.727 === StayOrGo Probe start ===
+11-06 05:17:59.733 I/StayOrGoProbe(28142): 05:17:59.732 package=ai.probe.staygo uid=1010175 targetSdk=34
+11-06 05:17:59.736 I/StayOrGoProbe(28142): 05:17:59.734 isSystemApp=false
+11-06 05:17:59.741 I/StayOrGoProbe(28142): 05:17:59.740 PERM check: pleos.car.permission.CAR_ENERGY => GRANTED
+11-06 05:17:59.743 I/StayOrGoProbe(28142): 05:17:59.743 PERM check: pleos.car.permission.CAR_INFO => GRANTED
+11-06 05:17:59.745 I/StayOrGoProbe(28142): 05:17:59.745 PERM check: android.car.permission.CAR_ENERGY => GRANTED
+11-06 05:17:59.748 I/StayOrGoProbe(28142): 05:17:59.747 PERM check: android.car.permission.CAR_INFO => GRANTED
+11-06 05:17:59.749 I/StayOrGoProbe(28142): 05:17:59.748 PERM check: android.permission.ACCESS_FINE_LOCATION => GRANTED
+11-06 05:17:59.750 I/StayOrGoProbe(28142): 05:17:59.750 PERM check: android.permission.ACCESS_COARSE_LOCATION => GRANTED
+11-06 05:17:59.751 I/StayOrGoProbe(28142): 05:17:59.750 --- Pleos Vehicle SOC ---
+11-06 05:17:59.788 I/StayOrGoProbe(28142): 05:17:59.788 Pleos Vehicle.initialize OK
+11-06 05:18:00.208 I/StayOrGoProbe(28142): 05:18:00.207 SOC registerEvBatteryStateOfCharge OK
+11-06 05:18:00.209 I/StayOrGoProbe(28142): 05:18:00.209 --- AAOS CarPropertyManager ---
+11-06 05:18:00.213 I/StayOrGoProbe(28142): 05:18:00.212 Car.createCar isConnected=true
+11-06 05:18:00.215 I/StayOrGoProbe(28142): 05:18:00.214 Car.createCar + PROPERTY_SERVICE OK class=android.car.hardware.property.CarPropertyManager
+11-06 05:18:00.219 I/StayOrGoProbe(28142): 05:18:00.219 AAOS get EV_BATTERY_LEVEL(291504905) => 40000.0
+11-06 05:18:00.225 I/StayOrGoProbe(28142): 05:18:00.224 AAOS get EV_CHARGE_STATE(289410881) => 2
+11-06 05:18:00.228 I/StayOrGoProbe(28142): 05:18:00.227 AAOS get EV_CHARGE_TIME_REMAINING(289410883) => 0
+11-06 05:18:00.232 I/StayOrGoProbe(28142): 05:18:00.230 AAOS get EV_BATTERY_INSTANTANEOUS_CHARGE_RATE(291504908) => 0.0
+11-06 05:18:00.237 I/StayOrGoProbe(28142): 05:18:00.236 AAOS get INFO_EV_BATTERY_CAPACITY(291504390) => 77400.0
+11-06 05:18:00.241 I/StayOrGoProbe(28142): 05:18:00.239 AAOS get GEAR_SELECTION FAIL: SecurityException: requires android.car.permission.CAR_POWERTRAIN
+11-06 05:18:00.243 I/StayOrGoProbe(28142): 05:18:00.242 AAOS get PERF_VEHICLE_SPEED FAIL: SecurityException: requires android.car.permission.CAR_SPEED
+11-06 05:18:00.246 I/StayOrGoProbe(28142): 05:18:00.245 AAOS registerCallback EV_CHARGE_TIME_REMAINING@1.0 Hz => true
+11-06 05:18:00.247 I/StayOrGoProbe(28142): 05:18:00.246 AAOS registerCallback EV_BATTERY_INSTANTANEOUS_CHARGE_RATE@1.0 Hz => true
+11-06 05:18:00.250 I/StayOrGoProbe(28142): 05:18:00.249 AAOS registerCallback EV_CHARGE_STATE@1.0 Hz => true
+11-06 05:18:00.253 I/StayOrGoProbe(28142): 05:18:00.251 AAOS registerCallback EV_BATTERY_LEVEL@1.0 Hz => true
+11-06 05:18:00.255 I/StayOrGoProbe(28142): 05:18:00.254 --- NaviHelper DrivingInfo/TripInfo ---
+11-06 05:18:00.270 I/StayOrGoProbe(28142): 05:18:00.270 --- CarUxRestrictions ---
+11-06 05:18:00.273 I/StayOrGoProbe(28142): 05:18:00.273 UX current requiresDO=false active=0
+11-06 05:18:00.275 I/StayOrGoProbe(28142): 05:18:00.275 UX registerListener OK
+11-06 05:18:00.304 I/StayOrGoProbe(28142): 05:18:00.303 AAOS callback#1 propId=289410883 value=0
+11-06 05:18:00.305 I/StayOrGoProbe(28142): 05:18:00.305 AAOS callback#2 propId=291504908 value=0.0
+11-06 05:18:00.306 I/StayOrGoProbe(28142): 05:18:00.306 AAOS callback#3 propId=289410881 value=2
+11-06 05:18:00.307 I/StayOrGoProbe(28142): 05:18:00.307 AAOS callback#4 propId=291504905 value=40000.0
+11-06 05:18:00.314 I/StayOrGoProbe(28142): 05:18:00.313 NaviHelper.initialize OK
+11-06 05:18:00.318 I/StayOrGoProbe(28142): 05:18:00.317 NAV getRouteStateInfo requested
+11-06 05:18:00.319 I/StayOrGoProbe(28142): 05:18:00.318 NAV getDestinationInfo requested
+11-06 05:18:00.320 I/StayOrGoProbe(28142): 05:18:00.319 NAV getCurrentLocationInfo requested
+11-06 05:18:00.330 I/StayOrGoProbe(28142): 05:18:00.330 NAV requestTrip sent lat=35.1796 lng=129.0756
+11-06 05:18:00.358 I/StayOrGoProbe(28142): 05:18:00.356 NAV onCurrentLocationInfo lat=37.4127212 lng=127.094681 routeId=27658315-d9e4-11f1-9066-72e3ec72fa29
+11-06 05:18:00.492 I/StayOrGoProbe(28142): 05:18:00.491 NAV onRouteStateInfo routing=false mode=ROUTE_GUIDING remainChg=7740
+11-06 05:18:00.557 I/StayOrGoProbe(28142): 05:18:00.556 SOC capability: CapabilityConfig(accessType=READ)
+11-06 05:18:00.559 I/StayOrGoProbe(28142): 05:18:00.558 SOC callback#1 value=80 dtMs=-1
+11-06 05:18:00.562 I/StayOrGoProbe(28142): 05:18:00.559 SOC getEvBatteryStateOfCharge => 80 (Integer)
+11-06 05:18:00.905 I/StayOrGoProbe(28142): 05:18:00.904 AAOS callback#5 propId=291504908 value=0.0
+11-06 05:18:00.929 I/StayOrGoProbe(28142): 05:18:00.928 AAOS callback#6 propId=291504905 value=40000.0
+11-06 05:18:00.931 I/StayOrGoProbe(28142): 05:18:00.931 AAOS callback#7 propId=289410883 value=0
+11-06 05:18:01.373 I/StayOrGoProbe(28142): 05:18:01.372 NAV onDestinationInfo name=ProbeDest remainDist=375000
+11-06 05:18:01.442 I/StayOrGoProbe(28142): 05:18:01.440 NAV onTripInfo distance=375459 eta=14599 estSoc=10 energy=54615.27734375 points=2
+11-06 05:18:01.443 I/StayOrGoProbe(28142): 05:18:01.442 NAV   point#0 type=EV_CHARGING kind=WAYPOINT ratio=53.09952710777516 name=선산(창원) 휴게소 전기차충전소 lat=36.2752174 lng=128.2497851
+11-06 05:18:01.444 I/StayOrGoProbe(28142): 05:18:01.443 NAV   point#1 type=NORMAL kind=DESTINATION ratio=100.0 name=ProbeDest lat=35.179264 lng=129.0762291
+11-06 05:18:02.884 I/StayOrGoProbe(28142): 05:18:02.884 AAOS callback#8 propId=291504905 value=40000.0
+11-06 05:18:02.903 I/StayOrGoProbe(28142): 05:18:02.902 AAOS callback#9 propId=289410883 value=0
+11-06 05:18:02.905 I/StayOrGoProbe(28142): 05:18:02.904 AAOS callback#10 propId=291504908 value=0.0
+11-06 05:18:04.883 I/StayOrGoProbe(28142): 05:18:04.883 AAOS callback#11 propId=289410883 value=0
+11-06 05:18:04.885 I/StayOrGoProbe(28142): 05:18:04.885 AAOS callback#12 propId=291504908 value=0.0
+11-06 05:18:04.900 I/StayOrGoProbe(28142): 05:18:04.900 AAOS callback#13 propId=291504905 value=40000.0
+11-06 05:18:05.882 I/StayOrGoProbe(28142): 05:18:05.882 AAOS callback#14 propId=289410883 value=0
+11-06 05:18:05.885 I/StayOrGoProbe(28142): 05:18:05.884 AAOS callback#15 propId=291504908 value=0.0
+11-06 05:18:06.882 I/StayOrGoProbe(28142): 05:18:06.882 AAOS callback#16 propId=291504905 value=40000.0
+11-06 05:18:06.885 I/StayOrGoProbe(28142): 05:18:06.884 POWER estimate from EV_BATTERY_LEVEL: 0.0 kW over 6.6 s
+11-06 05:18:06.888 I/StayOrGoProbe(28142): 05:18:06.887 AAOS callback#17 propId=289410883 value=0
+11-06 05:18:07.882 I/StayOrGoProbe(28142): 05:18:07.882 AAOS callback#18 propId=291504908 value=0.0
+11-06 05:18:07.900 I/StayOrGoProbe(28142): 05:18:07.899 AAOS callback#19 propId=291504905 value=40000.0
+11-06 05:18:07.905 I/StayOrGoProbe(28142): 05:18:07.904 POWER estimate from EV_BATTERY_LEVEL: 0.0 kW over 7.6 s
+11-06 05:18:08.882 I/StayOrGoProbe(28142): 05:18:08.882 AAOS callback#20 propId=289410883 value=0
+11-06 05:18:09.882 I/StayOrGoProbe(28142): 05:18:09.881 AAOS callback#21 propId=291504908 value=0.0
+11-06 05:18:09.883 I/StayOrGoProbe(28142): 05:18:09.883 AAOS callback#22 propId=291504905 value=40000.0
+11-06 05:18:09.885 I/StayOrGoProbe(28142): 05:18:09.884 POWER estimate from EV_BATTERY_LEVEL: 0.0 kW over 9.6 s
+11-06 05:18:09.900 I/StayOrGoProbe(28142): 05:18:09.900 AAOS callback#23 propId=289410883 value=0
+11-06 05:18:10.882 I/StayOrGoProbe(28142): 05:18:10.882 AAOS callback#24 propId=291504908 value=0.0
+11-06 05:18:10.888 I/StayOrGoProbe(28142): 05:18:10.887 AAOS callback#25 propId=291504905 value=40000.0
+11-06 05:18:10.894 I/StayOrGoProbe(28142): 05:18:10.890 POWER estimate from EV_BATTERY_LEVEL: 0.0 kW over 10.0 s
+11-06 05:18:11.884 I/StayOrGoProbe(28142): 05:18:11.883 AAOS callback#26 propId=289410883 value=0
+11-06 05:18:12.882 I/StayOrGoProbe(28142): 05:18:12.882 AAOS callback#27 propId=291504908 value=0.0
+11-06 05:18:12.888 I/StayOrGoProbe(28142): 05:18:12.884 AAOS callback#28 propId=291504905 value=40000.0
+11-06 05:18:12.892 I/StayOrGoProbe(28142): 05:18:12.891 POWER estimate from EV_BATTERY_LEVEL: 0.0 kW over 8.0 s
+11-06 05:18:12.897 I/StayOrGoProbe(28142): 05:18:12.897 AAOS callback#29 propId=289410883 value=0
+11-06 05:18:14.882 I/StayOrGoProbe(28142): 05:18:14.881 AAOS callback#30 propId=291504905 value=40000.0
+11-06 05:18:14.883 I/StayOrGoProbe(28142): 05:18:14.883 POWER estimate from EV_BATTERY_LEVEL: 0.0 kW over 10.0 s
+11-06 05:18:14.886 I/StayOrGoProbe(28142): 05:18:14.885 AAOS callback#31 propId=289410883 value=0
+11-06 05:18:14.887 I/StayOrGoProbe(28142): 05:18:14.887 AAOS callback#32 propId=291504908 value=0.0
+11-06 05:18:15.883 I/StayOrGoProbe(28142): 05:18:15.883 AAOS callback#33 propId=291504905 value=40000.0
+11-06 05:18:15.885 I/StayOrGoProbe(28142): 05:18:15.885 POWER estimate from EV_BATTERY_LEVEL: 0.0 kW over 9.0 s
+11-06 05:18:15.887 I/StayOrGoProbe(28142): 05:18:15.886 AAOS callback#34 propId=289410883 value=0
+11-06 05:18:16.885 I/StayOrGoProbe(28142): 05:18:16.885 AAOS callback#35 propId=291504908 value=0.0
+11-06 05:18:16.888 I/StayOrGoProbe(28142): 05:18:16.887 AAOS callback#36 propId=291504905 value=40000.0
+11-06 05:18:16.890 I/StayOrGoProbe(28142): 05:18:16.889 POWER estimate from EV_BATTERY_LEVEL: 0.0 kW over 9.0 s
+11-06 05:18:17.882 I/StayOrGoProbe(28142): 05:18:17.882 AAOS callback#37 propId=289410883 value=0
+11-06 05:18:18.882 I/StayOrGoProbe(28142): 05:18:18.881 AAOS callback#38 propId=291504908 value=0.0
+11-06 05:18:18.900 I/StayOrGoProbe(28142): 05:18:18.900 AAOS callback#39 propId=291504905 value=40000.0
+11-06 05:18:18.903 I/StayOrGoProbe(28142): 05:18:18.902 POWER estimate from EV_BATTERY_LEVEL: 0.0 kW over 9.0 s
+11-06 05:18:18.905 I/StayOrGoProbe(28142): 05:18:18.905 AAOS callback#40 propId=289410883 value=0
+11-06 05:18:19.883 I/StayOrGoProbe(28142): 05:18:19.882 AAOS callback#41 propId=291504908 value=0.0
+11-06 05:18:19.886 I/StayOrGoProbe(28142): 05:18:19.886 AAOS callback#42 propId=291504905 value=40000.0
+11-06 05:18:19.889 I/StayOrGoProbe(28142): 05:18:19.888 POWER estimate from EV_BATTERY_LEVEL: 0.0 kW over 9.0 s

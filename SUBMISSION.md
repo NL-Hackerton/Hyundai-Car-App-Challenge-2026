@@ -81,3 +81,29 @@
 - 제출 전 확인: 참고문헌 [3]의 개인 블로그(bonta.tistory.com)는 최종 판정에서 원문을 열어 제3자 시승기로 확인했다. 팀원도 본인 계정이 아닌지 한 번 더 확인한다.
 - 글꼴: DOCX는 `Apple SD Gothic Neo`로 만들었고 검수 PDF는 macOS LibreOffice 렌더다. Windows Word에는 이 글꼴이 없어 대체 글꼴로 바뀌면서 쪽 나뉨이 달라질 수 있다. 접수 전에 Windows Word로 DOCX를 열어 표 잘림과 빈 쪽이 없는지 확인한다.
 
+## Stay-or-Go 제출 체크리스트
+
+스테이고를 접수할 때 쓰는 목록이다. **에이전트는 메일을 작성·첨부·발송하지 않는다.** 사용자와 팀이 서명본을 만든 뒤 직접 보낸다.
+
+### 필수
+
+- 서명된 공식 DOCX. 저장소의 `submission/stay-or-go/application.docx`를 내려받아, 개인정보·동의·서명은 로컬에서만 채운다. 채운 값과 서명본은 커밋하지 않는다. 저장소 파일은 개인 값·체크·동의·서명이 공란인 검수본이다.
+- 수신: `appdevchallenge@hyundai-partners.com`
+- 제목: `[차량용 앱 개발 공모전] <팀명>_김유빈`. `<팀명>`은 사용자가 정한다. 개인 참가면 공고의 제목 형식(팀명 또는 개인 성명)에 맞춘다.
+- 참조: 팀으로 참가하면 팀원 전원을 CC한다.
+- 마감: 2026-11-15 23:59 KST.
+- 02 본문·참고 링크·첨부에는 성명·소속·연락처·계정·개발자 실명을 넣지 않는다. 01·03·04의 개인 값과 서명은 제출본에만 둔다.
+
+### 선택 가산 첨부
+
+기획서 7항은 이번 접수에서 시연 영상·GitHub·APK·숏폼을 내지 않고 `probe-log-excerpt.txt`만 첨부한다고 적는다. 아래 항목을 메일에 넣으면 그 문장과 어긋난다. 넣을 경우 팀이 7항을 고치고 다시 렌더·검수한 뒤 보낸다. 에이전트는 기획서 본문을 바꾸지 않았다.
+
+- GitHub: 이 저장소의 `apps/pleos-stayorgo-probe` 경로, 또는 저장소 전체. 소스는 `https://github.com/yoobinkim541/pleos-stayorgo-probe`에서 가져왔다. 이 저장소는 현재 private라서, 심사자가 여는 공개 링크가 되려면 공개가 필요하다.
+- APK: 가져온 트리에 커밋된 APK는 없다. `apps/pleos-stayorgo-probe/dist/`에 파일이 있을 때만 첨부한다. 없으면 `apps/pleos-stayorgo-probe/README.md`의 `./gradlew :app:assembleDebug`로 빌드한다.
+- 프로브 로그 발췌: `submission/stay-or-go/probe-log-excerpt.txt`. 7항이 이 파일 첨부를 전제하므로, 스테이고를 접수하면 DOCX와 함께 첨부한다.
+- 시연 영상: 팀이 가진 영상이 있을 때만 선택 첨부한다. 저장소에는 시연 영상이 없다.
+
+### 발송
+
+에이전트는 메일을 보내지 않는다. 서명·개인정보 입력·발송은 사용자와 팀이 한다.
+
