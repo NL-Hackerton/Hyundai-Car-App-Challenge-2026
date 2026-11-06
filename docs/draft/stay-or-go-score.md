@@ -1,19 +1,28 @@
-# 스테이고 자체 채점 (2026-11-06)
+# 스테이고 자체 채점 (2026-11-06, API 검증 반영)
 
 내부 가정 배점 25×4. 공식 배점 비공개.
 
 | 기준 | 점수 | 근거 |
 |---|---:|---|
-| 차량특화성 | 22 | 주차·충전 중 SOC 구독+내비 재경로는 폰 단독으로 대체하기 어렵다. |
-| 창의성 | 20 | 출발 전 루트플래너와 겹치지 않는 「세션 중 분기」에 초점을 좁혔다. 다만 아이디어 자체는 직관적이라 혁신성 만점은 어렵다. |
-| 기술 활용성 | 21 | Ready API(EvBattery SOC, NaviHelper)만으로 핵심이 성립. 잔여시간·상태 API는 선택으로 분리했다. |
-| 사업성 | 19 | CPO·OEM 경로는 현실적이나 계약·유입 증거가 없다. 수치는 민감도 가정이다. |
-| **합계** | **82** | 입상권 후보이나 90 목표에는 미달. |
+| 차량특화성 | 23 | SOC Integer 구독(CAR_ENERGY)+주차 UX+NaviHelper 재경로는 폰 단독 대체가 어렵다. DrivingInfo/TripInfo의 EV_CHARGING 포인트까지 확인했다. |
+| 창의성 | 20 | 출발 전 루트플래너와 겹치지 않는 「세션 중 분기」. 아이디어 자체는 직관적이라 만점은 어렵다. |
+| 기술 활용성 | 23 | Vehicle 2.3.2·NaviHelper/navi-data 시그니처로 SOC 단위·ChargerOperator 한계·경로 충전 포인트·AAOS-only 잔여시간/순간전력을 확정하고 폴백을 설계했다. |
+| 사업성 | 20 | 친환경차법 급속 1시간·과태료, 서울 점거 사용료 입법예고, CPO 혼잡수수료를 인용해 B2B/OEM 경로를 강화했다. 계약·유입 실적은 없다. |
+| **합계** | **86** | 검증으로 기술·사업 약점을 줄였으나 실차 데모·계약 증거는 여전히 없다. |
 
-## 남은 약점·미확인
-1. EvBattery SOC 반환 단위·범위·annotation 미검증.
-2. RANGE_REMAINING 메서드·도메인 미확인(토론만 존재).
-3. EV_CHARGE_STATE / TIME_REMAINING의 Pleos 노출 미확인.
-4. getChargerOperatorInfo가 「경로상 다음 급속」좌표까지 주는지는 샘플 로그 수준.
-5. Bluelink/차내 루트플래너가 향후 세션 중 분기를 내장하면 차별이 줄어든다.
-6. 환경부 상태 API 지연·누락 시 Go 추천의 신뢰도 하락.
+## 확인됨 (이번 검증)
+1. `getEvBatteryStateOfCharge` → `Integer`, `pleos.car.permission.CAR_ENERGY`. Wh가 아닌 퍼센트 SOC로 취급(정수+PercentLimit 정합). Level/Capacity Float는 deprecated→AAOS Wh.
+2. SOC 리스너 존재. 갱신 Hz·최소 주기는 SDK 미문서(unknown).
+3. Pleos EvBattery 2.3.2에 `EV_CHARGE_TIME_REMAINING`·`EV_BATTERY_INSTANTANEOUS_CHARGE_RATE` getter 없음. `EvChargeState` enum만 있고 getter 없음.
+4. AAOS: LEVEL Wh, TIME_REMAINING 초, INSTANTANEOUS_RATE mW, CHARGE_STATE — 읽기 `PERMISSION_ENERGY`(dangerous). CAPACITY는 `PERMISSION_CAR_INFO`(normal).
+5. `getChargerOperatorInfo` → `ChargerOperator(id, name)`만. 좌표·경로상 충전소 아님.
+6. 경로 급속: `onDrivingInfo`/`onTripInfo` + `RoutePointPoiType.EV_CHARGING`(lat/lng). 전체 폴리라인 없음.
+7. 환경부 `getChargerStatus`: period 1~10(기본 5), `stat`/`statUpdDt`, 개발계정 일 ~1000회 안내. 실시간 불일치·지연 보도 있음.
+8. 급속 1시간 초과=충전방해·과태료(지자체 안내 흔히 10만). 80%는 법률 아님. 서울 점거 사용료는 조례안.
+
+## 아직 unknown / 실차 확인 필요
+1. SOC 콜백 실제 Hz·에뮬레이터 값 범위(0–100 보장 여부).
+2. AAOS ENERGY 권한이 Pleos 3rd-party 앱에 실차 부여되는지, CarPropertyManager 직접 호출 가능 여부.
+3. DrivingInfo/TripInfo가 주차·충전 중 세션에서도 유효한지(내비 활성 조건).
+4. 환경부 API 운영 계정 한도·실제 지연 분포.
+5. Bluelink가 향후 세션 중 Stay/Go를 내장하면 차별 축소.

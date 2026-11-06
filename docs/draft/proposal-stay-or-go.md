@@ -6,7 +6,7 @@ participant_category: student
 
 ## 1. 앱 한 줄 소개
 
-스테이고는 공용 급속충전 중에 현재 충전기에서 더 채울지, 목적지와 경로상 다음 충전을 보고 이탈할지를 SOC·내비 목적지·충전 사업자 정보로 분기하는 Pleos 차량용 앱이다.
+스테이고는 공용 급속충전 중에 현재 충전기에서 더 채울지, 목적지와 경로상 다음 급속 후보를 보고 이탈할지를 차량 SOC·내비 목적지·경로 충전 포인트로 분기하는 Pleos 차량용 앱이다.
 
 ## 2. 기획 배경
 
@@ -22,7 +22,9 @@ participant_category: student
 
 [문헌] 2017년과 2024년 선택실험 자료를 비교한 연구에서는, 충전소 부족으로 인한 이동시간·대기시간에 대한 비효용이 2024년에 현저히 커진 것으로 나타났다.[2] 이는 단순 충전기 검색에 그치지 않고, 이미 점유한 충전기에서의 대기·이탈 판단이 사용자 효용과 맞닿아 있음을 시사한다. 본 앱은 위 수치를 시장 규모나 MAU로 환산하지 않으며, 공용 급속충전 이용자라는 초기 집단의 문제 맥락만 인용한다.
 
-[문헌] 직류 급속충전에서는 SOC가 높아질수록 충전 전력이 낮아지는 테이퍼가 일반적이다. 아이오닉 5의 공개 충전 곡선·실측 보도에서는 대략 80% 전후에서 전력이 뚜렷이 줄고, 장거리에서는 100%까지 채우기보다 80% 부근에서 출발하는 편이 총 이동시간에 유리할 수 있다고 설명한다.[3][4] 스테이고는 이 사실을 「항상 80%에서 떠나라」는 규칙으로 고정하지 않는다. 목적지까지 필요한 SOC와 예비분을 먼저 계산한 뒤, 현재 SOC가 그 임계를 초과했을 때만 테이퍼 구간 체류의 기회비용을 Stay/Go 문구에 반영한다.
+[문헌] 직류 급속충전에서는 SOC가 높아질수록 충전 전력이 낮아지는 테이퍼가 일반적이다. 아이오닉 5의 공개 충전 곡선·실측 보도에서는 대략 80% 전후에서 전력이 뚜렷이 줄고, 장거리에서는 100%까지 채우기보다 80% 부근에서 출발하는 편이 총 이동시간에 유리할 수 있다고 설명한다.[3][4] 스테이고는 이 사실을 「항상 80%에서 떠나라」는 법률·규칙으로 고정하지 않는다. 목적지까지 필요한 SOC와 예비분을 먼저 계산한 뒤, 현재 SOC가 그 임계를 초과했을 때만 테이퍼 구간 체류의 기회비용을 Stay/Go 문구에 반영한다.
+
+[문헌] 한국 법제는 「환경친화적 자동차의 개발 및 보급 촉진에 관한 법률」에서 급속충전시설 충전구역에 충전 개시 후 1시간을 초과해 계속 주차하는 행위를 충전방해로 규율하며, 지방자치단체 안내에 따르면 과태료(흔히 10만 원) 부과 대상이다.[18][19] 이는 SOC 80% 의무가 아니라 시간 기준 점유 제한이다, 스테이고의 Go 안내는 과태료·회차 리스크를 운전자에게 상기하는 보조 문구로만 쓴다. 서울시는 충전 종료·제한시간 경과 후 미이동 차량에 분당 상한·일 최대 한도의 「점거 사용료」를 도입하려는 조례 개정안을 입법예고한 바 있어, CPO·지자체 유휴 완화 수요와 맞닿는다.[20] 테슬라 등 CPO의 혼잡·점유 수수료 사례도 동일 문제(완충 후 점유)를 요금으로 푸는 상업 경로를 보여 준다.[21]
 
 ### 기존 기능과의 경계
 
@@ -39,8 +41,9 @@ Bluelink와 차량 EV 루트 플래너는 출발 전·주행 중 충전 정차�
 | 목적지·필요 SOC | 내비 목적지·경로 거리, 사용자 예비 SOC(기본 15%p, 조정 가능)로 목표 SOC를 산정한다. | 목적지 미설정 시 Go를 잠그고 목적지 설정을 요청한다. |
 | 현재 SOC 구독 | EvBattery SOC를 조회·구독한다. | 미지원·권한 실패 시 차량 연동을 중단하고 일반 계산기로 위장하지 않는다. |
 | Stay 판정 | 현재 SOC < 목표 SOC이면 Stay를 기본 추천한다. | 사용자가 목표를 낮추거나 예비분을 줄일 수 있다. |
-| Go 판정 | 현재 SOC ≥ 목표이고, SOC가 테이퍼 주의 구간(기본 80%) 이상이거나 사용자가 Go를 선택한 경우, 경로상·인근 다음 급속 후보와 재경로를 제시한다. | Go는 내비 `requestRoute`/`requestRouteWithWaypoints` 호출로 이어지며, 충전 케이블 분리는 사용자가 한다. |
-| 선택적 가용성 | 백엔드가 환경부·한국환경공단 충전소 상태 API를 조회하면 후보 충전기 상태(사용가능/충전중 등)를 보조 표시한다. | API 실패·지연 시 상태 없이 위치·사업자만 보여 주고, 가용성을 단정하지 않는다. |
+| Go 판정 | 현재 SOC ≥ 목표이고, SOC가 테이퍼 주의 구간(기본 80%) 이상이거나 사용자가 Go를 선택한 경우, 경로상·인근 다음 급속 후보와 재경로를 제시한다. | Go는 내비 `requestRoute`/`requestRouteWithWaypoints` 호출로 이어지며, 충전 케이블 분리는 사용자가 한다. 급속 1시간 점유 제한·과태료 가능성은 보조 고지로만 표시한다.[18] |
+| 경로 급속 후보 | NaviHelper `onDrivingInfo`/`onTripInfo`의 충전 포인트·`RoutePointPoiType.EV_CHARGING` 좌표를 1순위로 쓴다. `getChargerOperatorInfo`는 사업자 id·name만 반환하므로 좌표·경로상 충전소 목록으로 쓰지 않는다.[11][22] | 포인트가 없으면 목적지·현재 위치 좌표 기반 환경부 `getChargerInfo` 반경 조회로 폴백한다. 전체 경로 폴리라인은 NaviHelper에 없어 기하 기반 경로 버퍼 검색은 하지 않는다.[22] |
+| 선택적 가용성 | 백엔드가 환경부·한국환경공단 `getChargerStatus`(period 1~10분, 기본 5)로 `stat`·`statUpdDt`를 조회하면 후보 상태를 보조 표시한다.[15][23] | 호출 한도·지연·현장 불일치가 보고되어 있으므로 가용성을 단정하지 않고, 실패·지연 시 상태 없이 위치만 보여 준다.[24] |
 
 <p>표 1. 계획한 사용자 기능과 확인 책임.</p>
 
@@ -51,7 +54,7 @@ Bluelink와 차량 EV 루트 플래너는 출발 전·주행 중 충전 정차�
 3. S가 St 이상이고 T 이상이면 Go를 기본 강조한다. 문구는 「한계 전력 구간에 들어 추가 체류 대비 이동 재개가 유리할 수 있음」이며, 시간 단축을 보장하지 않는다.
 4. Go 선택 시 후보 충전소 또는 목적지 재경로를 NaviHelper로 전달한다. 후보가 없으면 목적지 직행만 제공한다.
 
-St는 [가정]으로 St = min(100, ceil(d / r) + m)처럼 단순화할 수 있다. d는 남은 경로 거리, r은 사용자·차량이 제공하는 전비 또는 최근 평균, m은 예비 SOC다. 전비·거리 입력이 불완전하면 사용자가 목표 SOC를 직접 입력한다. RANGE_REMAINING을 대상 환경에서 확인하면 d/r 대신 잔여 주행거리와 경로 거리를 비교하는 쪽으로 대체한다. 잔여 충전시간·충전전력(kW) API가 확인되기 전에는 시간 예측을 핵심 기능으로 포함하지 않는다.
+St는 [가정]으로 St = min(100, ceil(d / r) + m)처럼 단순화할 수 있다. d는 `DestinationInfo.remainDistance` 등 내비 남은 거리, r은 전비 또는 최근 평균, m은 예비 SOC다. 전비·거리 입력이 불완전하면 사용자가 목표 SOC를 직접 입력한다. Pleos `Odometer.getRangeRemainingDistance` 및 AAOS `RANGE_REMAINING`을 대상 환경에서 확인하면 d/r 대신 잔여 주행거리와 경로 거리를 비교한다.[14][22] 잔여 충전시간(초)·순간 충전전력(mW)은 AAOS `EV_CHARGE_TIME_REMAINING`·`EV_BATTERY_INSTANTANEOUS_CHARGE_RATE`로 문서화되어 있으나 Pleos EvBattery 2.3.2에는 대응 getter가 없어, 확인·권한 확보 전에는 시간·전력 예측을 핵심 기능에 넣지 않는다.[8][22]
 
 ### 직접 대안 대비 검증할 차이
 
@@ -80,24 +83,28 @@ St는 [가정]으로 St = min(100, ceil(d / r) + m)처럼 단순화할 수 있�
 
 <p>표 3. 주차·충전 중 Stay·Go 시나리오.</p>
 
-경계 조건은 다음과 같다. 목적지 없음, SOC 미지원, 권한 거절, UX 제한 true, Service 단절, 후보 충전소 0건, 환경부 상태 API 지연. 각 경우 기능을 잠그거나 보조 정보를 빼고, 실패를 성공처럼 보이지 않게 한다. 앱은 충전이 실제로 진행 중인지 보장하지 않으며, `getEvChargeSwitchState`를 충전 상태 대신 쓰지 않는다.[7][8]
+경계 조건은 다음과 같다. 목적지 없음, SOC 미지원, 권한 거절, UX 제한 true, Service 단절, DrivingInfo/TripInfo 충전 포인트 0건, 환경부 상태 API 지연·불일치. 각 경우 기능을 잠그거나 보조 정보를 빼고, 실패를 성공처럼 보이지 않게 한다. 앱은 충전이 실제로 진행 중인지 보장하지 않으며, `getEvChargeSwitchState`를 충전 상태 대신 쓰지 않는다. AAOS `EV_CHARGE_STATE`가 확보되면 그때만 충전 중 여부를 보조 표시한다.[7][8][22]
 
 ## 5. 개발 계획
 
 ### 개발 환경과 최소 API
 
-[문헌] Vehicle SDK·NaviHelper는 프로젝트 접근 안내에서 Ready to Use로 확인된다. FusedLocation·TTS/STT·Vehicle Control은 Not Available Yet로 안내되어 최소 구현에서 제외한다.[9] Vehicle 기준은 Sample App 문서의 2.3.2 / Service 2.3.22를 따른다.[10] NaviHelper는 3.0.5 샘플의 `requestRoute`, `requestRouteWithWaypoints`, `getDestinationInfo`, `getRouteStateInfo`, `getChargerOperatorInfo`를 사용한다.[11]
+[문헌] Vehicle SDK·NaviHelper는 프로젝트 접근 안내에서 Ready to Use로 확인된다. FusedLocation·TTS/STT·Vehicle Control은 Not Available Yet로 안내되어 최소 구현에서 제외한다.[9] Vehicle 기준은 Sample App 문서·Maven `Vehicle` 2.3.2다.[10][22] NaviHelper는 3.0.5와 `navi-data` 3.0.4 시그니처를 기준으로 한다.[11][22]
 
 | 용도 | 공개 API·권한 | 구현 시 적용할 조건 |
 |---|---|---|
 | 차량 연결 | `Vehicle.initialize()`, `Vehicle.release()` | 비동기 실패·수명주기를 관리한다. |
-| SOC | `checkEvBatteryStateOfChargeCapabilities`, `getEvBatteryStateOfCharge`, `registerEvBatteryStateOfCharge`, `unregisterEvBatteryStateOfCharge` | 권한 `pleos.car.permission.CAR_ENERGY`를 전제로 하되 annotation을 재확인한다.[7][12] |
-| 내비 | `NaviHelper.initialize()`, `addListener()`, `getDestinationInfo`, `getRouteStateInfo`, `getChargerOperatorInfo`, `requestRoute`, `requestRouteWithWaypoints`, `release()` | 내비 앱 상태에 의존한다. 실패 시 Go를 잠근다.[11] |
+| SOC(%) | `getEvBatteryStateOfCharge` → `Integer`, `registerEvBatteryStateOfCharge` → `onEvBatteryStateOfChargeUpdated(Integer)` | AAR 시그니처상 정수형이며 `setEvChargePercentLimit`과 함께 퍼센트 SOC로 취급한다(Wh 아님). 권한 `pleos.car.permission.CAR_ENERGY`. 콜백 Hz·최소 갱신 주기는 SDK에 문서화되어 있지 않아 이벤트 구독으로만 설계한다.[7][22] |
+| 배터리 Wh(선택) | `getEvBatteryLevel`/`getEvBatteryCapacity`(Float) | Level은 CAR_ENERGY, Capacity는 CAR_INFO. 둘 다 deprecated이며 각각 AAOS `EV_BATTERY_LEVEL`(Wh)·`INFO_EV_BATTERY_CAPACITY`(Wh) 사용을 안내한다.[8][22] |
+| 내비 목적지·경로 상태 | `getDestinationInfo`, `getRouteStateInfo`, `getCurrentLocationInfo`, `requestRoute`, `requestRouteWithWaypoints`, `requestTrip` | `DestinationInfo`에 lat/lng·remainDistance/Time. `RouteStateInfo`에 라우팅 여부·remainDestinationChargingInt 등. 전체 경로 폴리라인 필드는 없다.[22] |
+| 경로 급속 후보 | `onDrivingInfo`/`onTripInfo` | `DrivingState.isChargingStation`·`isRecommendedChargingStation`·`ChargingPlan(startSoc/endSoc/duration)`, `TripSummary.routePoints`의 `RoutePointPoiType.EV_CHARGING`(lat/lng)을 사용한다.[22] |
+| CPO 목록 | `getChargerOperatorInfo` → `List<ChargerOperator(id, name)>` | 사업자 카탈로그만. 충전소 좌표·경로상 목록이 아니다.[22] |
 | 화면 제한 | `CarUxRestrictionsManager` | `isRequiresDistractionOptimization()==false`에서만 비-DO 화면을 제공한다.[13] |
-| 선택: 잔여 주행거리 | `RANGE_REMAINING` 계열(공식 토론에서 읽기 가능으로 안내)[14] | 메서드·도메인·capability를 대상 환경에서 확인한 뒤에만 목표 SOC 산정에 포함한다. |
-| 선택: 충전 상태·잔여시간 | AAOS `EV_CHARGE_STATE`, `EV_CHARGE_TIME_REMAINING`[8] | Pleos 노출·권한이 확인되기 전에는 넣지 않는다. |
-| 선택: 충전기 가용성 | 환경부·한국환경공단 충전소 정보·상태 OpenAPI[15] | 백엔드 경유. 차내 최소 데모는 목 데이터로 대체 가능하다. |
-| 제외 | 충전 스위치로 충전 중 판정, 도어·공조 제어, 차 밖 푸시, 실내 카메라 | 오탐·미지원·주의 분산을 피한다. |
+| 선택: 잔여 주행거리 | Pleos `Odometer.getRangeRemainingDistance`, AAOS `RANGE_REMAINING`(읽기 권한 불필요 안내)[14] | capability 확인 후 목표 SOC 산정에 포함한다. |
+| 선택: 충전 상태·잔여시간·순간전력 | AAOS `EV_CHARGE_STATE`(ON_CHANGE), `EV_CHARGE_TIME_REMAINING`(초, CONTINUOUS), `EV_BATTERY_INSTANTANEOUS_CHARGE_RATE`(mW, CONTINUOUS). 읽기 `Car.PERMISSION_ENERGY`(dangerous).[8] | Pleos EvBattery 2.3.2에 TIME_REMAINING·INSTANTANEOUS_RATE getter 없음. `EvChargeState` enum은 상수만 존재하고 getter 없음. 3rd-party는 AAOS 권한·호환을 실차에서 확인한 뒤에만 선택 포함한다.[8][22][27] |
+| 선택: 전류 한도 | Pleos `get/setEvChargeCurrentDrawLimit`(Float, CAR_ENERGY) ≈ AAOS `EV_CHARGE_CURRENT_DRAW_LIMIT`(A)[8][22] | 순간 충전률이 아니라 사용자 설정 한도다. Stay/Go 핵심에 쓰지 않는다. |
+| 선택: 충전기 가용성 | 환경부 `getChargerStatus` period 1~10(기본 5), 필드 `stat`·`statUpdDt`; 개발 계정 일일 호출 한도 안내 약 1,000회.[15][23] | 백엔드 경유. 실시간 표기와 현장 불일치·지연이 보도되어 보조 표시만 한다.[24] |
+| 제외 | `getEvChargeSwitchState`로 충전 중 단정, 도어·공조 제어, 차 밖 푸시, 실내 카메라, `getChargerOperatorInfo`를 경로 충전소로 오용 | 오탐·미지원·주의 분산을 피한다. |
 
 <p>표 4. 최소 기술 구성과 선택 확장.</p>
 
@@ -126,7 +133,7 @@ St는 [가정]으로 St = min(100, ceil(d / r) + m)처럼 단순화할 수 있�
 
 ### 사업 모델
 
-초기에는 Pleos 앱 마켓 무료 앱으로 시작한다. 매출 가설은 (1) 충전사업자(CPO) 대상 유휴 완화·회차 안내 제휴, (2) OEM 인포테인먼트 기능으로의 편입 검토다. 어느 경로도 계약·입점이 확정되지 않았다. 충전 결제·광고 기반 어뷰징은 계획하지 않는다.
+초기에는 Pleos 앱 마켓 무료 앱으로 시작한다. 매출·확장 가설은 다음이다. (1) CPO·충전단지: 급속 1시간 초과 주차의 과태료 리스크와 완충 후 점유에 따른 회차 손실을 Stay/Go·회차 안내로 줄이는 B2B 제휴.[18][20][21] (2) OEM: 세션 중 분기 UX를 인포테인먼트·Bluelink 인접 기능으로 편입하는 라이선스·내장 검토. (3) 지자체·공용 급속: 점거 사용료·충전질서 정책과 맞춘 안내 모듈. 어느 경로도 계약·입점이 확정되지 않았다. 충전 결제·광고 기반 어뷰징은 계획하지 않는다. 「80% 의무」처럼 법률에 없는 주장은 쓰지 않는다.
 
 [가정·계산] 월 신규 후보 이용자 N=200(EV 커뮤니티·CPO 안내), 환경·권한·공용급속 이용 공동 통과율 e=30%, 설치율 i=40%, 첫 Stay/Go 완료율 a=50%이면 월 신규 활성 U≈12명이다. 재사용률 r=40% 가정 시 M3≈18명 수준이다. 수치는 민감도 예시이며 확보 수요가 아니다. 유료화는 30일 관찰 20명 이상에서 재사용 40% 이상일 때만 검토한다.
 
@@ -165,6 +172,14 @@ St는 [가정]으로 St = min(100, ceil(d / r) + m)처럼 단순화할 수 있�
 - [15] 공공데이터포털 한국환경공단 전기자동차 충전소 정보(getChargerInfo·getChargerStatus). https://www.data.go.kr/data/15076352/openapi.do
 - [16] 현대자동차그룹 차량용 앱 개발 공모전 심사·시상. https://appdevchallenge.auto-hmg.io/guide/judging-awards
 - [17] 공모전 개발 환경 안내. https://appdevchallenge.auto-hmg.io/guide/development
+- [18] 찾기쉬운 생활법령정보 — 전기자동차 운행 및 관리(급속충전시설 1시간 초과 주차=충전방해, 과태료 안내). https://www.easylaw.go.kr/CSP/CnpClsMainBtr.laf?ccfNo=2&cciNo=2&cnpClsNo=2&csmSeq=1404
+- [19] 국가법령정보센터 — 환경친화적 자동차의 개발 및 보급 촉진에 관한 법률·시행령 과태료 연계. https://www.law.go.kr/
+- [20] 동아일보, 서울시 충전 종료·제한시간 경과 후 점거 사용료(분당 상한·일 최대) 조례 개정안 보도(2024-08-19). https://www.donga.com/news/Society/article/all/20240819/126585540/1
+- [21] 오토데일리, 테슬라 수퍼차저 혼잡 수수료(완충·점유율 조건, 분당 과금) 보도. https://www.autodaily.co.kr/news/articleView.html?idxno=533660
+- [22] 본 검증에서 내려받은 Pleos Maven AAR 시그니처: `Vehicle` 2.3.2, `NaviHelper` 3.0.5, `navi-data` 3.0.4 (nexus-playground.pleos.ai). `getEvBatteryStateOfCharge(Integer)`, `ChargerOperator(id,name)`, `DrivingState`/`RoutePointPoiType.EV_CHARGING`, TIME_REMAINING·INSTANTANEOUS_RATE getter 부재를 확인.
+- [23] 공공데이터포털 한국환경공단 전기차 충전소 OpenAPI(getChargerStatus period 1~10·stat·statUpdDt, 호출 한도 안내). https://www.data.go.kr/data/15076352/openapi.do
+- [24] 이코노믹리뷰, 환경부·민간 앱 충전 상태 정보 불일치·지연 사례 보도. https://www.econovill.com/news/articleView.html?idxno=587199
+- [27] Pleos Playground Discussion #27 — AAOS Vehicle Properties 정렬 정책. https://github.com/Pleos-Playground/pleos-playground-api/discussions/27
 
 ### AI 활용 고지
 
