@@ -75,7 +75,7 @@
 ‘문별 하차 준비’와 별개인 두 번째 기획서다. 어느 기획서를 접수할지는 팀이 정한다. 위의 90점 판정과 해시는 이 파일에 적용되지 않는다.
 
 - 원고: `docs/draft/proposal-stay-or-go.md`. 그림 원본은 `docs/draft/assets/stay-or-go-screen.html`이며 PNG로 렌더해 넣었다.
-- 제출 파일: `submission/stay-or-go/application.docx`(SHA-256 `ae31fed1b79d9dff57e3b1d2e41809672eb68e68c389121384107eed76d2b007`). 검수용 PDF는 `application.pdf`(21쪽, `b57013ceb7f010c29e0cb1154702c953457c775eabb7a36af63800ec165ffb6f`)다. 개인 값·체크박스·동의·서명은 공란이다.
+- 제출 파일: `submission/stay-or-go/application.docx`(SHA-256 `4ebfa02ec627db51a29c5d86da1194039c4e221294a2e3ef9635a36895eed592`). 검수용 PDF는 `application.pdf`(21쪽, `ff42c603a99d6bb48cd3aecd974063fa40295a3223cdabb648ff58e17fa9d912`)다. 개인 값·체크박스·동의·서명은 공란이다.
 - 7항 참고자료 첨부: `submission/stay-or-go/probe-log-excerpt.txt`(`b2babaedf8fcb77079f909b81a3910d97c3c0a8e4c25ccde0e2ed8ebcbbed301`). 본문 7항이 이 파일을 첨부한다고 적고 있으므로, 스테이고를 접수하면 DOCX와 함께 메일에 첨부한다. 첨부하지 않을 경우 7항의 첨부 문장과 [34]의 파일 언급을 지우고 다시 렌더·검수한다.
 - 검수 기록: `JUDGE.md`의 ‘스테이고 기획서’ 절, `.private/visual-review/stay-or-go-final/review.md`.
 - 제출 전 확인: 참고문헌 [3]의 개인 블로그(bonta.tistory.com)는 최종 판정에서 원문을 열어 제3자 시승기로 확인했다. 팀원도 본인 계정이 아닌지 한 번 더 확인한다.
@@ -98,7 +98,7 @@
 
 기획서 7항은 시연 영상 파일과 `probe-log-excerpt.txt`를 첨부하고 GitHub 저장소 링크를 적는다. 8항은 숏폼을 제출하지 않는다고 적는다. 숏폼을 게시해 링크를 넣으려면 8항을 고치고 다시 렌더·검수한 뒤 보낸다.
 
-- 시연 영상: `submission/stay-or-go/staygo-demo.mp4`(1920×1080, 2분 30초). 7항이 첨부를 전제하므로 DOCX와 함께 첨부한다.
+- 시연 영상: `submission/stay-or-go/staygo-demo.mp4`(1920×1080, 2분 30초, SHA-256 `2489f629b21d526114f380a05947e67243eb69ab743b00a2910f29b8a9a45bb9`). 7항이 첨부를 전제하므로 DOCX와 함께 첨부한다.
 - 프로브 로그 발췌: `submission/stay-or-go/probe-log-excerpt.txt`. DOCX와 함께 첨부한다.
 - GitHub: https://github.com/NL-Hackerton/Hyundai-Car-App-Challenge-2026 (2026-11-07 KST 공개). 앱 소스 `apps/staygo/`, release APK `apk/김&양_StayGo_release.apk`, 프로브 소스와 원본 로그 `apps/pleos-stayorgo-probe/`.
 - 숏폼(선택, 특별상): `submission/stay-or-go/staygo-reel.mp4`(1080×1920, 45초)를 Instagram 릴스 또는 YouTube Shorts에 게시하고 캡션에 `#HMG차량용앱개발공모전 #스테이고 #전기차충전`을 넣는다. 링크를 넣을 때만 8항을 고친다.
