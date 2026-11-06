@@ -108,6 +108,8 @@ St는 [가정]으로 St = min(100, ceil(d / r) + m)처럼 단순화할 수 있�
 
 <p>표 4. 최소 기술 구성과 선택 확장.</p>
 
+[문헌·실증] 2026-11-06 Linux 검증 박스에서 Pleos Connect 시스템 이미지(공식 sys-img XML, ~3.9 GB)와 AAOS Automotive 34 이미지를 내려받고, 3rd-party 프로브 APK(`ai.probe.staygo`)를 빌드까지 완료했다. `/dev/kvm` 오픈·`KVM_CREATE_VM`은 성공했으나 GPU 부재·헤드리스 부팅에서 QEMU 게스트가 adb online에 도달하지 못해 SOC 콜백 Hz·`CAR_ENERGY` 런타임 부여·주차 중 `onDrivingInfo`/`onTripInfo`는 **여전히 미측정**이다. Vehicle SDK는 공식 샘플상 표준 AVD가 아니라 Pleos Connect Emulator가 필요하다.[11][22][28] 프로브 소스·실행 방법은 개인 계정 private 저장소에 두었다.[28]
+
 ### 2주 데모 일정(본선 PT 가정)
 
 아래 일정은 1차 합격 후 12월 3~4일 PT를 가정한 계획이다. 11월 15일 접수 단계에서는 기획서만 필수이며 APK는 선택이다.
@@ -180,6 +182,7 @@ St는 [가정]으로 St = min(100, ceil(d / r) + m)처럼 단순화할 수 있�
 - [23] 공공데이터포털 한국환경공단 전기차 충전소 OpenAPI(getChargerStatus period 1~10·stat·statUpdDt, 호출 한도 안내). https://www.data.go.kr/data/15076352/openapi.do
 - [24] 이코노믹리뷰, 환경부·민간 앱 충전 상태 정보 불일치·지연 사례 보도. https://www.econovill.com/news/articleView.html?idxno=587199
 - [27] Pleos Playground Discussion #27 — AAOS Vehicle Properties 정렬 정책. https://github.com/Pleos-Playground/pleos-playground-api/discussions/27
+- [28] yoobinkim541/pleos-stayorgo-probe (private) — Stay-or-Go 실증 프로브 APK·RESULTS(박스 에뮬 부팅 실패 기록). https://github.com/yoobinkim541/pleos-stayorgo-probe
 
 ### AI 활용 고지
 

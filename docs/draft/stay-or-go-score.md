@@ -20,9 +20,11 @@
 7. 환경부 `getChargerStatus`: period 1~10(기본 5), `stat`/`statUpdDt`, 개발계정 일 ~1000회 안내. 실시간 불일치·지연 보도 있음.
 8. 급속 1시간 초과=충전방해·과태료(지자체 안내 흔히 10만). 80%는 법률 아님. 서울 점거 사용료는 조례안.
 
-## 아직 unknown / 실차 확인 필요
-1. SOC 콜백 실제 Hz·에뮬레이터 값 범위(0–100 보장 여부).
-2. AAOS ENERGY 권한이 Pleos 3rd-party 앱에 실차 부여되는지, CarPropertyManager 직접 호출 가능 여부.
-3. DrivingInfo/TripInfo가 주차·충전 중 세션에서도 유효한지(내비 활성 조건).
+## 아직 unknown / 실차·정상 에뮬 확인 필요
+1. SOC 콜백 실제 Hz·값 범위(0–100). 박스에서 Pleos/AAOS 이미지·프로브 APK까지는 준비했으나 게스트가 adb online 전 정지 → 미측정(RESULTS.md).
+2. 3rd-party에 `android.car.permission.CAR_ENERGY` / `pleos.car.permission.CAR_ENERGY` 런타임 부여 여부.
+3. DrivingInfo/TripInfo가 주차(P)·무경로 vs 경로 설정 시 도래하는지.
 4. 환경부 API 운영 계정 한도·실제 지연 분포.
 5. Bluelink가 향후 세션 중 Stay/Go를 내장하면 차별 축소.
+
+점수 86 유지(서명·런타임 검증은 늘었으나 에뮬 실행 실패로 배점 상향 근거는 없음).
