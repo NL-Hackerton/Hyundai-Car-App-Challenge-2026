@@ -75,7 +75,7 @@
 ‘문별 하차 준비’와 별개인 두 번째 기획서다. 어느 기획서를 접수할지는 팀이 정한다. 위의 90점 판정과 해시는 이 파일에 적용되지 않는다.
 
 - 원고: `docs/draft/proposal-stay-or-go.md`. 그림 원본은 `docs/draft/assets/stay-or-go-screen.html`이며 PNG로 렌더해 넣었다.
-- 제출 파일: `submission/stay-or-go/application.docx`(SHA-256 `926e4d671f5a7de7781221f2a6feb251b033cb200fd14bf9110a6caad077cb3f`). 검수용 PDF는 `application.pdf`(20쪽, `050a0acb6a97f5f020b06c1a6b8b5933b728186df17b5ff99236ee13d9494844`)다. 개인 값·체크박스·동의·서명은 공란이다.
+- 제출 파일: `submission/stay-or-go/application.docx`(SHA-256 `864d41be8791320f35e18bfd514b0bafb573abc438bcf8e9f8667ef904bfa1d5`). 검수용 PDF는 `application.pdf`(21쪽, `547a859f40759277a80285fdea34a25a6852e163c9a4f8a228da23ff3e941f80`)다. 개인 값·체크박스·동의·서명은 공란이다.
 - 7항 참고자료 첨부: `submission/stay-or-go/probe-log-excerpt.txt`(`b2babaedf8fcb77079f909b81a3910d97c3c0a8e4c25ccde0e2ed8ebcbbed301`). 본문 7항이 이 파일을 첨부한다고 적고 있으므로, 스테이고를 접수하면 DOCX와 함께 메일에 첨부한다. 첨부하지 않을 경우 7항의 첨부 문장과 [34]의 파일 언급을 지우고 다시 렌더·검수한다.
 - 검수 기록: `JUDGE.md`의 ‘스테이고 기획서’ 절, `.private/visual-review/stay-or-go-final/review.md`.
 - 제출 전 확인: 참고문헌 [3]의 개인 블로그(bonta.tistory.com)는 최종 판정에서 원문을 열어 제3자 시승기로 확인했다. 팀원도 본인 계정이 아닌지 한 번 더 확인한다.

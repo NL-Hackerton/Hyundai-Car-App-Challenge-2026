@@ -9,6 +9,7 @@
 | StayGoFinal8 | `b5c67a8f…` | 23 | 21 | 24 | 22 | 90 | revise |
 | StayGoFinal9 | `81ad0565…` | 23 | 21 | 24 | 23 | 91 | revise |
 | StayGoFinal10 | `050a0acb…` | 23 | 21 | 24 | 23 | 91 | revise(HIGH-3만 남음) |
+| StayGoFinal11 | `4e1ff1c4…`(Argon 문장 검수 반영) | 23 | 21 | 24 | 23 | 91 | revise(LOW 의미 이동 5건 지적, 후속 보정본 `547a859f…`에서 모두 해결 확인) |
 
 <p>표 1. 스테이고 판정 이력.</p>
 
