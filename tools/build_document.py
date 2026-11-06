@@ -406,6 +406,10 @@ def run_command(command, commands):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", type=Path, default=ROOT / "docs/draft/proposal.md")
+    parser.add_argument("--output", type=Path, default=ROOT / "submission/application-review.docx",
+                        help="생성할 DOCX 경로. 기본값은 기존 제출 파일이다.")
+    parser.add_argument("--review-dir", type=Path, default=ROOT / ".private/visual-review",
+                        help="렌더 PNG·manifest 저장 디렉터리.")
     parser.add_argument("--font", default="Apple SD Gothic Neo")
     parser.add_argument("--replace", action="store_true")
     args = parser.parse_args()
@@ -422,9 +426,16 @@ def main():
     missing = [name for name, path in binaries.items() if not path]
     if missing:
         raise RuntimeError("필요한 로컬 변환 도구가 없다: " + ", ".join(missing))
-    target = ROOT / "submission/application-review.docx"
+    target = args.output if args.output.is_absolute() else (ROOT / args.output)
+    target = target.resolve()
+    if not target.is_relative_to(ROOT) or target.suffix.lower() != ".docx":
+        raise ValueError("출력 DOCX는 저장소 내부 .docx 경로여야 한다.")
+    target.parent.mkdir(parents=True, exist_ok=True)
     pdf = target.with_suffix(".pdf")
-    review = ROOT / ".private/visual-review"
+    review = args.review_dir if args.review_dir.is_absolute() else (ROOT / args.review_dir)
+    review = review.resolve()
+    if not review.is_relative_to(ROOT):
+        raise ValueError("review-dir은 저장소 내부여야 한다.")
     images = review / "final"
     manifest = review / "manifest.json"
     for output_path in (target, pdf, review, images, manifest):
@@ -483,7 +494,7 @@ def main():
     }
     manifest.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(f"생성 완료: {target.relative_to(ROOT)}, {pdf.relative_to(ROOT)}, {pages}개 PNG")
-    print("전 페이지 시각 검수 미실행. manifest: .private/visual-review/manifest.json")
+    print(f"전 페이지 시각 검수 미실행. manifest: {manifest.relative_to(ROOT)}")
 
 
 if __name__ == "__main__":
