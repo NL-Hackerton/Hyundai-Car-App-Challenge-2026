@@ -70,3 +70,14 @@
 - 제출 직전 공식 지원·제출 페이지와 공지 목록을 다시 열람했다. 접수기간 2026-10-21~11-15 및 지정 이메일·공식 DOCX 요구에 변경을 발견하지 못했다.
 - 개인정보·서명 사본과 검수 파생이미지는 `.private/`에만 보존하며 저장소에 올리지 않는다. 중단된 사본의 최종 검수 기록은 확정하지 않았고 인계 완료본으로 표시하지 않는다.
 
+## 스테이고 기획서(별도 인계본)
+
+‘문별 하차 준비’와 별개인 두 번째 기획서다. 어느 기획서를 접수할지는 팀이 정한다. 위의 90점 판정과 해시는 이 파일에 적용되지 않는다.
+
+- 원고: `docs/draft/proposal-stay-or-go.md`. 그림 원본은 `docs/draft/assets/stay-or-go-screen.html`이며 PNG로 렌더해 넣었다.
+- 제출 파일: `submission/stay-or-go/application.docx`(SHA-256 `926e4d671f5a7de7781221f2a6feb251b033cb200fd14bf9110a6caad077cb3f`). 검수용 PDF는 `application.pdf`(20쪽, `050a0acb6a97f5f020b06c1a6b8b5933b728186df17b5ff99236ee13d9494844`)다. 개인 값·체크박스·동의·서명은 공란이다.
+- 7항 참고자료 첨부: `submission/stay-or-go/probe-log-excerpt.txt`(`b2babaedf8fcb77079f909b81a3910d97c3c0a8e4c25ccde0e2ed8ebcbbed301`). 본문 7항이 이 파일을 첨부한다고 적고 있으므로, 스테이고를 접수하면 DOCX와 함께 메일에 첨부한다. 첨부하지 않을 경우 7항의 첨부 문장과 [34]의 파일 언급을 지우고 다시 렌더·검수한다.
+- 검수 기록: `JUDGE.md`의 ‘스테이고 기획서’ 절, `.private/visual-review/stay-or-go-final/review.md`.
+- 제출 전 확인: 참고문헌 [3]의 개인 블로그(bonta.tistory.com)는 최종 판정에서 원문을 열어 제3자 시승기로 확인했다. 팀원도 본인 계정이 아닌지 한 번 더 확인한다.
+- 글꼴: DOCX는 `Apple SD Gothic Neo`로 만들었고 검수 PDF는 macOS LibreOffice 렌더다. Windows Word에는 이 글꼴이 없어 대체 글꼴로 바뀌면서 쪽 나뉨이 달라질 수 있다. 접수 전에 Windows Word로 DOCX를 열어 표 잘림과 빈 쪽이 없는지 확인한다.
+

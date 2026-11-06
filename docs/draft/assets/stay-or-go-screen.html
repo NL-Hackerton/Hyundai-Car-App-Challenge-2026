@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>스테이고 분기 화면 시안</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { width: 1680px; height: 900px; background: #f2f3f5; font-family: "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; color: #1d2228; }
+  .frame { position: absolute; inset: 20px; background: #ffffff; border: 2px solid #c9ced6; border-radius: 28px; padding: 40px 52px; }
+  .top { display: flex; justify-content: space-between; align-items: center; }
+  .status { display: flex; align-items: center; gap: 16px; font-size: 34px; color: #3a434d; }
+  .dot { width: 20px; height: 20px; border-radius: 50%; background: #2f9e62; }
+  .tag { font-size: 30px; color: #6b7480; border: 3px dashed #9aa3ad; border-radius: 12px; padding: 6px 16px; }
+  .row { display: flex; gap: 36px; margin-top: 30px; }
+  .soc { width: 500px; border: 2px solid #dfe3e8; border-radius: 24px; padding: 28px 34px; }
+  .label { font-size: 32px; color: #6b7480; }
+  .big { font-size: 150px; font-weight: 700; line-height: 1.0; letter-spacing: -4px; }
+  .bar { height: 24px; background: #e5e8ec; border-radius: 12px; margin-top: 14px; position: relative; }
+  .bar > i { position: absolute; left: 0; top: 0; bottom: 0; width: 83%; background: #2f9e62; border-radius: 12px; }
+  .power { margin-top: 22px; font-size: 40px; font-weight: 700; }
+  .note { font-size: 31px; color: #59626c; margin-top: 6px; }
+  .info { flex: 1; display: flex; flex-direction: column; gap: 22px; }
+  .card { border: 2px solid #dfe3e8; border-radius: 24px; padding: 24px 32px; }
+  .card h3 { font-size: 32px; color: #6b7480; font-weight: 500; }
+  .card p { font-size: 44px; margin-top: 6px; }
+  .card p b { color: #1f6fd1; }
+  .ok { font-size: 31px; color: #2f7d4f; margin-top: 4px; }
+  .buttons { display: flex; gap: 32px; margin-top: 30px; }
+  .btn { flex: 1; border-radius: 24px; padding: 26px 34px; }
+  .stay { border: 3px solid #9aa3ad; background: #ffffff; }
+  .go { border: 3px solid #1f6fd1; background: #1f6fd1; color: #ffffff; }
+  .btn .t { font-size: 52px; font-weight: 700; }
+  .btn .s { font-size: 32px; margin-top: 6px; }
+  .stay .s { color: #4a535d; }
+  .foot { margin-top: 22px; font-size: 31px; color: #59626c; }
+</style>
+</head>
+<body>
+<div class="frame">
+  <div class="top">
+    <div class="status"><span class="dot"></span>급속충전 중 · 정차(조작 가능)</div>
+    <div class="tag">화면 시안 · 값은 가정</div>
+  </div>
+  <div class="row">
+    <div class="soc">
+      <div class="label">현재 SOC</div>
+      <div class="big">83%</div>
+      <div class="bar"><i></i></div>
+      <div class="power">충전전력 95 kW</div>
+      <div class="note">세션 최대 230 kW의 41%</div>
+    </div>
+    <div class="info">
+      <div class="card">
+        <h3>지금 출발하면</h3>
+        <p>목적지에 <b>20%</b>로 도착</p>
+        <div class="ok">예비 SOC 15%p 충족</div>
+      </div>
+      <div class="card">
+        <h3>내비 경로</h3>
+        <p>충전 경유 없이 목적지 직행</p>
+        <div class="ok">경유 충전안 없음 · 직행 도착 SOC가 10% 이상</div>
+      </div>
+    </div>
+  </div>
+  <div class="buttons">
+    <div class="btn stay"><div class="t">Stay · 더 충전</div><div class="s">1%p당 약 30초 (현재 전력 기준)</div></div>
+    <div class="btn go"><div class="t">Go · 지금 출발</div><div class="s">목적지 경로를 내비에 전달</div></div>
+  </div>
+  <div class="foot">앱이 충전을 확인한 뒤 8분 경과 · 급속충전구역 1시간 점유 제한 안내</div>
+</div>
+</body>
+</html>

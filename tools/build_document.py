@@ -11,6 +11,7 @@ from datetime import datetime, timezone
 import hashlib
 import json
 from pathlib import Path
+import math
 import re
 import shutil
 import subprocess
@@ -18,6 +19,7 @@ import tempfile
 
 from docx import Document
 from docx.enum.table import WD_TABLE_ALIGNMENT
+from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.shared import Cm, Pt
@@ -32,9 +34,17 @@ TITLES = (
 )
 HEADINGS = tuple(f"## {i}. {title}" for i, title in enumerate(TITLES, 1))
 INLINE = re.compile(r"\[([^\]\n]+)\]\((https?://[^\s)]+)\)|https?://[^\s<>]+|\*\*([^*\n]+)\*\*|\*([^*\n]+)\*|`([^`\n]+)`")
-CAPTION = re.compile(r'<p(?: align="center")?>(표\s+\d+\..+)</p>')
+CAPTION = re.compile(r'<p(?: align="center")?>((표|그림)\s+\d+\..+)</p>')
+IMAGE = re.compile(r"!\[([^\]\n]*)\]\(([A-Za-z0-9_./-]+\.png)\)")
 LIST = re.compile(r"^( *)([-*]|\d+\.) (.+)$")
 SEPARATOR = re.compile(r"^:?-{3,}:?$")
+# Tables estimated up to this height stay on one page with their caption (cm),
+# unless they have more than KEEP_TABLE_ROWS rows: long row lists may flow.
+KEEP_TABLE_CM = 14.0
+KEEP_TABLE_ROWS = 15
+# Table rows estimated taller than this may break across pages (cm).
+SPLIT_ROW_CM = 5.0
+TABLE_FONT_PT = 9.5
 
 
 def digest(path: Path) -> str:
@@ -45,7 +55,7 @@ def digest(path: Path) -> str:
 def validate_links(text: str):
     """Reject unsupported URL syntax before changing any existing output."""
     links = list(INLINE.finditer(text))
-    for start in re.finditer(r"\[[^\n]*?\]\(", text):
+    for start in re.finditer(r"(?<!!)\[[^\n]*?\]\(", text):
         match = INLINE.match(text, start.start())
         if not match or not match.group(1):
             raise ValueError("지원하지 않는 Markdown 링크다. http(s) 단순 링크를 사용한다.")
@@ -148,9 +158,15 @@ def parse_blocks(lines):
             continue
         caption = CAPTION.fullmatch(line)
         if caption:
-            if not blocks or blocks[-1][0] != "table":
-                raise ValueError("표 캡션은 바로 앞 Markdown 표에 붙여야 한다.")
+            expected = "table" if caption.group(2) == "표" else "image"
+            if not blocks or blocks[-1][0] != expected:
+                raise ValueError("표·그림 캡션은 바로 앞 Markdown 표 또는 그림에 붙여야 한다.")
             blocks.append(("caption", caption.group(1)))
+            i += 1
+            continue
+        image = IMAGE.fullmatch(line.strip())
+        if image:
+            blocks.append(("image", internal_input(ROOT / image.group(2))))
             i += 1
             continue
         if line.startswith("|"):
@@ -260,6 +276,39 @@ def allow_split(row):
             properties.remove(element)
 
 
+def text_width(text: str) -> float:
+    """Approximate rendered width in cm of table text at TABLE_FONT_PT."""
+    return sum(0.34 if ord(char) > 0x2E7F else 0.19 for char in text)
+
+
+def column_widths(rows, available: float):
+    """Give each column room for its longest unbroken token, then share the rest by text volume."""
+    columns = list(zip(*([re.sub(r"[`*]", "", value) for value in row] for row in rows)))
+    floors = [
+        min(max(1.6, max(text_width(token) for value in column for token in (value.split() or [""])) + 0.5),
+            available * 0.4)
+        for column in columns
+    ]
+    if sum(floors) > available:
+        floors = [floor * available / sum(floors) for floor in floors]
+    volume = [sum(text_width(value) for value in column) or 1.0 for column in columns]
+    rest = available - sum(floors)
+    return [floor + rest * share / sum(volume) for floor, share in zip(floors, volume)]
+
+
+def row_height(row, widths) -> float:
+    """Estimate one rendered row height in cm from wrapped line counts (calibrated on LibreOffice output)."""
+    lines = max(
+        max(1, math.ceil(text_width(re.sub(r"[`*]", "", value)) / max(width - 0.4, 0.5)))
+        for value, width in zip(row, widths)
+    )
+    return 0.51 * lines + 0.12
+
+
+def table_height(rows, widths) -> float:
+    return sum(row_height(row, widths) for row in rows)
+
+
 def render_blocks(outer, blocks, font):
     # Expand only the free-text box into borderless continuation rows.
     cell = outer.cell(0, 0)
@@ -280,22 +329,39 @@ def render_blocks(outer, blocks, font):
             for child in list(cell._tc):
                 if child.tag != qn("w:tcPr"):
                     cell._tc.remove(child)
-        if kind == "table":
-            # LibreOffice does not honor header keep-with-next inside a split
-            # nested table. Keep each manuscript table and its caption together;
-            # surrounding prose still flows through the continuation rows.
+        if kind == "image":
+            # The picture and its caption share one unsplittable row. No keep-with-next:
+            # LibreOffice would chain this row to the following heading and table.
             outer.rows[-1]._tr.get_or_add_trPr().append(OxmlElement("w:cantSplit"))
+            paragraph = cell.add_paragraph()
+            paragraph_format(paragraph)
+            paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            paragraph.add_run().add_picture(str(value), width=Cm(14))
+            # A separate empty paragraph receives the caption below the picture.
+            cell.add_paragraph()
+            continue
+        if kind == "table":
+            widths = column_widths(value, 17.2)
+            # LibreOffice neither honors header keep-with-next nor repeats the header
+            # inside a split nested table. Keep short tables that fit on a page together
+            # with their caption; let tall or long tables flow so they leave no blank page end.
+            if table_height(value, widths) <= KEEP_TABLE_CM and len(value) <= KEEP_TABLE_ROWS:
+                outer.rows[-1]._tr.get_or_add_trPr().append(OxmlElement("w:cantSplit"))
             table = cell.add_table(rows=len(value), cols=len(value[0]))
             table.alignment = WD_TABLE_ALIGNMENT.CENTER
             table.autofit = False
             # Exactly one nesting level is needed to preserve the official input box.
-            available = Cm(17.2)
-            for row in table.rows:
+            # LibreOffice lays out from the grid, Word from the cells; set both.
+            for column, width in zip(table.columns, widths):
+                column.width = Cm(width)
+            for row, data in zip(table.rows, value):
                 allow_split(row)
-                # Keep a data row intact across nested-table pagination.
-                row._tr.get_or_add_trPr().append(OxmlElement("w:cantSplit"))
-                for target in row.cells:
-                    target.width = int(available / len(value[0]))
+                # Keep a data row intact across nested-table pagination, except rows too
+                # tall to move without leaving a large blank page end.
+                if row_height(data, widths) <= SPLIT_ROW_CM:
+                    row._tr.get_or_add_trPr().append(OxmlElement("w:cantSplit"))
+                for target, width in zip(row.cells, widths):
+                    target.width = Cm(width)
             header = OxmlElement("w:tblHeader")
             table.rows[0]._tr.get_or_add_trPr().append(header)
             for r, data in enumerate(value):
@@ -303,6 +369,8 @@ def render_blocks(outer, blocks, font):
                     paragraph = table.cell(r, c).paragraphs[0]
                     paragraph_format(paragraph)
                     inline(paragraph, content, font)
+                    for run in paragraph.runs:
+                        run.font.size = Pt(TABLE_FONT_PT)
                     if r == 0:
                         paragraph.paragraph_format.keep_with_next = True
                         for run in paragraph.runs:
@@ -322,6 +390,8 @@ def render_blocks(outer, blocks, font):
             depth, marker, content = value
             paragraph.paragraph_format.left_indent = Cm(0.35 + depth * 0.4)
             paragraph.paragraph_format.first_line_indent = Cm(-0.3)
+            paragraph.paragraph_format.space_after = Pt(2)
+            paragraph.paragraph_format.line_spacing = 1.1
             inline(paragraph, f"{marker} {content}", font)
         else:
             inline(paragraph, value, font)
