@@ -52,9 +52,9 @@
 - 저장소의 기획서와 PDF는 개인정보·서명이 공란인 검수 완료본이다. 중단된 개인정보·서명 사본은 `.private/`에만 보존하며 push하지 않는다.
 - 기존 자동 승인 기록은 최신 지시로 발송 재개에 사용할 수 없다. 자동 승인·제출 재개를 막는 최신 인계 메모를 하네스에 기록한다.
 
-### 2026-11-06 — Stay-or-Go 제출 패키지와 프로브 경로
+### 2026-11-06 — Stay-or-Go 제출 패키지와 프로브 코드
 
 - Stay-or-Go 제출 패키지는 [`submission/stay-or-go/`](submission/stay-or-go/)에 있다. 공식 DOCX는 `application.docx`, 검수용 PDF는 `application.pdf`, 7항 로그 발췌는 `probe-log-excerpt.txt`다. 개인정보·동의·서명은 공란이다.
-- Stay-or-Go 프로브 코드를 둘 경로는 `apps/pleos-stayorgo-probe/`다. 출처로 지정된 `https://github.com/yoobinkim541/pleos-stayorgo-probe`(main)는 이 에이전트의 GitHub 자격 증명으로 열리지 않는다. API와 `git ls-remote` 모두 404다. 커밋 `0e9a1c2`는 그 저장소를 개인 계정 private 저장소로 적는다. 소스 트리와 APK는 복사하지 않았다. 빌드 산출물·키스토어·비밀·개인정보도 넣지 않았다.
-- 프로브를 심사자용 GitHub 링크로 쓰려면, 그 저장소를 이 에이전트가 읽을 수 있게 한 뒤 같은 경로로 다시 가져오고, 이 공모전 저장소(현재 private)를 심사자가 열 수 있게 공개해야 한다. 커밋된 APK가 없으면 그 트리의 README에 `assembleDebug` 빌드 방법을 적는다.
+- Stay-or-Go 프로브 코드는 [`apps/pleos-stayorgo-probe/`](apps/pleos-stayorgo-probe/)에 있다. `https://github.com/yoobinkim541/pleos-stayorgo-probe`의 소스를 가져왔다. 앱, Gradle 래퍼, `tools/`, `logs/`, `RESULTS.md`, README가 포함된다. 커밋된 APK는 없다. 디버그 APK는 그 README의 `./gradlew :app:assembleDebug`로 만든다.
+- 이 공모전 저장소는 현재 private다. 심사자가 여는 GitHub 링크가 되려면 공개가 필요하다.
 - 제출 절차는 [`SUBMISSION.md`](SUBMISSION.md)의 Stay-or-Go 제출 체크리스트를 따른다. 에이전트는 메일을 보내지 않는다. 사용자·팀이 서명한 뒤 직접 보낸다.

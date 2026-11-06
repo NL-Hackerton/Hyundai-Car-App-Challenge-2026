@@ -1,0 +1,19 @@
+## gwangju full
+22:59:58.419 PUT battery_level=77.4 200
+## gwangju direct 9.0% level 47.34 (E=40369.3203125 Wh)
+23:00:14.102 PUT battery_level=47.34 200
+## gwangju direct 11.0% level 48.88 (E=40369.3203125 Wh)
+23:00:29.643 PUT battery_level=48.88 200
+## gangneung full
+23:00:45.211 PUT battery_level=77.4 200
+## gangneung direct 9.0% level 35.03 (E=28066.375 Wh)
+23:01:00.937 PUT battery_level=35.03 200
+## gangneung direct 11.0% level 36.58 (E=28066.375 Wh)
+23:01:16.583 PUT battery_level=36.58 200
+## daegu full
+23:01:31.969 PUT battery_level=77.4 200
+## daegu direct 9.0% level 45.59 (E=38621.63671875 Wh)
+23:01:47.688 PUT battery_level=45.59 200
+## daegu direct 11.0% level 47.14 (E=38621.63671875 Wh)
+23:02:03.342 PUT battery_level=47.14 200
+done

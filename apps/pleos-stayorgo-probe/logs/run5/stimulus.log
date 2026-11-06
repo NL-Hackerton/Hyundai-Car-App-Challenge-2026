@@ -1,0 +1,9 @@
+## guidance to Busan at 62 kWh
+22:42:21.226 PUT battery_level=62 200
+## guidance to Busan at 60 kWh
+22:43:04.595 PUT battery_level=60 200
+## guidance to Busan at 50 kWh
+22:43:47.774 PUT battery_level=50 200
+## guidance to Busan at 40 kWh
+22:44:31.740 PUT battery_level=40 200
+done

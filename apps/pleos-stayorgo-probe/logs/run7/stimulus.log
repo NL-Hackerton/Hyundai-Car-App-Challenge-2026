@@ -1,0 +1,9 @@
+23:16:45.674 PUT battery_level=50 200
+23:16:45.681 STATE {'state_of_charge': 83.0, 'current_energy_kwh': 50.0, 'charging_activated': False, 'charging_door_opened': False, 'ready_to_charge': True}
+23:16:45.701 PUT charge_port_open=true 200
+23:16:47.708 PUT charge_switch=true 200
+23:16:49.731 STATE {'state_of_charge': 83.0, 'current_energy_kwh': 50.0, 'charging_activated': True, 'charging_door_opened': True, 'ready_to_charge': True}
+23:17:06.425 PUT charge_switch=false 200
+23:17:08.447 PUT charge_port_open=false 200
+23:17:11.467 STATE {'state_of_charge': 83.0, 'current_energy_kwh': 50.0, 'charging_activated': False, 'charging_door_opened': False, 'ready_to_charge': True}
+done
