@@ -98,7 +98,7 @@
 
 기획서 7항은 이번 접수에서 시연 영상·GitHub·APK·숏폼을 내지 않고 `probe-log-excerpt.txt`만 첨부한다고 적는다. 아래 항목을 메일에 넣으면 그 문장과 어긋난다. 넣을 경우 팀이 7항을 고치고 다시 렌더·검수한 뒤 보낸다. 에이전트는 기획서 본문을 바꾸지 않았다.
 
-- GitHub: 이 저장소의 `apps/pleos-stayorgo-probe` 경로, 또는 저장소 전체. 소스는 `https://github.com/yoobinkim541/pleos-stayorgo-probe`에서 가져왔다. 이 저장소는 현재 private라서, 심사자가 여는 공개 링크가 되려면 공개가 필요하다.
+- GitHub: 선호 링크는 이 공모전 저장소의 `apps/pleos-stayorgo-probe` 경로다. 저장소 https://github.com/NL-Hackerton/Hyundai-Car-App-Challenge-2026 는 2026-11-07 KST에 공개되었다. 심사자는 Collaborator 초대 없이 https://github.com/NL-Hackerton/Hyundai-Car-App-Challenge-2026 와 https://github.com/NL-Hackerton/Hyundai-Car-App-Challenge-2026/tree/main/apps/pleos-stayorgo-probe 를 열 수 있다. 소스는 `https://github.com/yoobinkim541/pleos-stayorgo-probe`에서 가져왔다. 그 개인 저장소는 비공개일 수 있으므로 공개된 심사 링크로 쓰지 않는다.
 - APK: 가져온 트리에 커밋된 APK는 없다. `apps/pleos-stayorgo-probe/dist/`에 파일이 있을 때만 첨부한다. 없으면 `apps/pleos-stayorgo-probe/README.md`의 `./gradlew :app:assembleDebug`로 빌드한다.
 - 프로브 로그 발췌: `submission/stay-or-go/probe-log-excerpt.txt`. 7항이 이 파일 첨부를 전제하므로, 스테이고를 접수하면 DOCX와 함께 첨부한다.
 - 시연 영상: 팀이 가진 영상이 있을 때만 선택 첨부한다. 저장소에는 시연 영상이 없다.
