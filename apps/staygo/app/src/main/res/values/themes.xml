@@ -1,0 +1,8 @@
+<resources>
+    <style name="Theme.StayGo" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowBackground">@color/bg</item>
+        <item name="android:fontFamily">@font/pretendard</item>
+        <item name="fontFamily">@font/pretendard</item>
+        <item name="android:textColor">@color/ink</item>
+    </style>
+</resources>

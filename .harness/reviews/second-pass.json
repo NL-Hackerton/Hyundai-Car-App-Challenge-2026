@@ -41,12 +41,12 @@
       "findings": "실제 잔여 문제만 제안하고 사실·숫자·기능·URL·표 열 구조는 유지했다."
     },
     {
-      "path": "/Users/hajung/Hajung/PersonaGraph/memory/writing/report-writing.md",
+      "path": "local:report-writing.md",
       "range": "이 세션에서 1-165행 열람",
       "findings": "설명 대상과 주장 범위의 명확성 기준을 적용했다. 이미 편집된 자연스러운 문장을 취향 차이로 재교정하지 않았다."
     },
     {
-      "path": "/Users/hajung/Hajung/DataCenter/reports/deepvoice-dacon-20261006/current_work/deliver_jy_20261006/1_model_report/1_overview_approach.md",
+      "path": "local:1_overview_approach.md",
       "range": "이 세션에서 1-165행 열람",
       "findings": "승인 기준본의 문장 호흡·보고서체 종결·표 설명·가정 한정 방식을 대조 기준으로 사용했다."
     }

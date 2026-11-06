@@ -54,7 +54,7 @@
 
 ### 2026-11-06 — Stay-or-Go 제출 패키지와 프로브 코드
 
-- Stay-or-Go 제출 패키지는 [`submission/stay-or-go/`](submission/stay-or-go/)에 있다. 공식 DOCX는 `application.docx`, 검수용 PDF는 `application.pdf`, 7항 로그 발췌는 `probe-log-excerpt.txt`다. 개인정보·동의·서명은 공란이다.
-- Stay-or-Go 프로브 코드는 [`apps/pleos-stayorgo-probe/`](apps/pleos-stayorgo-probe/)에 있다. `https://github.com/yoobinkim541/pleos-stayorgo-probe`의 소스를 가져왔다. 앱, Gradle 래퍼, `tools/`, `logs/`, `RESULTS.md`, README가 포함된다. 커밋된 APK는 없다. 디버그 APK는 그 README의 `./gradlew :app:assembleDebug`로 만든다.
-- 이 공모전 저장소는 2026-11-07 KST에 공개되었다. 심사자는 Collaborator 초대 없이 https://github.com/NL-Hackerton/Hyundai-Car-App-Challenge-2026 와 `apps/pleos-stayorgo-probe/`를 열 수 있다. Stay-or-Go GitHub 첨부의 선호 링크는 그 경로다. 개인 저장소 https://github.com/yoobinkim541/pleos-stayorgo-probe 는 비공개일 수 있다.
+- Stay-or-Go 제출 패키지는 [`submission/stay-or-go/`](submission/stay-or-go/)에 있다. 공식 DOCX는 `application.docx`, 검수용 PDF는 `application.pdf`, 7항 로그 발췌는 `probe-log-excerpt.txt`, 시연 영상은 `staygo-demo.mp4`, 세로 숏폼 영상은 `staygo-reel.mp4`다. 개인정보·동의·서명은 공란이다.
+- 스테이고 앱 소스는 [`apps/staygo/`](apps/staygo/), release APK는 [`apk/`](apk/)에 있다. 검증용 프로브 코드와 4~7차 원본 로그는 [`apps/pleos-stayorgo-probe/`](apps/pleos-stayorgo-probe/)에 있다. 시연 영상 프로젝트(Remotion)는 [`video/`](video/)에 있다.
+- 이 공모전 저장소는 2026-11-07 KST에 공개되었다. 심사자는 Collaborator 초대 없이 https://github.com/NL-Hackerton/Hyundai-Car-App-Challenge-2026 를 열 수 있으며, 기획서 7항의 GitHub 링크가 이 주소다.
 - 제출 절차는 [`SUBMISSION.md`](SUBMISSION.md)의 Stay-or-Go 제출 체크리스트를 따른다. 에이전트는 메일을 보내지 않는다. 사용자·팀이 서명한 뒤 직접 보낸다.

@@ -1,4 +1,4 @@
-> Imported from https://github.com/yoobinkim541/pleos-stayorgo-probe for the Hyundai Pleos contest (Stay-or-Go). Contest planning docs live at the repository root and in `submission/stay-or-go/`.
+> Imported from the team's probe repository for the Hyundai Pleos contest (Stay-or-Go). Contest planning docs live at the repository root and in `submission/stay-or-go/`.
 
 # pleos-stayorgo-probe
 

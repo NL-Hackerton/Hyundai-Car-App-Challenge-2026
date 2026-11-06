@@ -8,8 +8,8 @@
 
 - `skill://cs-report`
 - `skill://cs-report/references/review-prompt.md`
-- `/Users/hajung/Hajung/PersonaGraph/memory/writing/report-writing.md`
-- `/Users/hajung/Hajung/DataCenter/reports/deepvoice-dacon-20261006/current_work/deliver_jy_20261006/1_model_report/1_overview_approach.md:1-165` — 긴 97행도 원문으로 별도 읽었다.
+- 로컬 문체 정본 `report-writing.md`
+- 로컬 승인 기준본 `1_overview_approach.md:1-165` — 긴 97행도 원문으로 별도 읽었다.
 - `.harness/gate.json`, `CONTEST.md`, `SPEC.md`, `docs/form/contest-application-consent.docx`
 - `.harness/work-orders/draft-content-fixes.md`, `.harness/reviews/s1.json`, `.harness/reviews/s2.json`
 - `.harness/reviews/method.md`, `.harness/reviews/s1-model.json`

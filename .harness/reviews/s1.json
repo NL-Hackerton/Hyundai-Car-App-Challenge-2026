@@ -65,8 +65,8 @@
   ],
   "read_files": [
     "skill://cs-report",
-    "/Users/hajung/Hajung/PersonaGraph/memory/writing/report-writing.md",
-    "/Users/hajung/Hajung/DataCenter/reports/deepvoice-dacon-20261006/current_work/deliver_jy_20261006/1_model_report/1_overview_approach.md:1-165",
+    "local:report-writing.md",
+    "local:1_overview_approach.md:1-165",
     "skill://cs-report/references/review-prompt.md",
     ".harness/gate.json",
     "CONTEST.md",

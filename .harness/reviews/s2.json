@@ -93,12 +93,12 @@
       "basis": "7개 점검 기준과 교정 범주, 사실·숫자·표 구조·링크 보존, 원고 전체에서 old가 정확히 1회 등장하는 조건"
     },
     {
-      "path": "/Users/hajung/Hajung/PersonaGraph/memory/writing/report-writing.md",
+      "path": "local:report-writing.md",
       "range": "1-165행",
       "basis": "6대 작성 기준, 승인 문체의 적용 범위, 실제 검수 모델 확인 원칙"
     },
     {
-      "path": "/Users/hajung/Hajung/DataCenter/reports/deepvoice-dacon-20261006/current_work/deliver_jy_20261006/1_model_report/1_overview_approach.md",
+      "path": "local:1_overview_approach.md",
       "range": "1-165행",
       "basis": "본문의 문장 호흡과 ~다. 종결, 계산 대상·단위 정의, 가정 한정, 표와 본문 연결 방식을 실제 문단과 대조"
     },

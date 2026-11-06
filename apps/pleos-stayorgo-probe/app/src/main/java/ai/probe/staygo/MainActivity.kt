@@ -311,8 +311,9 @@ class MainActivity : ComponentActivity() {
                 // Destination comes from intent extras so long routes (EV charging stops) can be probed.
                 val lat = intent.getDoubleExtra("destLat", 37.5665)
                 val lng = intent.getDoubleExtra("destLng", 126.9780)
+                val destName = intent.getStringExtra("destName") ?: "ProbeDest"
                 try {
-                    helper.requestTrip(ai.pleos.playground.navi.data.TripRequest(lat, lng, "", "ProbeDest", ""))
+                    helper.requestTrip(ai.pleos.playground.navi.data.TripRequest(lat, lng, "", destName, ""))
                     log("NAV requestTrip sent lat=$lat lng=$lng")
                 } catch (t: Throwable) {
                     log("NAV requestTrip FAIL: ${t.message}")
@@ -321,7 +322,7 @@ class MainActivity : ComponentActivity() {
                     try {
                         helper.requestRoute(
                             ai.pleos.playground.navi.data.RouteInfo(
-                                lat, lng, null, null, "ProbeDest", "", "", "",
+                                lat, lng, null, null, destName, "", "", "",
                                 ai.pleos.playground.navi.constants.RouteOption.RECOMMENDED, "", false
                             )
                         )

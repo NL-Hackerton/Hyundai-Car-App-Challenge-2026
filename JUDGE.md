@@ -184,6 +184,13 @@ LibreOffice 26.8.0.3에서 PDF로 변환하고 Poppler 26.07.0으로 160DPI PNG�
 
 Argon 반영본(PDF SHA-256 `4e1ff1c47be7cc52f311d34080e099c554349dbab1812ddc36ea9ce1bdabefed`, 21쪽)은 ContestJudge 최종 채점(StayGoFinal11)에서 91/100, `revise`였다(차량특화성 23, 창의성 21, 기술 활용성 24, 사업성 23). 판정자는 변경 51행을 모두 다시 읽고 수치 변경이 없고 한계·[가정] 표지가 그대로임을 확인했다. 표 5 목적지 없음 행과 표 10 「6 ms 뒤」는 의도대로 맞다고 판정했다. 다만 문장 검수가 만든 LOW 의미 이동 5건(N-1 「여기에」가 기대 전력을 가리켜 kW에 분을 더하는 것처럼 읽힘, N-2 「순정 내비만으로」가 백엔드를 쓰는 규칙 5와 충돌, N-3 표 1 [3] 행 「비교해야 했다」가 원문에 없는 불가피성을 더함, N-4 「원본 로그」가 발췌를 전체처럼 읽히게 함, N-5 표 3 「연동되지 않음」 단정)과 N-6(「월 2회 이용」과 「월 2회 Go」 혼용)을 지적했다. 9건으로 모두 고쳤다(`.private/reviews/stay-or-go-argon/followup.json`). 숫자·인용·코드·표지·표 구조는 보정 전과 같다.
 
+### 11차 보강 내용(시연 영상·앱·APK 제출 반영)
+
+- 스테이고 앱을 구현했다(`apps/staygo/`). 규칙 1~6(`decision/DecisionModel.kt`, m 15·k 0.5·s 5·0.7×C÷T), 배터리 잔량 10초 창·30초 중앙값 전력 추정과 30초 상승 충전 인식(`signal/PowerEstimator.kt`), 내비 목적지 `getDestinationInfo`·`requestTrip`·경유지 재요청·`onDrivingInfo`(`navi/NaviClient.kt`), Pleos SOC·AAOS 속성·CarUxRestrictions(`vehicle/VehicleSignals.kt`)를 담았다. 단위 테스트 16건이 통과했고 release APK(`apk/김&양_StayGo_release.apk`)는 에뮬레이터에서 실행을 확인했다.
+- Pleos Connect v2.1.0 에뮬레이터에서 부산시청 경로 안내를 켠 뒤 가상 콘솔로 충전 곡선(SOC 78%까지 230 kW, 82% 이후 95 kW)을 입력하며 녹화했다. 로그 기준으로 74%에서 충전 인식·Stay(규칙 2, A 5.9%), 청도새마을휴게소 경유 300 kW·6기 수신, 86%에서 Go(규칙 4, A 15.0%, P 95 kW, Pmax 230 kW), Go 탭 뒤 내비 경로 화면, D단 30 km/h에서 DO 잠금을 확인했다. 시연 영상(`submission/stay-or-go/staygo-demo.mp4`, 2분 30초)과 세로 숏폼(`staygo-reel.mp4`, 45초)은 Remotion으로 만들었고(`video/`), 자막은 화면 값과 대조했다. 배경음악은 팀원이 생성형 AI 음악 도구로 만든 곡을 반복해 길이를 맞췄다.
+- 원고: 7항 제출물 문단(시연 영상 첨부, GitHub 저장소의 앱 소스·APK·프로브 소스와 4~7차 원본 로그, 녹화 방법, 백엔드 미구현), 5항 2주 일정 도입문과 표 7의 세 행, 시연 대체 문단, [34](원본 비공개 문구 삭제), AI 활용 고지(앱 구현·시연 녹화·영상 편집·배경음악, 「본 앱의 구현은 수행하지 않았다」 삭제)를 고쳤다. 8항(숏폼 미제출)은 유지했다.
+- 공개 저장소 정리: README·SUBMISSION·프로브 README의 개인 GitHub 주소와 실명, `.harness`·`docs/draft/ai-use.md`의 로컬 사용자 경로를 지웠다. 커밋 작성자 이름·이메일은 히스토리에 남아 있다.
+
 ### 한글 윤문 기록
 
 | 시각 | 대상 파일 | run_id | 경로 | 작업 폴더 | guarded_check.py | 직접 대조 | 채택 | 적용 뒤 SHA-256 |
@@ -200,20 +207,23 @@ Argon 반영본(PDF SHA-256 `4e1ff1c47be7cc52f311d34080e099c554349dbab1812ddc36e
 | 2026-11-06 | `docs/draft/proposal-stay-or-go.md`(9차 보강본) | `2026-11-06-010-1433` | heavy(진단→무수정 finalize) | `.private/humanize/_workspace/2026-11-06-010-1433` | PASS(0). verify_gates P0 0.0%, P4 0.0%(0/516문장), P5 서법 소실 0, P3 golden 12건은 7~9차와 같은 날짜·시각 괄호의 각주 오인 | 후보가 원문과 바이트 동일 | 변경 없음(`pass_no_change`). 수신 횟수 문장·규칙 5 조건 문장·동의율 문장 진단 | `e489e5fe9a2b3021a3623d10b1a5f36de4810eb6e4b9a2efd0c0d60f32099893`(윤문 전과 같음) |
 | 2026-11-07 | `docs/draft/proposal-stay-or-go.md`(10차 보강본, Argon 검수 반영) | `2026-11-07-011-ebd0` | heavy(진단→무수정 finalize) | `.private/humanize/_workspace/2026-11-07-011-ebd0` | PASS(0). verify_gates P0 0.0%, P4 0.0%(0/516문장), P5 서법 소실 0(당위 6·완곡 5), P3 golden 12건은 7~10차와 같은 각주 오인 | 후보가 원문과 바이트 동일 | 변경 없음(`pass_no_change`). 채택한 Argon 문장 51행 진단 | `1d42ebdb833759b275039f9448c4e882c4112cda963d4a83f2ae07be832b7572`(윤문 전과 같음) |
 | 2026-11-07 | `docs/draft/proposal-stay-or-go.md`(10차 보강본, 후속 의미 보정) | `2026-11-07-012-0ed4` | heavy(진단→무수정 finalize) | `.private/humanize/_workspace/2026-11-07-012-0ed4` | PASS(0). verify_gates P0 0.0%, P4 0.0%(0/516문장), P5 서법 소실 0(당위 5·완곡 5), P3 golden 12건은 같은 각주 오인 | 후보가 원문과 바이트 동일 | 변경 없음(`pass_no_change`). 보정 9건 진단 | `97ea4ac599120774073f627098e9492b3d071cddf05124c34c410e3607477d73`(윤문 전과 같음) |
+| 2026-11-07 | `docs/draft/proposal-stay-or-go.md`(11차 보강본, 제출물 반영) | `2026-11-07-013-8dce` | heavy(진단→무수정 finalize) | `.private/humanize/_workspace/2026-11-07-013-8dce` | PASS(0). verify_gates P0 0.0%, P4 0.0%(0/520문장), P5 서법 소실 0(당위 5·완곡 5), P3 golden 12건은 같은 각주 오인 | 후보가 원문과 바이트 동일 | 변경 없음(`pass_no_change`). 7항·5항 일정·[34]·AI 고지 문장 진단 | `b49051c5e76771475899dfa393f265a2c3728e5d76e8c315d606c7ca3bebf27b`(윤문 전과 같음) |
 
 <p>표 2. 스테이고 원고 한글 윤문 기록.</p>
 
-1차 윤문 채택 뒤 표 6의 권한 칸 네 곳에서 백틱 코드와 괄호 사이에 공백 하나를 넣었다(줄바꿈 위치 보정, 문장 변경 없음). 2차 보강은 그 원고(`397ed684…`)를 고친 뒤 다시 윤문했다. 3차 윤문 채택 뒤 5항 「같은 방법으로 보인다」를 「같은 방법으로 재현한다」로 고쳤다. 「보인다」가 추측으로 읽히는 중의성을 없애려는 한 단어 수정이며 사실·수치는 바뀌지 않았다. 4차 윤문 뒤에는 그림 1의 이미지·캡션 줄을 문장 변경 없이 4항 표 4 뒤로 옮겼다(그 뒤 원고 `c455a94a…`). 6차 윤문 뒤에는 「사업 모델과 단계」의 [계산] 가치 문단 한 개를 문장 변경 없이 표 8 앞으로 옮겼다(그 뒤 원고 `17791268…`). 7~12차 윤문은 각 보강본 전체를 대상으로 했고 변경이 없었으므로, 현재 원고 SHA-256은 12차 행의 값 `97ea4ac599120774073f627098e9492b3d071cddf05124c34c410e3607477d73`와 같다.
+1차 윤문 채택 뒤 표 6의 권한 칸 네 곳에서 백틱 코드와 괄호 사이에 공백 하나를 넣었다(줄바꿈 위치 보정, 문장 변경 없음). 2차 보강은 그 원고(`397ed684…`)를 고친 뒤 다시 윤문했다. 3차 윤문 채택 뒤 5항 「같은 방법으로 보인다」를 「같은 방법으로 재현한다」로 고쳤다. 「보인다」가 추측으로 읽히는 중의성을 없애려는 한 단어 수정이며 사실·수치는 바뀌지 않았다. 4차 윤문 뒤에는 그림 1의 이미지·캡션 줄을 문장 변경 없이 4항 표 4 뒤로 옮겼다(그 뒤 원고 `c455a94a…`). 6차 윤문 뒤에는 「사업 모델과 단계」의 [계산] 가치 문단 한 개를 문장 변경 없이 표 8 앞으로 옮겼다(그 뒤 원고 `17791268…`). 7~13차 윤문은 각 보강본 전체를 대상으로 했고 변경이 없었으므로, 현재 원고 SHA-256은 13차 행의 값 `b49051c5e76771475899dfa393f265a2c3728e5d76e8c315d606c7ca3bebf27b`와 같다.
 
 ### 최종 파일과 전 페이지 시각 검수
 
 | 대상 | SHA-256 | 검수 범위 |
 |---|---|---|
-| `submission/stay-or-go/application.docx` | `864d41be8791320f35e18bfd514b0bafb573abc438bcf8e9f8667ef904bfa1d5` | 공식 01~04와 02의 1~8항목 보존 |
-| `submission/stay-or-go/application.pdf` | `547a859f40759277a80285fdea34a25a6852e163c9a4f8a228da23ff3e941f80` | 21/21쪽 직접 열람 |
+| `submission/stay-or-go/application.docx` | `ae31fed1b79d9dff57e3b1d2e41809672eb68e68c389121384107eed76d2b007` | 공식 01~04와 02의 1~8항목 보존 |
+| `submission/stay-or-go/application.pdf` | `b57013ceb7f010c29e0cb1154702c953457c775eabb7a36af63800ec165ffb6f` | 21/21쪽(바뀐 12~19쪽 직접 열람, 나머지는 직전 검수본과 바이트 동일) |
+| `submission/stay-or-go/staygo-demo.mp4` | `48b96777d45aa3f277bb62263697614d446f15f9d3f06614f7ac61d16be43c21` | 7항 첨부 시연 영상. 1920×1080 30fps 150초, 장면별 프레임과 자막·화면 값 대조, 잠금 화면 120.0~128.0초 원본 구간 확인 |
+| `apk/김&양_StayGo_release.apk` | `bdefef3f334d4f3b7a089f1d76d1b0114f6b81088a119a04cb41d481027a937a` | release 서명(CN=StayGo, 인증서 SHA-256 41d4a3c0…be85). 에뮬레이터 설치·실행, 목적지·도착 SOC 수신 확인 |
 | `submission/stay-or-go/probe-log-excerpt.txt` | `b2babaedf8fcb77079f909b81a3910d97c3c0a8e4c25ccde0e2ed8ebcbbed301` | 7항 첨부. 4차 556줄·5차 310줄·6차 449줄·7차 60줄, 표 10 20행의 시각·값을 원 로그 줄과 대조, 개인·계정 식별자 없음. 9차에 머리말 경로 안내 줄만 고침 |
 | `docs/draft/assets/stay-or-go-screen.png` | `93477fda28345ee714cd99285f4b5b00bd8ea3af3a209017b553f6fcb3e0d554` | 그림 1, 본문 시나리오 수치와 대조 |
 
 <p>표 3. 스테이고 검수 대상 파일과 해시.</p>
 
-LibreOffice로 PDF를 만들고 pdftoppm 160 dpi로 렌더했다. 쪽별 관찰은 `.private/visual-review/stay-or-go-final/review.md`, 렌더 명령과 이미지 해시는 같은 폴더의 `manifest.json`에 있다. 표 6(9~11쪽)의 머리행 미반복, 키 큰 행의 쪽 넘김, 긴 식별자의 단어 중간 줄바꿈은 허용 사항으로 기록했다. 표 1을 한 쪽에 두면서 생긴 2쪽 약 30% 하단 여백, 그림 1이 캡션과 함께 8쪽으로 넘어가며 생긴 7쪽 약 35% 여백, 03이 새 쪽에서 시작하는 19쪽 하단 여백은 허용 사항이다. 10차 문장 검수로 02가 한 쪽 늘어 전체 21쪽이 되었다(분량 제한 없음). 추출 텍스트와 첨부 파일에서 개인 계정·‘개인 계정’·‘private’·검수 모델 이름은 검색되지 않았고, GitHub URL은 Pleos 공식 샘플 [32] 하나다. `ach check linkareer-358198 --json`의 findings는 비어 있다.
+LibreOffice로 PDF를 만들고 pdftoppm 160 dpi로 렌더했다. 쪽별 관찰은 `.private/visual-review/stay-or-go-final/review.md`, 렌더 명령과 이미지 해시는 같은 폴더의 `manifest.json`에 있다. 표 6(9~11쪽)의 머리행 미반복, 키 큰 행의 쪽 넘김, 긴 식별자의 단어 중간 줄바꿈은 허용 사항으로 기록했다. 표 1을 한 쪽에 두면서 생긴 2쪽 약 30% 하단 여백, 그림 1이 캡션과 함께 8쪽으로 넘어가며 생긴 7쪽 약 35% 여백, 03이 새 쪽에서 시작하는 19쪽 하단 여백은 허용 사항이다. 추출 텍스트와 첨부 파일에서 개인 계정·‘개인 계정’·‘private’·검수 모델 이름은 검색되지 않았다. GitHub URL은 Pleos 공식 샘플 [32]와 7항의 팀 공모전 저장소 두 개다. `ach check linkareer-358198 --json`의 findings는 비어 있다.

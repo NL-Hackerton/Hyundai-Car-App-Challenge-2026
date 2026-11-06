@@ -15,8 +15,8 @@
 ## 적용한 작성 기준
 
 - `skill://cs-report`와 `skill://contest-harness`를 읽었다.
-- 정본 `/Users/hajung/Hajung/PersonaGraph/memory/writing/report-writing.md`의 완결 문장·설명 대상·용어 정의·사실과 가정 구분 기준을 읽었다.
-- 승인 기준본 `/Users/hajung/Hajung/DataCenter/reports/deepvoice-dacon-20261006/current_work/deliver_jy_20261006/1_model_report/1_overview_approach.md` 1~165행을 실제 읽고 문단 연결과 설계 표의 완결 문장을 대조했다.
+- 로컬 문체 정본 `report-writing.md`의 완결 문장·설명 대상·용어 정의·사실과 가정 구분 기준을 읽었다.
+- 로컬 승인 기준본 `1_overview_approach.md` 1~165행을 실제 읽고 문단 연결과 설계 표의 완결 문장을 대조했다.
 - `.harness/work-orders/document-production.md`와 `document-interface.md`의 공식 항목·Markdown 입력·개인정보 경계를 적용했다.
 
 ## 규정과 책임
