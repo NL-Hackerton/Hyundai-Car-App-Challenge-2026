@@ -1,0 +1,185 @@
+{
+  "clips": [
+    {
+      "file": "demo/staygo-run-1.mp4",
+      "startFrom": 2,
+      "endAt": 38,
+      "playbackRate": 3
+    },
+    {
+      "file": "demo/staygo-run-1.mp4",
+      "startFrom": 38,
+      "endAt": 128,
+      "playbackRate": 6
+    },
+    {
+      "file": "demo/staygo-run-1.mp4",
+      "startFrom": 128,
+      "endAt": 178,
+      "playbackRate": 6
+    },
+    {
+      "file": "demo/staygo-run-2.mp4",
+      "startFrom": 0,
+      "endAt": 64,
+      "playbackRate": 6
+    },
+    {
+      "file": "demo/staygo-run-2.mp4",
+      "startFrom": 64,
+      "endAt": 104,
+      "playbackRate": 4
+    },
+    {
+      "file": "demo/staygo-run-2.mp4",
+      "startFrom": 104,
+      "endAt": 119,
+      "playbackRate": 1.25,
+      "label": "실제 화면 녹화 · 1.25배속"
+    },
+    {
+      "file": "demo/staygo-run-2.mp4",
+      "startFrom": 119,
+      "endAt": 131,
+      "playbackRate": 1
+    }
+  ],
+  "annotations": [
+    {
+      "at": 0.5,
+      "title": "충전 감지",
+      "body": "배터리 잔량이 30초 동안 늘면 충전 중으로 판단"
+    },
+    {
+      "at": 12,
+      "title": "내비 계산",
+      "body": "지금 떠나면 도착 6%, 내비가 경유 충전지를 추가"
+    },
+    {
+      "at": 17,
+      "title": "Stay 권장",
+      "body": "예비 SOC 15%p에 못 미쳐 더 충전을 권함"
+    },
+    {
+      "at": 24,
+      "title": "충전전력 하락",
+      "body": "230 kW에서 떨어져 후반 판정선 115 kW 아래로"
+    },
+    {
+      "at": 33,
+      "title": "도착 SOC 상승",
+      "body": "SOC가 1%p 오를 때마다 내비가 다시 계산"
+    },
+    {
+      "at": 46,
+      "title": "Go 권장",
+      "body": "도착 15% 충족, 충전 후반이라 출발을 권함"
+    },
+    {
+      "at": 57.5,
+      "title": "내비 연동",
+      "body": "Go를 누르면 목적지 경로를 내비에 전달"
+    },
+    {
+      "at": 68.5,
+      "title": "주행 중 잠금",
+      "body": "D단 주행을 시작하면 조작 화면을 숨김"
+    }
+  ],
+  "reel": {
+    "clips": [
+      {
+        "file": "demo/staygo-run-1.mp4",
+        "startFrom": 4,
+        "endAt": 40,
+        "playbackRate": 6,
+        "crop": {
+          "x": 641,
+          "y": 0,
+          "w": 1279,
+          "h": 975
+        }
+      },
+      {
+        "file": "demo/staygo-run-1.mp4",
+        "startFrom": 40,
+        "endAt": 130,
+        "playbackRate": 9,
+        "crop": {
+          "x": 641,
+          "y": 0,
+          "w": 1279,
+          "h": 975
+        }
+      },
+      {
+        "file": "demo/staygo-run-2.mp4",
+        "startFrom": 50,
+        "endAt": 70,
+        "playbackRate": 5,
+        "crop": {
+          "x": 641,
+          "y": 0,
+          "w": 1279,
+          "h": 975
+        }
+      },
+      {
+        "file": "demo/staygo-run-2.mp4",
+        "startFrom": 104,
+        "endAt": 112,
+        "playbackRate": 2,
+        "crop": {
+          "x": 641,
+          "y": 0,
+          "w": 1279,
+          "h": 975
+        }
+      },
+      {
+        "file": "demo/staygo-run-2.mp4",
+        "startFrom": 119,
+        "endAt": 123,
+        "playbackRate": 2,
+        "crop": {
+          "x": 641,
+          "y": 0,
+          "w": 1279,
+          "h": 975
+        }
+      }
+    ],
+    "annotations": [
+      {
+        "at": 0,
+        "title": "충전 감지",
+        "body": "잔량이 계속 늘면 충전 중"
+      },
+      {
+        "at": 6,
+        "title": "Stay 권장",
+        "body": "도착 10% 미만, 예비 SOC 부족"
+      },
+      {
+        "at": 11,
+        "title": "전력 하락",
+        "body": "230 kW에서 점점 떨어지는 중"
+      },
+      {
+        "at": 19.0,
+        "title": "Go 권장",
+        "body": "도착 15% 충족, 지금 출발"
+      },
+      {
+        "at": 21.5,
+        "title": "내비 연동",
+        "body": "Go 한 번에 경로 전달"
+      },
+      {
+        "at": 24.4,
+        "title": "주행 중 잠금",
+        "body": "출발하면 조작 화면 숨김"
+      }
+    ]
+  }
+}
