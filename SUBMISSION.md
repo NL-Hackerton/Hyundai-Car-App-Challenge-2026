@@ -77,11 +77,11 @@
 ‘문별 하차 준비’와 별개인 두 번째 기획서다. 어느 기획서를 접수할지는 팀이 정한다. 위의 90점 판정과 해시는 이 파일에 적용되지 않는다.
 
 - 원고: `docs/draft/proposal-stay-or-go.md`. 그림 원본은 `docs/draft/assets/stay-or-go-screen.html`이며 PNG로 렌더해 넣었다.
-- 제출 파일: `submission/stay-or-go/application.docx`(SHA-256 `414eeef32c84c6254f4b0dcb02bcfea1ac2d3401e7f5aca3b598288c8dccff88`). 검수용 PDF는 `application.pdf`(22쪽, `ec8b98246a10871712ca005f22d9876e8cdbcbd5c04976e0eafdf3883c23e059`)다. 개인 값·체크박스·동의·서명은 공란이다.
+- 제출 파일: `submission/stay-or-go/application.docx`(SHA-256 `28b33b8de0952c0ea03582d68c66c1996930a3fe54538e814e8a9d81983cb453`). 검수용 PDF는 `application.pdf`(22쪽, `c6de769a05023aeb97cddf2ec060bf9c1a2444e05384bf4513b768233f5e67d9`)다. 개인 값·체크박스·동의·서명은 공란이다.
 - 7항 참고자료 첨부: `submission/stay-or-go/probe-log-excerpt.txt`(`b2babaedf8fcb77079f909b81a3910d97c3c0a8e4c25ccde0e2ed8ebcbbed301`). 본문 7항이 이 파일을 첨부한다고 적고 있으므로, 스테이고를 접수하면 DOCX와 함께 메일에 첨부한다. 첨부하지 않을 경우 7항의 첨부 문장과 [34]의 파일 언급을 지우고 다시 렌더·검수한다.
 - 검수 기록: `JUDGE.md`의 ‘스테이고 기획서’ 절, `.private/visual-review/stay-or-go-final/review.md`.
 - 제출 전 확인: 참고문헌 [3]의 개인 블로그(bonta.tistory.com)는 최종 판정에서 원문을 열어 제3자 시승기로 확인했다. 팀원도 본인 계정이 아닌지 한 번 더 확인한다.
-- 글꼴: 2026-11-07 레이아웃 개편으로 DOCX 기본 글꼴을 `맑은 고딕`(본문 10.5pt, 줄간격 1.5, 표 머리 음영·셀 여백, 캡션 가운데 정렬)으로 바꾸었다. 검수 PDF는 Linux LibreOffice에서 맑은 고딕을 나눔고딕으로 대체해 렌더한 것이다. 서비스명 표기는 영문 `Stay-or-Go`로 통일했다(원고 SHA-256 `64ebcc855df0d822dd59a2f124b106a9fe8953d17830de11fb13f15b6c463d3f`). Windows Word에는 이 글꼴이 없어 대체 글꼴로 바뀌면서 쪽 나뉨이 달라질 수 있다. 접수 전에 Windows Word로 DOCX를 열어 표 잘림과 빈 쪽이 없는지 확인한다.
+- 글꼴: 2026-11-07 레이아웃 개편으로 DOCX 기본 글꼴을 `맑은 고딕`(본문 10.5pt, 줄간격 1.5, 표 머리 음영·셀 여백, 캡션 가운데 정렬)으로 바꾸었다. 본문 표는 0.5pt 회색 격자, 세로 가운데 정렬, 숫자 열 오른쪽 정렬, 머리행 반복, 행 분할 방지, 내용 비례 열 너비(본문 폭 16.8cm)로 정리했다. 검수 PDF는 Linux LibreOffice에서 맑은 고딕을 나눔고딕으로 대체해 렌더한 것이다. 서비스명 표기는 영문 `Stay-or-Go`로 통일했다(원고 SHA-256 `64ebcc855df0d822dd59a2f124b106a9fe8953d17830de11fb13f15b6c463d3f`). Windows Word에는 이 글꼴이 없어 대체 글꼴로 바뀌면서 쪽 나뉨이 달라질 수 있다. 접수 전에 Windows Word로 DOCX를 열어 표 잘림과 빈 쪽이 없는지 확인한다.
 
 ## Stay-or-Go 제출 체크리스트
 

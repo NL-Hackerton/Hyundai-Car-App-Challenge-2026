@@ -43,7 +43,7 @@ SEPARATOR = re.compile(r"^:?-{3,}:?$")
 KEEP_TABLE_CM = 14.0
 KEEP_TABLE_ROWS = 15
 # Table rows estimated taller than this may break across pages (cm).
-SPLIT_ROW_CM = 5.0
+SPLIT_ROW_CM = 12.0
 TABLE_FONT_PT = 9.5
 # Readability layout (Windows-safe defaults).
 BODY_FONT_PT = 10.5
@@ -57,6 +57,12 @@ TABLE_HEADER_FILL = "DCE6F2"
 # Cell padding in twips (1/20 pt): top/bottom, left/right.
 CELL_PAD_TB = 60
 CELL_PAD_LR = 100
+# Inner table grid: 0.5 pt (sz in eighths of a point) light gray.
+TABLE_BORDER_SZ = 4
+TABLE_BORDER_COLOR = "A6A6A6"
+# Usable width inside the official free-text box (cm), after its own cell margins.
+INNER_TABLE_CM = 16.8
+NUMERIC = re.compile(r"^[\s\d.,:%~±+\-−×÷/()=≈<>≤≥]*\d[\s\d.,:%~±+\-−×÷/()=≈<>≤≥]*(?:\s?(?:kW|kWh|Wh|km|ms|초|분|시간|원|만 원|곳|대|명|건|회|%p|°C))?$")
 
 
 def digest(path: Path) -> str:
@@ -290,6 +296,37 @@ def shade(cell, fill):
     properties.append(element)
 
 
+def table_borders(table):
+    properties = table._tbl.tblPr
+    for old in list(properties.findall(qn("w:tblBorders"))):
+        properties.remove(old)
+    borders = OxmlElement("w:tblBorders")
+    for edge in ("top", "left", "bottom", "right", "insideH", "insideV"):
+        element = OxmlElement(f"w:{edge}")
+        element.set(qn("w:val"), "single")
+        element.set(qn("w:sz"), str(TABLE_BORDER_SZ))
+        element.set(qn("w:space"), "0")
+        element.set(qn("w:color"), TABLE_BORDER_COLOR)
+        borders.append(element)
+    properties.append(borders)
+
+
+def v_center(cell):
+    properties = cell._tc.get_or_add_tcPr()
+    element = OxmlElement("w:vAlign")
+    element.set(qn("w:val"), "center")
+    properties.append(element)
+
+
+def numeric_columns(rows):
+    """Columns whose body cells are mostly numbers or short quantities."""
+    result = []
+    for column in zip(*rows[1:]):
+        values = [re.sub(r"[`*]", "", v).strip() for v in column if v.strip() and v.strip() != "-"]
+        result.append(bool(values) and sum(bool(NUMERIC.fullmatch(v)) for v in values) >= 0.7 * len(values))
+    return result
+
+
 def cell_margins(table):
     properties = table._tbl.tblPr
     margins = OxmlElement("w:tblCellMar")
@@ -318,12 +355,13 @@ def column_widths(rows, available: float):
     columns = list(zip(*([re.sub(r"[`*]", "", value) for value in row] for row in rows)))
     floors = [
         min(max(1.6, max(text_width(token) for value in column for token in (value.split() or [""])) + 0.5),
-            available * 0.4)
+            available * 0.22)
         for column in columns
     ]
     if sum(floors) > available:
         floors = [floor * available / sum(floors) for floor in floors]
-    volume = [sum(text_width(value) for value in column) or 1.0 for column in columns]
+    # Share by content volume, softened so wide description columns win without starving labels.
+    volume = [(sum(text_width(value) for value in column) or 1.0) ** 0.85 for column in columns]
     rest = available - sum(floors)
     return [floor + rest * share / sum(volume) for floor, share in zip(floors, volume)]
 
@@ -373,7 +411,8 @@ def render_blocks(outer, blocks, font):
             cell.add_paragraph()
             continue
         if kind == "table":
-            widths = column_widths(value, 17.2)
+            widths = column_widths(value, INNER_TABLE_CM)
+            numeric = numeric_columns(value)
             # LibreOffice neither honors header keep-with-next nor repeats the header
             # inside a split nested table. Keep short tables that fit on a page together
             # with their caption; let tall or long tables flow so they leave no blank page end.
@@ -383,6 +422,7 @@ def render_blocks(outer, blocks, font):
             table.alignment = WD_TABLE_ALIGNMENT.CENTER
             table.autofit = False
             cell_margins(table)
+            table_borders(table)
             # Exactly one nesting level is needed to preserve the official input box.
             # LibreOffice lays out from the grid, Word from the cells; set both.
             for column, width in zip(table.columns, widths):
@@ -400,7 +440,11 @@ def render_blocks(outer, blocks, font):
             for r, data in enumerate(value):
                 for c, content in enumerate(data):
                     paragraph = table.cell(r, c).paragraphs[0]
+                    v_center(table.cell(r, c))
                     paragraph_format(paragraph)
+                    paragraph.paragraph_format.widow_control = False
+                    if r and numeric[c]:
+                        paragraph.alignment = WD_ALIGN_PARAGRAPH.RIGHT
                     paragraph.paragraph_format.space_after = Pt(0)
                     paragraph.paragraph_format.line_spacing = TABLE_LINE_SPACING
                     inline(paragraph, content, font)
