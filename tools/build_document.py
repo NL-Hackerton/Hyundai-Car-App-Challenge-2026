@@ -22,7 +22,7 @@ from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
-from docx.shared import Cm, Pt
+from docx.shared import Cm, Pt, RGBColor
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "docs/form/contest-application-consent.docx"
@@ -45,6 +45,18 @@ KEEP_TABLE_ROWS = 15
 # Table rows estimated taller than this may break across pages (cm).
 SPLIT_ROW_CM = 5.0
 TABLE_FONT_PT = 9.5
+# Readability layout (Windows-safe defaults).
+BODY_FONT_PT = 10.5
+HEADING_FONT_PT = 12
+CAPTION_FONT_PT = 9
+BODY_LINE_SPACING = 1.5
+TABLE_LINE_SPACING = 1.15
+HEADING_COLOR = "1F3864"
+CAPTION_COLOR = "595959"
+TABLE_HEADER_FILL = "DCE6F2"
+# Cell padding in twips (1/20 pt): top/bottom, left/right.
+CELL_PAD_TB = 60
+CELL_PAD_LR = 100
 
 
 def digest(path: Path) -> str:
@@ -208,7 +220,7 @@ def parse_blocks(lines):
     return blocks
 
 
-def set_font(run, font, size=10.5):
+def set_font(run, font, size=BODY_FONT_PT):
     run.font.name = font
     run.font.size = Pt(size)
     run._element.get_or_add_rPr().rFonts.set(qn("w:eastAsia"), font)
@@ -261,12 +273,32 @@ def inline(paragraph, text, font):
 
 def paragraph_format(paragraph, *, heading=False):
     fmt = paragraph.paragraph_format
-    fmt.space_before = Pt(5 if heading else 0)
-    fmt.space_after = Pt(5)
-    fmt.line_spacing = 1.18
+    fmt.space_before = Pt(12 if heading else 0)
+    fmt.space_after = Pt(4 if heading else 6)
+    fmt.line_spacing = 1.15 if heading else BODY_LINE_SPACING
     fmt.keep_with_next = heading
     fmt.keep_together = False
     fmt.widow_control = True
+
+
+def shade(cell, fill):
+    properties = cell._tc.get_or_add_tcPr()
+    element = OxmlElement("w:shd")
+    element.set(qn("w:val"), "clear")
+    element.set(qn("w:color"), "auto")
+    element.set(qn("w:fill"), fill)
+    properties.append(element)
+
+
+def cell_margins(table):
+    properties = table._tbl.tblPr
+    margins = OxmlElement("w:tblCellMar")
+    for edge, value in (("top", CELL_PAD_TB), ("bottom", CELL_PAD_TB), ("left", CELL_PAD_LR), ("right", CELL_PAD_LR)):
+        element = OxmlElement(f"w:{edge}")
+        element.set(qn("w:w"), str(value))
+        element.set(qn("w:type"), "dxa")
+        margins.append(element)
+    properties.append(margins)
 
 
 def allow_split(row):
@@ -302,7 +334,7 @@ def row_height(row, widths) -> float:
         max(1, math.ceil(text_width(re.sub(r"[`*]", "", value)) / max(width - 0.4, 0.5)))
         for value, width in zip(row, widths)
     )
-    return 0.51 * lines + 0.12
+    return 0.53 * lines + 0.32
 
 
 def table_height(rows, widths) -> float:
@@ -350,6 +382,7 @@ def render_blocks(outer, blocks, font):
             table = cell.add_table(rows=len(value), cols=len(value[0]))
             table.alignment = WD_TABLE_ALIGNMENT.CENTER
             table.autofit = False
+            cell_margins(table)
             # Exactly one nesting level is needed to preserve the official input box.
             # LibreOffice lays out from the grid, Word from the cells; set both.
             for column, width in zip(table.columns, widths):
@@ -368,11 +401,15 @@ def render_blocks(outer, blocks, font):
                 for c, content in enumerate(data):
                     paragraph = table.cell(r, c).paragraphs[0]
                     paragraph_format(paragraph)
+                    paragraph.paragraph_format.space_after = Pt(0)
+                    paragraph.paragraph_format.line_spacing = TABLE_LINE_SPACING
                     inline(paragraph, content, font)
                     for run in paragraph.runs:
                         run.font.size = Pt(TABLE_FONT_PT)
                     if r == 0:
                         paragraph.paragraph_format.keep_with_next = True
+                        paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                        shade(table.cell(r, c), TABLE_HEADER_FILL)
                         for run in paragraph.runs:
                             run.bold = True
             # Keep the final row attached to the following caption, not the entire table.
@@ -390,17 +427,25 @@ def render_blocks(outer, blocks, font):
             depth, marker, content = value
             paragraph.paragraph_format.left_indent = Cm(0.35 + depth * 0.4)
             paragraph.paragraph_format.first_line_indent = Cm(-0.3)
-            paragraph.paragraph_format.space_after = Pt(2)
-            paragraph.paragraph_format.line_spacing = 1.1
+            paragraph.paragraph_format.space_after = Pt(3)
+            paragraph.paragraph_format.line_spacing = 1.35
             inline(paragraph, f"{marker} {content}", font)
         else:
             inline(paragraph, value, font)
             if kind == "heading":
                 for run in paragraph.runs:
                     run.bold = True
+                    run.font.size = Pt(HEADING_FONT_PT)
+                    run.font.color.rgb = RGBColor.from_string(HEADING_COLOR)
             if kind == "caption":
+                paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
                 paragraph.paragraph_format.keep_together = True
-                paragraph.paragraph_format.space_before = Pt(2)
+                paragraph.paragraph_format.space_before = Pt(4)
+                paragraph.paragraph_format.space_after = Pt(10)
+                paragraph.paragraph_format.line_spacing = 1.15
+                for run in paragraph.runs:
+                    run.font.size = Pt(CAPTION_FONT_PT)
+                    run.font.color.rgb = RGBColor.from_string(CAPTION_COLOR)
     # Word requires a terminating paragraph after a nested table.
     if len(cell._tc) == 1 or cell._tc[-1].tag != qn("w:p"):
         cell.add_paragraph()
@@ -480,7 +525,7 @@ def main():
                         help="생성할 DOCX 경로. 기본값은 기존 제출 파일이다.")
     parser.add_argument("--review-dir", type=Path, default=ROOT / ".private/visual-review",
                         help="렌더 PNG·manifest 저장 디렉터리.")
-    parser.add_argument("--font", default="Apple SD Gothic Neo")
+    parser.add_argument("--font", default="맑은 고딕")
     parser.add_argument("--replace", action="store_true")
     args = parser.parse_args()
     args.input = internal_input(args.input)
