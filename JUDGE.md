@@ -186,7 +186,7 @@ Argon 반영본(PDF SHA-256 `4e1ff1c47be7cc52f311d34080e099c554349dbab1812ddc36e
 
 ### 11차 보강 내용(시연 영상·앱·APK 제출 반영)
 
-- 스테이고 앱을 구현했다(`apps/staygo/`). 규칙 1~6(`decision/DecisionModel.kt`, m 15·k 0.5·s 5·0.7×C÷T), 배터리 잔량 10초 창·30초 중앙값 전력 추정과 30초 상승 충전 인식(`signal/PowerEstimator.kt`), 내비 목적지 `getDestinationInfo`·`requestTrip`·경유지 재요청·`onDrivingInfo`(`navi/NaviClient.kt`), Pleos SOC·AAOS 속성·CarUxRestrictions(`vehicle/VehicleSignals.kt`)를 담았다. 단위 테스트 16건이 통과했고 release APK(`apk/김&양_StayGo_release.apk`)는 에뮬레이터에서 실행을 확인했다.
+- 스테이고 앱을 구현했다(`apps/staygo/`). 규칙 1~6(`decision/DecisionModel.kt`, m 15·k 0.5·s 5·0.7×C÷T), 배터리 잔량 10초 창·30초 중앙값 전력 추정과 30초 상승 충전 인식(`signal/PowerEstimator.kt`), 내비 목적지 `getDestinationInfo`·`requestTrip`·경유지 재요청·`onDrivingInfo`(`navi/NaviClient.kt`), Pleos SOC·AAOS 속성·CarUxRestrictions(`vehicle/VehicleSignals.kt`)를 담았다. 단위 테스트 16건이 통과했고 release APK(`apk/StayGo_release.apk`)는 에뮬레이터에서 실행을 확인했다.
 - Pleos Connect v2.1.0 에뮬레이터에서 부산시청 경로 안내를 켠 뒤 가상 콘솔로 충전 곡선(SOC 78%까지 230 kW, 82% 이후 95 kW)을 입력하며 녹화했다. 로그 기준으로 74%에서 충전 인식·Stay(규칙 2, A 5.9%), 청도새마을휴게소 경유 300 kW·6기 수신, 86%에서 Go(규칙 4, A 15.0%, P 95 kW, Pmax 230 kW), Go 탭 뒤 내비 경로 화면, D단 30 km/h에서 DO 잠금을 확인했다. 시연 영상(`submission/stay-or-go/staygo-demo.mp4`, 2분 30초)과 세로 숏폼(`staygo-reel.mp4`, 45초)은 Remotion으로 만들었고(`video/`), 자막은 화면 값과 대조했다. 배경음악은 팀원이 생성형 AI 음악 도구로 만든 곡을 반복해 길이를 맞췄다.
 - 원고: 7항 제출물 문단(시연 영상 첨부, GitHub 저장소의 앱 소스·APK·프로브 소스와 4~7차 원본 로그, 녹화 방법, 백엔드 미구현), 5항 2주 일정 도입문과 표 7의 세 행, 시연 대체 문단, [34](원본 비공개 문구 삭제), AI 활용 고지(앱 구현·시연 녹화·영상 편집·배경음악, 「본 앱의 구현은 수행하지 않았다」 삭제)를 고쳤다. 8항(숏폼 미제출)은 유지했다.
 - 공개 저장소 정리: README·SUBMISSION·프로브 README의 개인 GitHub 주소와 실명, `.harness`·`docs/draft/ai-use.md`의 로컬 사용자 경로를 지웠다. 커밋 작성자 이름·이메일은 히스토리에 남아 있다.
@@ -227,7 +227,7 @@ Argon 반영본(PDF SHA-256 `4e1ff1c47be7cc52f311d34080e099c554349dbab1812ddc36e
 | `submission/stay-or-go/application.docx` | `4ebfa02ec627db51a29c5d86da1194039c4e221294a2e3ef9635a36895eed592` | 공식 01~04와 02의 1~8항목 보존 |
 | `submission/stay-or-go/application.pdf` | `ff42c603a99d6bb48cd3aecd974063fa40295a3223cdabb648ff58e17fa9d912` | 21/21쪽(바뀐 15~19쪽 직접 열람, 나머지는 직전 검수본과 바이트 동일) |
 | `submission/stay-or-go/staygo-demo.mp4` | `2489f629b21d526114f380a05947e67243eb69ab743b00a2910f29b8a9a45bb9` | 7항 첨부 시연 영상. 1920×1080 30fps 150초, 장면별 프레임과 자막·화면 값 대조, 잠금 화면 120.0~128.0초 원본 구간 확인, 70초 자막 수정 프레임 확인 |
-| `apk/김&양_StayGo_release.apk` | `bdefef3f334d4f3b7a089f1d76d1b0114f6b81088a119a04cb41d481027a937a` | release 서명(CN=StayGo, 인증서 SHA-256 41d4a3c0…be85). 에뮬레이터 설치·실행, 목적지·도착 SOC 수신 확인 |
+| `apk/StayGo_release.apk` | `bdefef3f334d4f3b7a089f1d76d1b0114f6b81088a119a04cb41d481027a937a` | release 서명(CN=StayGo, 인증서 SHA-256 41d4a3c0…be85). 에뮬레이터 설치·실행, 목적지·도착 SOC 수신 확인 |
 | `submission/stay-or-go/probe-log-excerpt.txt` | `b2babaedf8fcb77079f909b81a3910d97c3c0a8e4c25ccde0e2ed8ebcbbed301` | 7항 첨부. 4차 556줄·5차 310줄·6차 449줄·7차 60줄, 표 10 20행의 시각·값을 원 로그 줄과 대조, 개인·계정 식별자 없음. 9차에 머리말 경로 안내 줄만 고침 |
 | `docs/draft/assets/stay-or-go-screen.png` | `93477fda28345ee714cd99285f4b5b00bd8ea3af3a209017b553f6fcb3e0d554` | 그림 1, 본문 시나리오 수치와 대조 |
 

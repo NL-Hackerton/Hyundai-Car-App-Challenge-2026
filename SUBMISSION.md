@@ -1,5 +1,7 @@
 # 팀원 제출 인계 안내
 
+> **최종 제출안: Stay-or-Go(스테이고).** 제출 파일은 `submission/stay-or-go/`이며 아래 ‘Stay-or-Go 제출 체크리스트’를 따른다. 이어지는 ‘문별 하차 준비’ 절과 `submission/application-review.*`, `docs/draft/proposal.md`는 대체됨(superseded) 기록이며 제출하지 않는다.
+
 **최신 사용자 지시: 에이전트는 제출하지 않고 결과물을 push하며, 팀원이 직접 제출한다.** 이전 자동 제출 승인으로 발송을 재개하지 않는다. 메일 작성·첨부·업로드·발송·접수는 수행하지 않았다.
 
 팀원은 `submission/application-review.docx`를 내려받아 실제 참가자 정보·동의·서명을 작성한 뒤 직접 제출한다. `application-review.pdf`는 내용·배치 확인용이며 개인정보·서명이 공란인 비식별 버전이다. 저장소에는 개인 값·서명본이 포함되지 않는다.
@@ -100,7 +102,7 @@
 
 - 시연 영상: `submission/stay-or-go/staygo-demo.mp4`(1920×1080, 2분 30초, SHA-256 `2489f629b21d526114f380a05947e67243eb69ab743b00a2910f29b8a9a45bb9`). 7항이 첨부를 전제하므로 DOCX와 함께 첨부한다.
 - 프로브 로그 발췌: `submission/stay-or-go/probe-log-excerpt.txt`. DOCX와 함께 첨부한다.
-- GitHub: https://github.com/NL-Hackerton/Hyundai-Car-App-Challenge-2026 (2026-11-07 KST 공개). 앱 소스 `apps/staygo/`, release APK `apk/김&양_StayGo_release.apk`, 프로브 소스와 원본 로그 `apps/pleos-stayorgo-probe/`.
+- GitHub: https://github.com/NL-Hackerton/Hyundai-Car-App-Challenge-2026 (2026-11-07 KST 공개). 앱 소스 `apps/staygo/`, release APK `apk/StayGo_release.apk`, 프로브 소스와 원본 로그 `apps/pleos-stayorgo-probe/`.
 - 숏폼(선택, 특별상): `submission/stay-or-go/staygo-reel.mp4`(1080×1920, 45초)를 Instagram 릴스 또는 YouTube Shorts에 게시하고 캡션에 `#HMG차량용앱개발공모전 #스테이고 #전기차충전`을 넣는다. 링크를 넣을 때만 8항을 고친다.
 - 저장소 커밋 기록에는 작성자 이름·이메일이 남아 있다. 블라인드 심사에서 이것이 문제가 되는지는 공고에서 확인하지 못했다.
 
