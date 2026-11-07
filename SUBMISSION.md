@@ -1,5 +1,7 @@
 # 팀원 제출 인계 안내
 
+> **제출 완료: 2026-11-07 16:33 KST** — yoobinkim06@gmail.com → appdevchallenge@hyundai-partners.com(팀원 CC), Gmail messageId `1a1b4ed749489da5`. 제출안 Stay-or-Go, 첨부 `StayGo_신청서_김&양_서명본.docx`(커밋 `4177a44` 생성본에 참가자 정보·서명 입력, 저장소 미포함)·`staygo-demo.mp4`·`probe-log-excerpt.txt`. 1차 서류 결과 11/23, 합격 시 12/3~4 서울 오프라인 PT·앱 시연. 마감 전 같은 발신자 재제출 시 마지막 메일로 심사한다.
+
 > **최종 제출안: Stay-or-Go(스테이고).** 제출 파일은 `submission/stay-or-go/`이며 아래 ‘Stay-or-Go 제출 체크리스트’를 따른다. 이어지는 ‘문별 하차 준비’ 절과 `submission/application-review.*`, `docs/draft/proposal.md`는 대체됨(superseded) 기록이며 제출하지 않는다.
 
 **최신 사용자 지시: 에이전트는 제출하지 않고 결과물을 push하며, 팀원이 직접 제출한다.** 이전 자동 제출 승인으로 발송을 재개하지 않는다. 메일 작성·첨부·업로드·발송·접수는 수행하지 않았다.

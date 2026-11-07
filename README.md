@@ -1,6 +1,7 @@
 # 현대자동차그룹 차량용 앱 개발 공모전
 
-- 상태: **최종 제출안은 Stay-or-Go(스테이고)다 — [`submission/stay-or-go/`](submission/stay-or-go/)**. 팀원이 서명 후 직접 제출하며 에이전트는 발송하지 않는다.
+- 상태: **제출 완료: 2026-11-07 16:33 KST** — yoobinkim06@gmail.com → appdevchallenge@hyundai-partners.com(팀원 CC), Gmail messageId `1a1b4ed749489da5`. 제출안 Stay-or-Go, 첨부 `StayGo_신청서_김&양_서명본.docx`(커밋 `4177a44` 생성본에 참가자 정보·서명 입력, 저장소 미포함)·`staygo-demo.mp4`·`probe-log-excerpt.txt`. 1차 서류 결과 11/23, 합격 시 12/3~4 서울 오프라인 PT·앱 시연. 마감 전 같은 발신자 재제출 시 마지막 메일로 심사한다.
+- 이전 상태 기록: **최종 제출안은 Stay-or-Go(스테이고)다 — [`submission/stay-or-go/`](submission/stay-or-go/)**. 팀원이 서명 후 직접 제출하며 에이전트는 발송하지 않는다.
 - 대체됨(superseded): 이전 ‘문별 하차 준비’ 파일(`docs/draft/proposal.md`, `submission/application-review.*`)은 기록용으로만 남기며 제출하지 않는다.
 - 공식 공고: https://appdevchallenge.auto-hmg.io/landing
 - 마감: 2026-11-15T23:59+09:00
