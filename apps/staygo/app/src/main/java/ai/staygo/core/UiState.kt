@@ -104,6 +104,10 @@ sealed interface RouteState {
         val maxPowerKw: Double?,
         val chargerCount: Int?,
         val comparison: CandidateComparison?,
+        /** Where maxPowerKw and chargerCount came from; null when unknown. */
+        val outputSource: OutputSource? = null,
+        /** Date of the bundled snapshot, to show when outputSource is SNAPSHOT. */
+        val snapshotAsOf: String? = null,
     ) : RouteState
 }
 

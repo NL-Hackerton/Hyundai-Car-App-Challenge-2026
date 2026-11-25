@@ -1,5 +1,6 @@
 package ai.staygo
 
+import ai.staygo.core.GridStationDirectory
 import ai.staygo.core.StayGoEngine
 import ai.staygo.core.StayGoUiState
 import ai.staygo.core.UiNotice
@@ -8,7 +9,9 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,6 +38,23 @@ class StayGoViewModel(app: Application, handle: SavedStateHandle) : AndroidViewM
     )
     private val _state = MutableStateFlow(engine.snapshot())
     private var started = false
+
+    init {
+        // The station snapshot is optional: without the asset, stop output comes from the active route only.
+        viewModelScope.launch {
+            val directory = withContext(Dispatchers.IO) {
+                try {
+                    app.assets.open(STATIONS_ASSET).bufferedReader().useLines { GridStationDirectory.parse(it) }
+                } catch (e: java.io.IOException) {
+                    null
+                }
+            }
+            if (directory != null) {
+                Log.i(TAG, "station snapshot asOf=${directory.asOf} stations=${directory.size}")
+                engine.stations = directory
+            }
+        }
+    }
 
     val state: StateFlow<StayGoUiState> = _state
     val notices: SharedFlow<UiNotice> = _notices
@@ -86,5 +106,7 @@ class StayGoViewModel(app: Application, handle: SavedStateHandle) : AndroidViewM
 
     companion object {
         const val TAG = "StayGo"
+        /** Built by tools/build_station_snapshot.py; the app works without it. */
+        const val STATIONS_ASSET = "stations.tsv"
     }
 }

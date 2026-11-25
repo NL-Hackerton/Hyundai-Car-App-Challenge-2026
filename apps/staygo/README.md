@@ -12,6 +12,7 @@
 - 목표 SOC: 내비에 연결하지 못하거나 도착 예상 SOC 요청이 두 번 연속 실패하면 운전자가 목표 SOC를 정하고, 앱은 현재 SOC와 목표 SOC의 차이로 판단한다. 내비가 다시 응답하면 내비 값으로 돌아간다.
 - 차량 연동 불가: 권한이 거절되거나 SOC 조회가 지원되지 않으면 차량 신호를 시작하지 않고 연동 불가를 안내한다. 차량 값은 표시하지 않는다.
 - SOC 차이: Pleos SOC와 배터리 잔량 기준 SOC가 3%p 넘게 다르면 두 값을 함께 표시한다. 내비의 도착 예상 SOC는 잔량을 따른다.
+- 경유지 출력: 활성 경로의 `onDrivingInfo`가 경유지 최대 출력을 주지 않으면 앱에 넣어 둔 급속충전소 목록(`assets/stations.tsv`)에서 경유지 좌표 300 m 안의 충전소를 찾아 최대 출력·충전기 수를 쓴다. 조회는 기기 안에서 하며 좌표를 외부로 보내지 않는다. 화면에는 목록의 기준일을 함께 표시한다. 목록은 `tools/build_station_snapshot.py`가 한국환경공단 전기자동차 충전소 정보 OpenAPI로 만든다(해당 API 활용신청이 된 인증키 필요). 목록 파일이 없으면 이 조회를 건너뛴다. 현재 저장소에는 목록 파일이 없다.
 - 판단: `decision/DecisionModel.kt`의 규칙 1~6(기획서 3항). 예비 SOC 15%p(화면에서 5%p 단위로 조정, 기기에 저장), 후반 판정 비율 0.5, 경유 정차 부가시간 5분이 기본값이다.
 - Go: 목적지 경로(규칙 5에서 경유지가 더 빠르면 경유지 포함 경로)를 내비에 요청한다.
 - 주행 중: `CarUxRestrictionsManager`가 주의 분산 최적화를 요구하면 조작 화면을 숨기고 요약 한 줄만 보인다.
@@ -37,7 +38,7 @@
 JDK 17과 Android SDK(compileSdk 34)가 필요하다. Pleos SDK는 `nexus-playground.pleos.ai` Maven 저장소에서 받는다.
 
 ```bash
-./gradlew :app:testDebugUnitTest      # 판단 규칙·전력 추정·엔진 상태·시나리오 재생 테스트(44건)
+./gradlew :app:testDebugUnitTest      # 판단 규칙·전력 추정·엔진 상태·충전소 목록·시나리오 재생 테스트(51건)
 ./gradlew :app:assembleDebug
 ./gradlew :app:assembleRelease        # keystore.properties가 있으면 서명
 ```
@@ -50,7 +51,7 @@ Pleos Connect 에뮬레이터 v2.1.0에서 확인했다. `tools/demo_charge.sh`�
 
 에뮬레이터의 충전 상태 값은 충전 스위치를 켜도 바뀌지 않고 순간 충전전력은 0이므로, 시연 화면의 충전 인식과 충전전력은 배터리 잔량 변화로 계산한 값이다.
 
-버전 1.1.0(구조 변경과 차량 상태 화면 추가)은 JVM 테스트와 디버그 빌드 시뮬레이터(일반 Android 에뮬레이터)로 확인했다. Pleos Connect 에뮬레이터에서의 재확인은 아직 하지 않았다. 1.0.0의 시연 영상과 `apk/StayGo_release.apk`는 이전 버전이다.
+버전 1.1.0은 서명한 release 빌드로 Pleos Connect v2.1.0 에뮬레이터에서 `tools/demo_charge.sh`를 실행해 충전 인식, 규칙 2 → 4 전환, Go의 경로 전달, 주행 중 화면 제한을 확인했다(2026-11-26). 가상 콘솔 쓰기는 브라우저 세션 신호(`POST /browser/session?client=<id>`, 1초 간격)가 살아 있어야 200을 돌려준다. 권한 거절·SOC 미지원·내비 실패 등 나머지 상태는 JVM 테스트와 디버그 빌드 시뮬레이터로 확인했다. `apk/StayGo_release.apk`와 시연 영상은 1.0.0이다.
 
 ## 라이선스
 

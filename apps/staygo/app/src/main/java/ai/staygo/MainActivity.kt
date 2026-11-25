@@ -2,6 +2,7 @@ package ai.staygo
 
 import ai.staygo.core.ArrivalBasis
 import ai.staygo.core.GoAvailability
+import ai.staygo.core.OutputSource
 import ai.staygo.core.RouteState
 import ai.staygo.core.Screen
 import ai.staygo.core.StayGoUiState
@@ -238,7 +239,8 @@ class MainActivity : ComponentActivity() {
                     r.arrivalSocPct == null -> "경유지 도착 SOC를 계산하는 중"
                     c != null && c.gainMinutes > 0 -> {
                         note.setTextColor(color(R.color.blue))
-                        "지금 출발해 경유지에서 채우면 약 ${"%.1f".format(c.gainMinutes)}분 빠름 (최대 ${r.maxPowerKw?.roundToInt()} kW · ${r.chargerCount}기${if (c.expectedPowerEstimated) " · 추정" else ""})$unknown"
+                        val source = if (r.outputSource == OutputSource.SNAPSHOT) " · ${r.snapshotAsOf ?: "이전"} 공개자료 기준" else ""
+                        "지금 출발해 경유지에서 채우면 약 ${"%.1f".format(c.gainMinutes)}분 빠름 (최대 ${r.maxPowerKw?.roundToInt()} kW · ${r.chargerCount}기${if (c.expectedPowerEstimated) " · 추정" else ""}$source)$unknown"
                     }
                     c != null -> "여기서 채우면 ${"%.1f".format(c.hereMinutes)}분, 경유지는 ${"%.1f".format(c.candidateMinutes)}분 (정차 ${s.stopOverheadMin.roundToInt()}분 포함)"
                     r.maxPowerKw == null -> "경유지 도착 SOC ${r.arrivalSocPct.roundToInt()}% · 최대 출력 미확인으로 비교 생략"

@@ -45,7 +45,7 @@ flowchart LR
 | `power` | 현재 충전전력. `estimated`가 true이면 「추정」 표시가 필요하다. `sessionMaxTrusted`가 false이면 SOC 기준(규칙 6)으로 판단 중이다. |
 | `powerHistory` | 세션 충전전력 기록(차트용) |
 | `arrival` | 도착 예상. `basis`가 `NAVI_DIRECT`(내비 값), `NAVI_ROUTE_ENERGY`(경유 충전 없이 갈 때의 계산값), `DRIVER_TARGET`(목표 SOC 기준) 중 하나다. `deficitPct`는 부족분, `extraWaitMinutes`는 현재 전력 기준 대기 시간의 하한이다. |
-| `route` | `None`, `Direct`, `ViaStop`(경유지 이름, 경유지 도착 SOC, 최대 출력, 충전기 수, 비교 결과) |
+| `route` | `None`, `Direct`, `ViaStop`(경유지 이름, 경유지 도착 SOC, 최대 출력, 충전기 수, 비교 결과). `outputSource`가 `SNAPSHOT`이면 최대 출력·충전기 수는 앱에 넣어 둔 목록 값이므로 `snapshotAsOf`(기준일)를 함께 표시한다. |
 | `go` | `DIRECT`, `VIA_STOP`이면 Go 가능. `LOCKED_*`이면 잠금 사유 |
 | `socMismatch` | 차량 표시 SOC와 잔량 기준 SOC가 3%p 넘게 다를 때만 값이 있다. |
 | `occupancy` | 앱이 충전을 처음 확인한 뒤 지난 분. `warning`은 50분부터 true. 실제 충전 시작 시각이 아니다. |

@@ -330,6 +330,19 @@ class StayGoEngineTest {
         assertEquals(StayGoEngine.RESERVE_MAX, r.state().reserveSocPct)
     }
 
+    @Test fun destinationClearedByTheRequestedRerouteKeepsTheDecision() {
+        val r = Rig()
+        r.vehicle(); r.navi()
+        r.engine.onDestinationTrip(DestinationTrip(20, 48_800.0, 375_000, null))
+        r.charge(45, 230.0)
+        r.engine.onRouteResult(null, true, null)
+        r.engine.onDestination(null) // the navigation drops the old route before starting the new one
+        assertEquals(Screen.DECISION, r.state().screen)
+        r.now += 11_000L
+        r.engine.onDestination(null) // a real cancellation later is honoured
+        assertEquals(GoAvailability.LOCKED_NO_DESTINATION, r.state().go)
+    }
+
     @Test fun tripIsRequestedAgainWhenSocChanges() {
         val r = Rig()
         r.vehicle(soc = 74); r.navi()

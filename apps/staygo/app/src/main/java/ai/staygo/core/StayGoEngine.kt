@@ -27,6 +27,10 @@ class StayGoEngine(
     private val onChange: () -> Unit = {},
 ) : VehicleSource.Listener, NaviSource.Listener {
 
+    /** Bundled station snapshot; fills in a stop's max output when the active route does not provide it. */
+    var stations: StationDirectory? = null
+        set(value) { field = value; onChange() }
+
     private var startedAtMs: Long? = null
 
     // Vehicle
@@ -58,6 +62,7 @@ class StayGoEngine(
     private var lastTripSoc: Int? = null
     private var lastTripRequestMs: Long? = null
     private var tripFailures = 0
+    private var routeSentAtMs: Long? = null
 
     private var lastDecision: Decision? = null
 
@@ -188,6 +193,8 @@ class StayGoEngine(
     }
 
     override fun onDestination(destination: Destination?) {
+        // The navigation clears the destination for a moment while it replaces the route the app just requested.
+        if (destination == null && routeSentAtMs?.let { clock() - it < REROUTE_GRACE_MS } == true) return
         val changed = destination?.name != this.destination?.name
         this.destination = destination
         if (changed) {
@@ -227,6 +234,7 @@ class StayGoEngine(
 
     override fun onRouteResult(viaStop: ChargingStop?, sent: Boolean, detail: String?) {
         log("route via=${viaStop?.name} sent=$sent $detail")
+        if (sent) routeSentAtMs = clock()
         notify(if (sent) UiNotice.RouteSent(viaStop?.name) else UiNotice.RouteFailed(detail))
     }
 
@@ -324,7 +332,11 @@ class StayGoEngine(
             route = when {
                 destination == null || trip == null -> RouteState.None
                 trip.chargingStop == null -> RouteState.Direct
-                else -> RouteState.ViaStop(trip.chargingStop.name, candidate?.arrivalSoc, candidate?.maxPowerKw, candidate?.chargerCount, decision.comparison)
+                else -> RouteState.ViaStop(
+                    trip.chargingStop.name, candidate?.arrivalSoc, candidate?.maxPowerKw, candidate?.chargerCount, decision.comparison,
+                    outputSource = stopOutput(trip.chargingStop)?.second,
+                    snapshotAsOf = stations?.asOf,
+                )
             },
             decision = decision,
             go = goAvailability(decision),
@@ -423,8 +435,15 @@ class StayGoEngine(
     private fun candidate(): Candidate? {
         val stop = destinationTrip?.chargingStop ?: return null
         val ac = stopArrival?.takeIf { it.first.name == stop.name }?.second
-        val wp = matchWaypoint(stop.name, activeWaypoints)
-        return Candidate(stop.name, ac?.toDouble(), wp?.maxPowerKw?.toDouble()?.takeIf { it > 0 }, wp?.chargerCount)
+        val output = stopOutput(stop)?.first
+        return Candidate(stop.name, ac?.toDouble(), output?.maxPowerKw?.toDouble(), output?.chargerCount)
+    }
+
+    /** Max output and charger count of the stop: the active route's value first, the bundled snapshot otherwise. */
+    private fun stopOutput(stop: ChargingStop): Pair<ActiveWaypoint, OutputSource>? {
+        matchWaypoint(stop.name, activeWaypoints)?.takeIf { it.maxPowerKw > 0 }?.let { return it to OutputSource.ACTIVE_ROUTE }
+        val s = stations?.lookup(stop.name, stop.latitude, stop.longitude) ?: return null
+        return ActiveWaypoint(s.name, s.maxPowerKw, s.chargerCount) to OutputSource.SNAPSHOT
     }
 
     private fun socMismatch(): SocMismatch? {
@@ -450,6 +469,7 @@ class StayGoEngine(
         private const val CONNECT_GRACE_MS = 5_000L
         private const val TRIP_RETRY_MS = 3_000L
         private const val TRIP_REFRESH_MS = 30_000L
+        private const val REROUTE_GRACE_MS = 10_000L
 
         /**
          * The planned stop (onTripInfo) and the active-route waypoint (onDrivingInfo) share no id.
