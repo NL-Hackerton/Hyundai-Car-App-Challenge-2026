@@ -55,4 +55,23 @@ class PowerEstimatorTest {
         }
         assertFalse(e.pmaxTrusted)
     }
+
+    /** Host under load: level updates stall, then the backlog arrives as a burst at 10 updates/s. On the
+     *  emulator rehearsal (2026-11-25) this made the app show "세션 최대 836 kW"; before the fix this input
+     *  gave Pmax 754 kW (20 s stall) and 1426 kW (30 s stall). */
+    @Test fun stallThenBurstDoesNotInflateSessionMax() {
+        for (stallS in listOf(20, 30)) {
+            val e = PowerEstimator()
+            var wh = feed(e, 0, 20, 55_000.0, 230.0)
+            var t = (20 + stallS) * 1000L
+            repeat(stallS) { // the stalled seconds' energy, delivered 100 ms apart
+                wh += 230.0 * 1000.0 / 3600.0
+                e.addLevel(t, wh)
+                t += 100L
+            }
+            feed(e, t, 40, wh, 230.0)
+            assertEquals("stall ${stallS}s", 230.0, e.sessionMaxKw!!, 15.0)
+            assertEquals("stall ${stallS}s", 230.0, e.powerKw!!, 15.0)
+        }
+    }
 }

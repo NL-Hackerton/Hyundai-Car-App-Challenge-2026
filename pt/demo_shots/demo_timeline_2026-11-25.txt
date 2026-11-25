@@ -1,0 +1,52 @@
+   32.4s  21:20:52  demo_live.sh route  -> ROUTE NOT SET after 30 s - run 'route' again (or set the destination in the navi)
+   45.1s  21:21:05  demo_live.sh route  -> route OK: 부산광역시청 부산
+   46.5s  21:21:06  demo_live.sh open
+   50.5s  21:21:10  record segment 1 start
+   54.9s  21:21:15  screenshot 01_open_74.png
+   54.9s  21:21:15  RAMP start (this is the 'LIVE -2:10' cue)
+    ramp| 21:21:15 PUT ev-battery?field=charge_port_open&value=true 200
+   55.0s  21:21:15  +  0.0s after ramp: rule=1 emphasis=NONE state=NOT_CHARGING soc=null A=null P=null Pmax=null
+    ramp| 21:21:27 SOC 75% level 58.07 kWh power 230 kW
+   67.0s  21:21:27  + 12.1s after ramp: SOC 75%
+    ramp| 21:21:39 SOC 76% level 58.83 kWh power 230 kW
+   79.0s  21:21:39  + 24.1s after ramp: SOC 76%
+   87.7s  21:21:47  + 32.8s after ramp: rule=2 emphasis=STAY state=SHORT_OF_RESERVE soc=76 A=6.3 P=213.6 Pmax=207.9
+    ramp| 21:21:51 SOC 77% level 59.60 kWh power 230 kW
+   91.0s  21:21:51  + 36.1s after ramp: SOC 77%
+    ramp| 21:22:04 SOC 78% level 60.43 kWh power 230 kW
+  104.0s  21:22:04  + 49.1s after ramp: SOC 78%
+  105.9s  21:22:06  screenshot 02_stay_78.png
+    ramp| 21:22:17 SOC 79% level 61.19 kWh power 191 kW
+  117.0s  21:22:17  + 62.1s after ramp: SOC 79%
+    ramp| 21:22:33 SOC 80% level 61.94 kWh power 151 kW
+  133.0s  21:22:33  + 78.1s after ramp: SOC 80%
+    ramp| 21:22:53 SOC 81% level 62.71 kWh power 130 kW
+  153.0s  21:22:53  + 98.1s after ramp: SOC 81%
+    ramp| 21:23:16 SOC 82% level 63.48 kWh power 111 kW
+  176.0s  21:23:16  +121.1s after ramp: SOC 82%
+    ramp| 21:23:45 SOC 83% level 64.24 kWh power 95 kW
+  205.0s  21:23:45  +150.1s after ramp: SOC 83%
+  206.9s  21:23:47  screenshot 03_stay_83.png
+  228.8s  21:24:08  record segment 2 start
+    ramp| 21:24:15 SOC 84% level 65.04 kWh power 95 kW
+  235.1s  21:24:15  +180.2s after ramp: SOC 84%
+    ramp| 21:24:44 SOC 85% level 65.80 kWh power 95 kW
+  264.1s  21:24:44  +209.2s after ramp: SOC 85%
+    ramp| 21:25:13 SOC 86% level 66.57 kWh power 95 kW
+  293.1s  21:25:13  +238.2s after ramp: SOC 86%
+  293.5s  21:25:13  +238.6s after ramp: rule=4 emphasis=GO state=RESERVE_MET_POWER_LOW soc=86 A=15.0 P=95.1 Pmax=230.1
+  293.5s  21:25:13  GO shown 238.6s after ramp start (soc=86, A=15.0)
+  295.8s  21:25:15  screenshot 04_go.png
+  295.8s  21:25:16  tapped Go
+  296.9s  21:25:17  foreground after Go: ai.umos.maps.android.navigation.app/.MainActivity
+  303.6s  21:25:23  screenshot 05_after_go_navi.png
+  311.6s  21:25:31  demo_live.sh stop
+    ramp| ramp stopped
+  312.7s  21:25:32  reopened StayGo
+  317.0s  21:25:37  screenshot 06_back_in_app.png
+  317.1s  21:25:37  demo_live.sh drive
+  322.4s  21:25:42  screenshot 07_drive_lock.png
+  322.4s  21:25:42  demo_live.sh park
+  327.8s  21:25:47  screenshot 08_parked.png
+  330.7s  21:25:50  pulled 2 segments
+  330.7s  21:25:50  done
