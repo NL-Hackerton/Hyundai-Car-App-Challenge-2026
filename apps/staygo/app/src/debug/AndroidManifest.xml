@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Debug builds install on any emulator so the UI can be developed against the simulator. -->
+    <uses-feature
+        android:name="android.hardware.type.automotive"
+        android:required="false"
+        tools:replace="android:required" />
+
+    <application>
+        <!-- Second launcher entry: starts the app on simulated vehicle and navigation signals. -->
+        <activity-alias
+            android:name=".SimLauncher"
+            android:exported="true"
+            android:label="스테이고 시뮬레이터"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+    </application>
+</manifest>

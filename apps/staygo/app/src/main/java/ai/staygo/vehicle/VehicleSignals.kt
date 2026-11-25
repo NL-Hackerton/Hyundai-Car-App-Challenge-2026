@@ -1,45 +1,50 @@
 package ai.staygo.vehicle
 
 import ai.pleos.playground.vehicle.Vehicle
+import ai.pleos.playground.vehicle.api.model.capability.AccessType
 import ai.pleos.playground.vehicle.listener.EvBatteryStateOfChargeListener
+import ai.staygo.core.VehicleLinkFailure
+import ai.staygo.core.VehicleSource
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Proxy
 
 /**
  * Vehicle inputs for the decision model.
- * - Pleos Vehicle SDK: integer SOC (query + subscription).
+ * - Pleos Vehicle SDK: integer SOC (capability check, query, subscription). Without it the vehicle link is reported as failed.
  * - AAOS CarPropertyManager (reflection, android.car is provided by the platform): battery level (Wh),
- *   charge state, instantaneous charge rate (mW), battery capacity (Wh).
+ *   charge state, instantaneous charge rate (mW), battery capacity (Wh). These are optional: when they cannot
+ *   be read the engine falls back to driver confirmation and the SOC-based rule.
  * - CarUxRestrictionsManager: whether the current driving state requires distraction optimization.
+ *
+ * SDK and binder callbacks arrive on arbitrary threads; everything is forwarded on the main thread.
  */
-class VehicleSignals(private val context: Context, private val listener: Listener) {
+class VehicleSignals(private val context: Context) : VehicleSource {
 
-    interface Listener {
-        fun onSoc(soc: Int)
-        fun onBatteryLevelWh(wh: Double)
-        fun onChargeState(state: Int)
-        fun onInstantaneousRateKw(kw: Double)
-        fun onCapacityWh(wh: Double)
-        fun onRequiresDistractionOptimization(required: Boolean)
-        fun onSignalError(source: String, message: String)
-    }
+    private val main = Handler(Looper.getMainLooper())
+    @Volatile private var listener: VehicleSource.Listener? = null
 
     private var vehicle: Vehicle? = null
+    private var socListener: EvBatteryStateOfChargeListener? = null
     private var car: Any? = null
     private var cpm: Any? = null
     private var propertyCallback: Any? = null
     private var uxManager: Any? = null
-    private var uxListener: Any? = null
 
-    fun start() {
+    override fun start(listener: VehicleSource.Listener) {
+        this.listener = listener
         startPleosSoc()
         startAaos()
         startUxRestrictions()
     }
 
-    fun stop() {
+    override fun stop() {
+        listener = null
+        main.removeCallbacksAndMessages(null)
+        try { socListener?.let { vehicle?.getEvBattery()?.unregisterEvBatteryStateOfCharge(it) } } catch (_: Throwable) {}
         try { vehicle?.release() } catch (_: Throwable) {}
         try {
             val cb = propertyCallback
@@ -49,12 +54,18 @@ class VehicleSignals(private val context: Context, private val listener: Listene
                 m.javaClass.getMethod("unregisterCallback", cbClass).invoke(m, cb)
             }
         } catch (_: Throwable) {}
-        try {
-            val l = uxListener
-            if (l != null) uxManager?.javaClass?.getMethod("unregisterListener")?.invoke(uxManager)
-        } catch (_: Throwable) {}
-        try { car?.javaClass?.getMethod("disconnect")?.invoke(car) } catch (_: Throwable) {}
+        try { uxManager?.let { it.javaClass.getMethod("unregisterListener").invoke(it) } } catch (_: Throwable) {}
+        try { car?.let { it.javaClass.getMethod("disconnect").invoke(it) } } catch (_: Throwable) {}
+        vehicle = null; socListener = null; car = null; cpm = null; propertyCallback = null; uxManager = null
     }
+
+    private inline fun emit(crossinline block: VehicleSource.Listener.() -> Unit) {
+        main.post { listener?.block() }
+    }
+
+    private fun socFailure(e: Throwable): VehicleLinkFailure =
+        if (e is SecurityException || e.message?.contains("permission", ignoreCase = true) == true) VehicleLinkFailure.PERMISSION_DENIED
+        else VehicleLinkFailure.UNAVAILABLE
 
     private fun startPleosSoc() {
         try {
@@ -62,24 +73,35 @@ class VehicleSignals(private val context: Context, private val listener: Listene
             vehicle = v
             v.initialize()
             val battery = v.getEvBattery()
-            battery.getEvBatteryStateOfCharge({ soc -> if (soc != null) listener.onSoc(soc) }, { e -> listener.onSignalError("SOC", e.message ?: "get failed") })
-            battery.registerEvBatteryStateOfCharge(object : EvBatteryStateOfChargeListener {
+            battery.checkEvBatteryStateOfChargeCapabilities({ config ->
+                val access = config.accessType
+                if (access != AccessType.READ && access != AccessType.READ_WRITE) {
+                    emit { onVehicleLinkFailed(VehicleLinkFailure.SOC_UNSUPPORTED, "accessType=$access") }
+                }
+            }, { e -> Log.w(TAG, "SOC capability check failed: ${e.message}") })
+            battery.getEvBatteryStateOfCharge(
+                { soc -> if (soc != null) emit { onSoc(soc) } },
+                { e -> emit { onVehicleLinkFailed(socFailure(e), "get: ${e.message}") } },
+            )
+            val l = object : EvBatteryStateOfChargeListener {
                 override fun onEvBatteryStateOfChargeUpdated(value: Int?) {
-                    if (value != null) listener.onSoc(value)
+                    if (value != null) emit { onSoc(value) }
                 }
                 override fun onFailed(e: Exception) {
-                    listener.onSignalError("SOC", e.message ?: "listener failed")
+                    emit { onVehicleLinkFailed(socFailure(e), "listener: ${e.message}") }
                 }
-            })
+            }
+            socListener = l
+            battery.registerEvBatteryStateOfCharge(l)
         } catch (t: Throwable) {
-            listener.onSignalError("SOC", "${t.javaClass.simpleName}: ${t.message}")
+            emit { onVehicleLinkFailed(socFailure(t), "${t.javaClass.simpleName}: ${t.message}") }
         }
     }
 
     private fun startAaos() {
         try {
             val carClass = Class.forName("android.car.Car")
-            val c = carClass.getMethod("createCar", Context::class.java).invoke(null, context)
+            val c = carClass.getMethod("createCar", Context::class.java).invoke(null, context) ?: error("no car service")
             car = c
             if (!(carClass.getMethod("isConnected").invoke(c) as Boolean)) carClass.getMethod("connect").invoke(c)
             val name = carClass.getField("PROPERTY_SERVICE").get(null) as String
@@ -92,13 +114,12 @@ class VehicleSignals(private val context: Context, private val listener: Listene
                 val v = getProperty.invoke(m, id(n), 0)
                 v?.javaClass?.getMethod("getValue")?.invoke(v)
             } catch (t: Throwable) {
-                val cause = (t as? InvocationTargetException)?.targetException ?: t
-                listener.onSignalError(n, cause.javaClass.simpleName); null
+                Log.w(TAG, "read $n: ${cause(t).javaClass.simpleName}"); null
             }
-            (read("INFO_EV_BATTERY_CAPACITY") as? Float)?.let { listener.onCapacityWh(it.toDouble()) }
-            (read("EV_BATTERY_LEVEL") as? Float)?.let { listener.onBatteryLevelWh(it.toDouble()) }
-            (read("EV_CHARGE_STATE") as? Int)?.let { listener.onChargeState(it) }
-            (read("EV_BATTERY_INSTANTANEOUS_CHARGE_RATE") as? Float)?.let { listener.onInstantaneousRateKw(it / 1_000_000.0) }
+            (read("INFO_EV_BATTERY_CAPACITY") as? Float)?.let { emit { onCapacityWh(it.toDouble()) } }
+            (read("EV_BATTERY_LEVEL") as? Float)?.let { emit { onBatteryLevelWh(it.toDouble()) } }
+            (read("EV_CHARGE_STATE") as? Int)?.let { emit { onChargeState(it) } }
+            (read("EV_BATTERY_INSTANTANEOUS_CHARGE_RATE") as? Float)?.let { emit { onInstantaneousRateKw(it / 1_000_000.0) } }
 
             val levelId = id("EV_BATTERY_LEVEL")
             val stateId = id("EV_CHARGE_STATE")
@@ -114,9 +135,9 @@ class VehicleSignals(private val context: Context, private val listener: Listene
                         val pid = ev?.javaClass?.getMethod("getPropertyId")?.invoke(ev) as? Int
                         val value = ev?.javaClass?.getMethod("getValue")?.invoke(ev)
                         when (pid) {
-                            levelId -> (value as? Float)?.let { listener.onBatteryLevelWh(it.toDouble()) }
-                            stateId -> (value as? Int)?.let { listener.onChargeState(it) }
-                            rateId -> (value as? Float)?.let { listener.onInstantaneousRateKw(it / 1_000_000.0) }
+                            levelId -> (value as? Float)?.let { emit { onBatteryLevelWh(it.toDouble()) } }
+                            stateId -> (value as? Int)?.let { emit { onChargeState(it) } }
+                            rateId -> (value as? Float)?.let { emit { onInstantaneousRateKw(it / 1_000_000.0) } }
                         }
                     }
                 }
@@ -126,13 +147,11 @@ class VehicleSignals(private val context: Context, private val listener: Listene
             val register = m.javaClass.getMethod("registerCallback", cbClass, Int::class.javaPrimitiveType, Float::class.javaPrimitiveType)
             for (pid in listOf(levelId, stateId, rateId)) {
                 try { register.invoke(m, cb, pid, 1f) } catch (t: Throwable) {
-                    val cause = (t as? InvocationTargetException)?.targetException ?: t
-                    listener.onSignalError("register $pid", cause.javaClass.simpleName)
+                    Log.w(TAG, "register $pid: ${cause(t).javaClass.simpleName}")
                 }
             }
         } catch (t: Throwable) {
-            val cause = (t as? InvocationTargetException)?.targetException ?: t
-            listener.onSignalError("AAOS", "${cause.javaClass.simpleName}: ${cause.message}")
+            Log.w(TAG, "AAOS car properties unavailable: ${cause(t).javaClass.simpleName}: ${cause(t).message}")
         }
     }
 
@@ -144,7 +163,8 @@ class VehicleSignals(private val context: Context, private val listener: Listene
             uxManager = manager
             fun requiresDo(r: Any?): Boolean =
                 (r?.javaClass?.getMethod("isRequiresDistractionOptimization")?.invoke(r) as? Boolean) ?: false
-            listener.onRequiresDistractionOptimization(requiresDo(manager.javaClass.getMethod("getCurrentCarUxRestrictions").invoke(manager)))
+            val current = requiresDo(manager.javaClass.getMethod("getCurrentCarUxRestrictions").invoke(manager))
+            emit { onDrivingRestricted(current) }
             val lClass = Class.forName("android.car.drivingstate.CarUxRestrictionsManager\$OnUxRestrictionsChangedListener")
             val l = Proxy.newProxyInstance(lClass.classLoader, arrayOf(lClass)) { self, method, args ->
                 when (method.name) {
@@ -152,23 +172,23 @@ class VehicleSignals(private val context: Context, private val listener: Listene
                     "equals" -> self === args?.get(0)
                     "toString" -> "StayGoUxListener"
                     else -> {
-                        if (method.name == "onUxRestrictionsChanged") listener.onRequiresDistractionOptimization(requiresDo(args?.get(0)))
+                        if (method.name == "onUxRestrictionsChanged") {
+                            val required = requiresDo(args?.get(0))
+                            emit { onDrivingRestricted(required) }
+                        }
                         null
                     }
                 }
             }
-            uxListener = l
             manager.javaClass.getMethod("registerListener", lClass).invoke(manager, l)
         } catch (t: Throwable) {
-            val cause = (t as? InvocationTargetException)?.targetException ?: t
-            Log.w(TAG, "UX restrictions unavailable: ${cause.message}")
-            listener.onSignalError("UX", cause.javaClass.simpleName)
+            Log.w(TAG, "UX restrictions unavailable: ${cause(t).message}")
         }
     }
 
+    private fun cause(t: Throwable): Throwable = (t as? InvocationTargetException)?.targetException ?: t
+
     companion object {
         const val TAG = "StayGo"
-        const val CHARGE_STATE_CHARGING = 1
-        const val CHARGE_STATE_FULLY_CHARGED = 2
     }
 }

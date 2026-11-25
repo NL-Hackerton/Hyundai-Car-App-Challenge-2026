@@ -60,3 +60,12 @@
 - 스테이고 앱 소스는 [`apps/staygo/`](apps/staygo/), release APK는 [`apk/`](apk/)에 있다. 검증용 프로브 코드와 4~7차 원본 로그는 [`apps/pleos-stayorgo-probe/`](apps/pleos-stayorgo-probe/)에 있다. 시연 영상 프로젝트(Remotion)는 [`video/`](video/)에 있다.
 - 이 공모전 저장소는 2026-11-07 KST에 공개되었다. 심사자는 Collaborator 초대 없이 https://github.com/NL-Hackerton/Hyundai-Car-App-Challenge-2026 를 열 수 있으며, 기획서 7항의 GitHub 링크가 이 주소다.
 - 제출 절차는 [`SUBMISSION.md`](SUBMISSION.md)의 Stay-or-Go 제출 체크리스트를 따른다. 에이전트는 메일을 보내지 않는다. 사용자·팀이 서명한 뒤 직접 보낸다.
+
+### 2026-11-25 — 본선 대비 앱 1.1.0(브랜치 `staygo-production`)
+
+- 1차 서류심사를 통과해 2026-12-03~04 본선 PT에서 Pleos Connect 에뮬레이터 시연을 한다. 화면 디자인은 팀원이 맡고, 이 작업은 화면을 제외한 부분을 정리했다.
+- 구조: 차량·내비 이벤트를 받아 화면 상태를 만드는 `StayGoEngine`(Android 비의존)과 `StayGoViewModel`을 분리했다. 화면은 `StayGoUiState`를 그리기만 한다. 경계와 상태 필드는 [`apps/staygo/docs/UI_CONTRACT.md`](apps/staygo/docs/UI_CONTRACT.md)에 있다.
+- 기획서 7항에서 미구현으로 적었던 항목 가운데 차량 연동 불가 안내(권한 거절·SOC 미지원), 충전 상태 확인 불가 시 운전자 확인, 목표 SOC 직접 입력, Pleos SOC와 잔량 기준 SOC의 3%p 차이 표시, 예비 SOC 조정을 구현했다. 정차 여부는 주행 제한 상태로 판단해 주행 중 회생제동을 충전으로 보지 않는다. 선택 백엔드(충전기 상태·출력 조회)는 구현하지 않았다.
+- 내비 요청은 무응답 5초를 실패로 처리하고 다시 요청한다.
+- 디버그 빌드에 시뮬레이터를 넣어 Pleos Connect 에뮬레이터 없이 일반 Android 에뮬레이터에서 13개 상태를 재현한다. release 빌드에는 들어가지 않는다.
+- 검증: JVM 테스트 44건 통과, 디버그 빌드를 일반 Android 에뮬레이터(arm64)에 설치해 시뮬레이터 시나리오 13종의 화면을 확인했다. Pleos Connect 에뮬레이터에서는 아직 실행하지 않았다(에뮬레이터 호스트 접속 불가). `apk/StayGo_release.apk`와 시연 영상은 1.0.0 그대로다.
