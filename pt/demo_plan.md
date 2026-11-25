@@ -57,7 +57,7 @@
 | 차량 값 입력 | 에뮬레이터 내장 Pleos Virtual Console(HTTP, `adb forward tcp:18088 tcp:8088`) + 1초 하트비트(스크립트가 자동) | RESULTS.md Run 3 |
 | 시연 스크립트 | **`apps/staygo/tools/demo_live.sh`**(단계별, 녹화·자동 탭 없음), 리허설·녹화 자동화는 **`apps/staygo/tools/demo_rehearse.py`** | |
 
-> **결정 필요(팀):** 부팅이 확인된 호스트는 Linux 데스크톱뿐이다. 행사장에 그 PC를 가져갈지, 노트북(Linux+KVM)에 같은 AVD를 다시 구성할지 정해야 한다. 아래 「호스트 구성」대로 하면 새 Linux 머신에서 약 30분이면 된다(다운로드 4.1 GB). 노트북에서 부팅이 안 되면 라이브 시연은 하지 말고 백업 영상으로 보인다.
+> **결정 필요(팀):** 부팅이 확인된 호스트는 Linux 데스크톱뿐이다. 행사장에 그 PC를 가져갈지, 노트북(Linux+KVM)에 같은 AVD를 다시 구성할지 정해야 한다. 아래 「호스트 구성」대로 하면 새 Linux 머신에서 약 30분이면 된다(다운로드 4.1 GB). 노트북에서 부팅이 안 되면 라이브 시연은 하지 말고 백업 영상으로 보인다. **11/26: 12/3 시연은 양하정 MacBook이 유력 → 아래 「1-M. macOS 데모 머신 세팅」.** Pleos는 Mac용으로 arm64 이미지만 공개하며, 우리는 그 이미지를 아직 돌려 보지 않았다.
 
 ### 호스트 구성 (새 Linux 머신, 11/25에 이 순서로 재구성함)
 
@@ -98,6 +98,105 @@ showDeviceFrame=no
 - **에뮬레이터가 떠 있는 동안 Gradle 빌드를 돌리지 말 것.** CPU를 다 쓰면 QEMU가 15초 이상 멈추고 에뮬레이터 워치독이 프로세스를 죽인다(11/25 1회 발생).
 - 창을 실수로 닫으면 에뮬레이터가 그대로 종료된다(원격 데스크톱 입력으로 1회 발생). 리허설·녹화는 `-no-window`로 돌려도 된다(`screenrecord`·`screencap`은 창 없이 동작).
 - 디스크 여유 약 12 GB 이상 필요(이미지 7 GB + userdata 확장).
+
+## 1-M. macOS 데모 머신 세팅 (양하정 MacBook, 12/3 유력)
+
+### 먼저 알아 둘 것: Pleos가 macOS에 대해 말하는 것 (2026-11-26 확인)
+
+| 항목 | 공식 문서 내용 | 출처 |
+|---|---|---|
+| Mac용 시스템 이미지 | SDK 업데이트 사이트에 **「URL for Mac」** 이 따로 있고, 이 주소는 **arm64 이미지만** 준다: `system-images;android-34;pleos_car_emulator;arm64-v8a`, 「Pleos Connect v2.1.0 APIs arm64 System Image」, 압축본 4.67 GB | [Pleos SDK·에뮬레이터 설정](https://document.pleos.ai/en/docs/connect/guide/getting-started/application-development/setup-connect-sdk-emulator), [crp-arm64-sys-img.xml](https://nexus-playground.pleos.ai/repository/raw-releases/connect-avd/2.x/crp-arm64-sys-img.xml) |
+| Windows/Linux용 | 「URL for Windows/Linux」 → **x86_64 이미지**(우리가 Linux에서 검증한 것) | 같은 문서, [crp-sys-img.xml](https://nexus-playground.pleos.ai/repository/raw-releases/connect-avd/2.x/crp-sys-img.xml) |
+| 지원 OS·CPU 목록 | **문서에 없다.** macOS·Apple Silicon·Intel Mac을 지원한다/안 한다는 문장이 없다. Mac 경로가 arm64 이미지라는 것만 URL로 알 수 있다. **Intel Mac용 경로는 문서에 없다.** | 같은 문서 |
+| GPU | 「A graphics card is required」, 권장·최소 사양에 **NVIDIA·AMD만** 적혀 있다(RTX 3060 Laptop 6 GB 이상 등). Apple GPU 언급 없음 | [에뮬레이터 구성](https://document.pleos.ai/en/docs/connect/guide/getting-started/application-development/configure-pleos-connect-emulator) |
+| AVD 설정 | Automotive → `Pleos Connect v2.1.0`, **Cold boot 필수**(quick boot이면 VHAL을 못 씀), RAM 4 GB | 같은 두 문서 |
+| Virtual Console | `adb forward tcp:8088 tcp:8088` 후 `http://127.0.0.1:8088/` | [Vehicle Emulator 사용](https://document.pleos.ai/en/docs/connect/guide/getting-started/application-development/use-vehicle-emulator) |
+
+**판단.**
+- **Apple Silicon(M1~M4) MacBook:** 공식 Mac 경로가 있다. 다만 **우리는 arm64 이미지를 한 번도 돌려 보지 않았다.** Virtual Console·내비·경로 연동이 x86_64와 똑같이 되는지는 그 MacBook에서 리허설로 확인해야 한다. Apple GPU가 문서의 GPU 목록에 없다는 점도 위험이다.
+- **Intel MacBook:** 공식 경로가 없다. x86_64 이미지를 macOS 하이퍼바이저로 띄우는 것은 기술적으로는 가능할 수 있지만 문서에도 우리 검증에도 없다. **Intel Mac이면 라이브 시연 호스트로 쓰지 않는 것을 권한다.**
+- **확인된 사실:** `apk/StayGo_release.apk`와 프로브 APK에는 네이티브 라이브러리(`lib/`)가 없어 arm64 이미지에도 그대로 설치된다. 기기 프로필 「Pleos Connect v2.1.0」은 2560×1440 @160 dpi로, Linux에서 검증한 화면과 같다(이미지의 `devices.xml`). 따라서 Go 버튼 좌표(2100, 1165)도 같다.
+
+**가장 안전한 방법(권장 순서).**
+1. **12/1까지 MacBook에서 아래 리허설을 끝까지 1회 통과**하면 MacBook으로 라이브 시연을 한다.
+2. 통과하지 못하거나 Intel Mac이면, 검증된 **Linux 데스크톱을 행사장에 가져가는 것**이 유일한 검증된 라이브 경로다(1항 표).
+3. 둘 다 안 되면 라이브 없이 **백업 영상**(1배속 실시간 녹화, 아래)으로 시연한다. 화면·타이밍이 라이브와 같아서 설명은 그대로 쓸 수 있다.
+
+### 설치 (Apple Silicon 기준)
+
+먼저 **애플 메뉴 → 이 Mac에 관하여**에서 칩을 확인한다(Apple M… = Apple Silicon, Intel … = Intel). 디스크는 이미지 압축본 4.7 GB와 압축 해제분을 합쳐 **30 GB 이상** 비워 둔다. 메모리는 16 GB 이상이면 좋다(문서상 AVD는 RAM 4 GB).
+
+1. **Android Studio** 최신판을 설치한다(https://developer.android.com/studio, Mac with Apple chip용 dmg). 처음 실행 마법사에서 Standard로 설치하면 SDK가 `~/Library/Android/sdk`에 생기고 Android Emulator·Platform-Tools(adb)가 함께 깔린다. 예전 Pleos 에뮬레이터가 있으면 먼저 지운다(문서 2단계).
+2. **JDK 17**: 앱을 Mac에서 빌드할 일은 없다(서명된 `apk/StayGo_release.apk`를 그대로 쓴다). 빌드가 필요할 때만 `brew install --cask temurin@17`을 설치하고 `export JAVA_HOME=$(/usr/libexec/java_home -v 17)`. Android Studio 내장 JBR(21)로도 Gradle 8.10.2는 돈다.
+3. **Pleos 시스템 이미지**: Android Studio → **Settings → Languages & Frameworks → Android SDK**(또는 Tools → SDK Manager) → **SDK Update Sites** 탭 → `+`
+   - Name `Pleos Connect System Image`
+   - URL `https://nexus-playground.pleos.ai/repository/raw-releases/connect-avd/2.x/crp-arm64-sys-img.xml` (**Mac용 주소**)
+   - OK → **SDK Platforms** 탭 → 아래 **Show Package Details** 켜기 → Android 14 (API 34) 아래 「Pleos Connect v2.1.0 APIs arm64 System Image」 체크 → OK → 설치 → Android Studio 재시작
+4. **AVD 만들기**: Tools → **Device Manager** → Create device → Form Factor **Automotive** → **Pleos Connect v2.1.0** → Next → API 34, 「Pleos Connect v2.1.0 APIs」 → Advanced Settings: **Default boot = Cold**, **RAM 4 GB**(메모리가 32 GB 이상이면 8 GB), Graphics는 자동(구버전이면 Hardware) → Finish.
+5. **터미널 PATH**(macOS 기본 셸은 zsh): `~/.zshrc`에 추가하고 새 터미널을 연다.
+   ```zsh
+   export ANDROID_HOME="$HOME/Library/Android/sdk"
+   export PATH="$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$PATH"
+   ```
+   확인: `adb version`, `emulator -list-avds` → AVD 이름(예: `Pleos_Connect_v2.1.0_API_34`)이 보여야 한다.
+6. **저장소 받기**: `git clone https://github.com/NL-Hackerton/Hyundai-Car-App-Challenge-2026.git && cd Hyundai-Car-App-Challenge-2026 && git checkout yoobinkim541/staygo-final-pt`(PR이 머지됐으면 `main`). `python3`가 없다고 나오면 macOS가 띄우는 Command Line Tools 설치를 허용한다(python3 3.9로 충분: 스크립트는 3.10 이상 문법을 쓰지 않는다).
+
+### 실행 (매번)
+
+시연 스크립트는 `#!/bin/bash`라 zsh 터미널에서도 그대로 실행된다(macOS 기본 bash 3.2에서도 되는 문법만 쓴다 — 정적 검사로 확인, Mac 실행은 아직). `chmod +x`는 저장소에 이미 들어 있다. 스크립트는 기기 이름을 `SERIAL`로 받는다. **에뮬레이터를 아래처럼 터미널에서 `-port 5560`으로 띄우면 기본값 그대로 쓸 수 있다.** Android Studio의 ▶로 띄우면 보통 `emulator-5554`이므로 `export SERIAL=emulator-5554`를 먼저 한다(`adb devices`로 확인).
+
+```zsh
+# 0) 에뮬레이터: Cold boot, 창 표시. AVD 이름은 emulator -list-avds 로 확인
+emulator -avd Pleos_Connect_v2.1.0_API_34 -port 5560 -no-snapshot -no-boot-anim &
+export SERIAL=emulator-5560
+adb -s $SERIAL wait-for-device; until [ "$(adb -s $SERIAL shell getprop sys.boot_completed | tr -d '\r')" = 1 ]; do sleep 2; done
+adb -s $SERIAL forward tcp:18088 tcp:8088          # 스크립트는 18088을 쓴다(문서 예시는 8088:8088)
+# 1) 예전 StayGo 지우고 새 APK 설치(11/25 서명 키 변경 → 안 지우면 INSTALL_FAILED_UPDATE_INCOMPATIBLE)
+adb -s $SERIAL uninstall ai.staygo.app
+adb -s $SERIAL install -g apk/StayGo_release.apk
+adb -s $SERIAL install -r -g <프로브 APK>            # 아래 「프로브 APK」
+sleep 15                                            # 홈 화면이 새 앱을 등록할 시간
+adb -s $SERIAL shell settings put system show_touches 1
+# 2) 경로·앱 열기
+apps/staygo/tools/demo_live.sh route                # 「route OK: 부산광역시청 부산」(약 30초)
+apps/staygo/tools/demo_live.sh open
+```
+
+- **프로브 APK**: 경로 안내를 켜는 `ai.probe.staygo` 앱은 저장소에 빌드물이 없다. Linux 데스크톱의 `apps/pleos-stayorgo-probe/app/build/outputs/apk/debug/app-debug.apk`를 USB·메신저로 받아 설치하는 것이 가장 빠르다(네이티브 라이브러리가 없어 arm64에서도 설치됨). Mac에서 직접 빌드하려면 JDK 17을 설치한 뒤 `cd apps/pleos-stayorgo-probe && ./gradlew :app:assembleDebug`. 프로브 없이도 내비 화면에서 「부산시청」을 검색해 **1번 결과 「부산광역시청 부산」** 으로 안내를 시작하면 같은 상태가 된다(POI가 같아 Go 뒤 오류 팝업도 안 뜬다).
+- 경로(PATH)·명령은 Linux와 같다. 다른 점은 SDK 위치(`~/Library/Android/sdk`)와 기본 셸(zsh)뿐이다. 스크립트가 쓰는 `curl`, `python3`, `adb` 세 가지가 PATH에 있으면 된다.
+- macOS 방화벽이 `qemu-system-aarch64`의 수신 연결을 물으면 **허용**한다(Virtual Console 포트 포워딩).
+- **노트북 전원**: 충전기를 꽂고, 시연 중 잠자기 방지 `caffeinate -dis &`. 저전력 모드는 끈다(에뮬레이터가 느려지면 타이밍이 밀린다).
+
+### 리허설 점검표 (MacBook에서 처음 1회는 처음부터 끝까지, 기대값과 비교)
+
+자동 리허설(녹화·스크린샷·시간 기록 포함, 약 5분):
+
+```zsh
+SERIAL=emulator-5560 python3 apps/staygo/tools/demo_rehearse.py ~/Desktop/staygo-rehearsal --no-record
+```
+
+| # | 확인 | 기대값 (Linux 실측 9회) | 통과 기준 |
+|---|---|---|---|
+| 1 | `emulator` 부팅 → `sys.boot_completed=1` | 15~20초(Mac은 더 걸릴 수 있음) | 3분 이내 |
+| 2 | Virtual Console 쓰기 | `demo_live.sh open` 출력의 `PUT … 200` 3줄 | 모두 200 (503이면 하트비트 문제 → `hb-stop` 후 재실행) |
+| 3 | `route` | 「route OK: 부산광역시청 부산」, 약 27초 | 54초 안에 OK |
+| 4 | `open` 화면 | 「대기」, SOC 74%, 도착 예상 4~6%, 상단 칩 「부산광역시청 부산 · 375 km」 | 목적지 칩이 「목적지 없음」이 아님 |
+| 5 | `ramp` 출력 | 약 12초 뒤 `SOC 75% … power 230 kW`, 이후 1%p마다 한 줄 | 74→78% 약 49초 |
+| 6 | **STAY** | ramp 후 **약 33초**(SOC 76%), 초록 STAY 「조금 더 충전하세요」, 충전 전력 카드 230 kW | 40초 안 |
+| 7 | 세션 최대 전력 | 230 kW 근처 | 200~240 kW (그 밖이면 호스트가 느린 것 → 다른 앱을 끄고 재시도) |
+| 8 | **GO** | ramp 후 **약 3분 59초**(SOC 86%), 파란 GO 「지금 출발하세요」, 도착 15%, 「지금 출발해도 됩니다」 알림 | 4분 10초 안 |
+| 9 | Go 탭 (2100, 1165) | 1초 안에 내비 경로 선택 화면, 5초 뒤 안내 시작, 오류 팝업 없음 | 팝업 없음 |
+| 10 | 앱 복귀 | 독의 StayGo 아이콘 → 「GO · 충전이 끝났습니다」, 목적지 유지 | 리허설 출력 `foreground ai.staygo.app` |
+| 11 | `drive` / `park` | 자물쇠 + 「주행 중에는 조작할 수 없습니다」 / 다시 앱 화면 | 잠금 화면이 뜸 |
+| 12 | 프로젝터 | 2560×1440 창이 잘리지 않음(에뮬레이터 창 크기 조절 또는 `-scale 0.5`), 마우스 포인터 보임 | 전체가 보임 |
+
+6·8번 시간이 기대값보다 10초 넘게 늦으면 대본 큐(LIVE −2:10)를 그만큼 앞당긴다. 한 항목이라도 통과하지 못하면 12/3에는 라이브 대신 아래 백업으로 간다.
+
+### 백업 영상 (MacBook에서도 그대로)
+
+- 파일: `pt/demo_backup_2026-11.mp4`(H.264 1920×1080, 4분 40초, 1배속 실시간, 소리 없음). QuickTime에서 바로 재생된다. **노트북 로컬(바탕화면)과 USB 두 곳**에 복사하고 네트워크에 의존하지 않는다.
+- 재생 구간 **2:15~4:35** = LIVE 0:00~2:20 (2:15 SOC 82% STAY → 4:03 GO → 4:05 Go 탭 → 4:13 내비 경로 → 4:25 앱 복귀 → 4:30 주행 잠금). QuickTime에서 2:15로 옮겨 일시정지해 두고, 라이브가 실패하면 `space`로 재생, `⌃⌘F`로 전체 화면.
+- 시간이 아주 부족하면 3:50부터(45초).
 
 ## 2. 시나리오 데이터
 
@@ -179,6 +278,7 @@ apps/staygo/tools/demo_live.sh route && apps/staygo/tools/demo_live.sh open
 ## 5. 행사 전 점검표
 
 - [ ] 시연 호스트 결정(데스크톱 반입 / 노트북 재구성) 및 그 호스트에서 에뮬레이터 부팅 확인 — **12/1까지**
+- [ ] (MacBook이면) 칩 확인(Apple Silicon인지), 1-M항 설치, 리허설 점검표 12항목 1회 통과 — **12/1까지**
 - [x] 처음부터 끝까지 리허설, 74%→Go 소요 시간 실측 — 11/25 Linux 데스크톱에서 개편 전 3회·개편 후 4회 성공, **3분 58.6~58.8초**
 - [x] release APK 재빌드 — 11/25 새 키로 서명, 에뮬레이터에서 기존 앱 삭제 → 설치 → 시연 경로 1회 통과(GO +3:58.7)
 - [ ] 시연 기기(에뮬레이터·노트북)에 예전 StayGo가 깔려 있으면 `adb uninstall ai.staygo.app` 후 새 APK 설치
@@ -195,7 +295,7 @@ apps/staygo/tools/demo_live.sh route && apps/staygo/tools/demo_live.sh open
 
 ## 6. 남은 위험 / 메모
 
-1. 시연 호스트 확보(위 「결정 필요」). 가장 큰 위험.
+1. 시연 호스트 확보(위 「결정 필요」). 가장 큰 위험. MacBook이면 Apple Silicon + arm64 이미지 리허설 통과가 전제(1-M항), Intel Mac은 공식 경로 없음.
 2. 74%에서 Go까지 실시간 약 4분 — 시연 시간보다 길어 `ramp`를 미리 시작하는 방식으로 해결했다. 더 짧게 하려면 부산보다 가까운 목적지를 골라야 하고 슬라이드 6의 숫자가 바뀐다.
 3. 내비의 POI 상세 조회 서버는 11/25 기준 실패 중이다(내비 자체 검색 경로에서도 `poiDetails error` 로그). 화면에는 영향이 없지만, 다른 목적지를 쓸 때는 반드시 내비 검색 결과의 POI ID를 `demo_live.sh`에 넣어야 Go 뒤 오류 팝업이 안 뜬다.
 4. 기획서 7항대로 아직 미구현: 선택 백엔드(후보 출력 조회), 3%p SOC 어긋남 표시, 충전 상태 확인 불가·권한 거절 안내, 목표 SOC 직접 입력. 시연에서 이 화면을 보여 준다고 말하지 않는다.
