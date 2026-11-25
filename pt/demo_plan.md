@@ -52,7 +52,7 @@
 | AVD | `pleos21`: 2560×1440 @160 dpi, RAM 8 GB, 4코어, `tag.id=android-automotive`, `image.sysdir.1=system-images/android-34/pleos_car_emulator/x86_64/` (아래 config.ini) | 같은 문서, 11/25 재구성 |
 | 실행 | `emulator -avd pleos21 -no-audio -no-snapshot -no-boot-anim -no-metrics -gpu swiftshader_indirect -accel on -port 5560` (창 표시. 녹화만 할 때는 `-no-window`) | 11/25 실측 |
 | 호스트 | **Linux + KVM** 에서 부팅 확인: 11/6 Ubuntu 24.04·RTX 4060 Ti, **11/25 같은 계열 데스크톱(Ubuntu 24.04, 16코어/30 GB, RTX 5080)에서 15~20초에 `boot_completed=1`.** GPU 없는 Linux 박스(Run 1)는 부팅 실패. Windows 호스트는 시도하지 않았다 | |
-| 앱 | `apk/StayGo_release.apk` — 패키지 `ai.staygo.app`, 런처 액티비티 `ai.staygo.MainActivity`, minSdk 28 / targetSdk 34 | |
+| 앱 | `apk/StayGo_release.apk` (2026-11-25 재빌드: 새 UI·아이콘·수정 포함, **새 서명 키**) — 패키지 `ai.staygo.app` 1.0.0, 런처 액티비티 `ai.staygo.MainActivity`, minSdk 28 / targetSdk 34 | 아래 「release APK와 서명 키」 |
 | 내비 목적지 설정 | `demo_live.sh route`(프로브 앱 `ai.probe.staygo`를 intent로 실행). 프로브 APK는 `apps/pleos-stayorgo-probe`에서 `./gradlew :app:assembleDebug` | |
 | 차량 값 입력 | 에뮬레이터 내장 Pleos Virtual Console(HTTP, `adb forward tcp:18088 tcp:8088`) + 1초 하트비트(스크립트가 자동) | RESULTS.md Run 3 |
 | 시연 스크립트 | **`apps/staygo/tools/demo_live.sh`**(단계별, 녹화·자동 탭 없음), 리허설·녹화 자동화는 **`apps/staygo/tools/demo_rehearse.py`** | |
@@ -129,7 +129,8 @@ emulator -avd pleos21 -no-audio -no-snapshot -no-boot-anim -no-metrics -gpu swif
 adb -s $SERIAL wait-for-device
 adb -s $SERIAL shell getprop sys.boot_completed      # 1
 adb -s $SERIAL forward tcp:18088 tcp:8088
-# 1) 앱 설치 (이미 설치돼 있으면 -r). 서명이 다른 이전 빌드가 있으면 먼저 adb uninstall ai.staygo.app
+# 1) 앱 설치. 11/25에 서명 키가 바뀌었으므로 이전 빌드(11/7 제출본·debug 빌드)가 깔린 기기는 반드시 먼저 지운다:
+#    adb -s $SERIAL uninstall ai.staygo.app   (안 지우면 INSTALL_FAILED_UPDATE_INCOMPATIBLE)
 #    설치 직후 15초는 기다린다: 홈 화면이 새 패키지를 등록하기 전에 띄우면 앱이 「떠 있는 창」으로 잡혀
 #    Go 뒤에 앱으로 돌아오지 못하는 경우가 있었다(아래 4항).
 adb -s $SERIAL install -r -g apk/StayGo_release.apk
@@ -179,7 +180,8 @@ apps/staygo/tools/demo_live.sh route && apps/staygo/tools/demo_live.sh open
 
 - [ ] 시연 호스트 결정(데스크톱 반입 / 노트북 재구성) 및 그 호스트에서 에뮬레이터 부팅 확인 — **12/1까지**
 - [x] 처음부터 끝까지 리허설, 74%→Go 소요 시간 실측 — 11/25 Linux 데스크톱에서 개편 전 3회·개편 후 4회 성공, **3분 58.6~58.8초**
-- [ ] **release APK 재빌드(서명 키 필요)** — `apk/StayGo_release.apk`는 아직 11/7 제출본(아이콘·새 UI·오늘 수정 없음). 팀 키(`keystore.properties`+jks)로 `./gradlew :app:assembleRelease` 후 교체
+- [x] release APK 재빌드 — 11/25 새 키로 서명, 에뮬레이터에서 기존 앱 삭제 → 설치 → 시연 경로 1회 통과(GO +3:58.7)
+- [ ] 시연 기기(에뮬레이터·노트북)에 예전 StayGo가 깔려 있으면 `adb uninstall ai.staygo.app` 후 새 APK 설치
 - [ ] 시연 호스트에서 `demo_rehearse.py`로 같은 리허설 3회(호스트가 바뀌면 다시)
 - [ ] 프로젝터/HDMI 출력에서 2560×1440 에뮬레이터 창이 잘리지 않는지(창 크기 조정 또는 `-scale`) 확인
 - [ ] 마우스 포인터가 보이게(`adb shell settings put system show_touches 1`) 설정
@@ -198,6 +200,14 @@ apps/staygo/tools/demo_live.sh route && apps/staygo/tools/demo_live.sh open
 3. 내비의 POI 상세 조회 서버는 11/25 기준 실패 중이다(내비 자체 검색 경로에서도 `poiDetails error` 로그). 화면에는 영향이 없지만, 다른 목적지를 쓸 때는 반드시 내비 검색 결과의 POI ID를 `demo_live.sh`에 넣어야 Go 뒤 오류 팝업이 안 뜬다.
 4. 기획서 7항대로 아직 미구현: 선택 백엔드(후보 출력 조회), 3%p SOC 어긋남 표시, 충전 상태 확인 불가·권한 거절 안내, 목표 SOC 직접 입력. 시연에서 이 화면을 보여 준다고 말하지 않는다.
 
+## release APK와 서명 키 (2026-11-25 변경)
+
+- 11/7 제출본은 팀 키(CN=StayGo, SHA-256 `41d4a3c0…be85`)로 서명됐지만 그 키를 찾지 못해, 소유자 결정(옵션 B)에 따라 **새 키로 다시 서명했다.**
+- 새 인증서: CN=StayGo, O=StayGo, C=KR · RSA 4096 · 유효 30년 · **SHA-256 `75d23ed785849d41120302e36934be41334c48bc5c9e57ca40cd7662358dc7cf`** (APK Signature Scheme v2, `apksigner verify --print-certs`로 확인).
+- **인증서가 바뀌었으므로 예전 빌드가 깔린 기기는 업데이트 설치가 안 된다. 먼저 `adb uninstall ai.staygo.app` 후 설치한다.** (앱 데이터는 기기에 남길 것이 없다: 대역별 최대 전력 기록만 지워진다.)
+- `apk/StayGo_release.apk`는 이제 11/7 **제출본과 다른 파일**이다(SHA-256 `462604d6…388d`). 제출본(SHA-256 `bdefef3f…937a`, `JUDGE.md` 검수 기록)은 git 기록에 그대로 있다: `git show 514bddd:apk/StayGo_release.apk > StayGo_submitted_1107.apk`.
+- 키 저장 위치: 시연 데스크톱의 `~/.staygo-keys/` (`staygo-release.jks` + 비밀번호가 든 `keystore.properties`, 권한 600). 저장소에는 없다(`*.jks`, `keystore.properties`는 gitignore). `apps/staygo/keystore.properties`는 그 파일을 가리키는 심볼릭 링크다. **이 두 파일을 잃으면 같은 서명으로 다시 빌드할 수 없으니 소유자가 따로 백업해야 한다.**
+
 ## 빌드 기록
 
 2026-11-25 (Linux 데스크톱, OpenJDK 21, Gradle 8.10.2 wrapper, AGP 8.5.2, SDK Platform 34):
@@ -210,7 +220,7 @@ PowerEstimatorTest  tests=5  failures=0 errors=0
 NaviRouteTest       tests=1  failures=0 errors=0
 ```
 
-- release 빌드는 이 PC에 서명 키가 없어 만들지 않았다(시연·녹화는 같은 코드의 debug 빌드). 키를 넣은 뒤 위 명령으로 `apk/`를 교체한다.
+- release: `./gradlew :app:testReleaseUnitTest :app:assembleRelease` → `app/build/outputs/apk/release/app-release.apk`를 `apk/StayGo_release.apk`로 복사(12.2 MB). 백업 영상은 같은 코드의 debug 빌드로 녹화했고, release로도 시연 경로를 다시 돌려 같은 결과(STAY +32.6초, GO +3:58.7)를 확인했다.
 
 - Gradle 8.10.2는 JDK 17·21에서 돈다(JDK 25는 안 됨).
 - release 서명은 저장소 밖 `apps/staygo/keystore.properties`를 읽는다(없으면 서명 없는 release가 나온다).
