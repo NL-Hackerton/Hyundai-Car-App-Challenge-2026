@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 48dp icon (Pleos base grid), filled: Go (hand route to the navi) -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="48dp" android:height="48dp" android:viewportWidth="48" android:viewportHeight="48" android:tint="?android:attr/textColorPrimary">
+    <path android:fillColor="#FFFFFF" android:pathData="M24,4 L40,42 L24,33 L8,42 Z" />
+</vector>

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Wide landscape (Connect-S full / 1:1 split, Connect-W 2:1 main window): hero verdict on the left, the three key
+  numbers stacked on the right, the Stay/Go action row across the bottom. Narrow/portrait windows use layout/activity_main.xml.
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/sg_bg">
+
+    <LinearLayout
+        android:id="@+id/content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingStart="@dimen/page_pad"
+        android:paddingTop="28dp"
+        android:paddingEnd="@dimen/page_pad"
+        android:paddingBottom="24dp">
+
+        <include layout="@layout/topbar" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="@dimen/gap"
+            android:layout_weight="1"
+            android:baselineAligned="false"
+            android:orientation="horizontal">
+
+            <include
+                layout="@layout/hero"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="@dimen/hero_weight" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="@dimen/gap"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <include
+                    layout="@layout/tile_soc"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+                <include
+                    layout="@layout/tile_power"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_marginTop="@dimen/gap"
+                    android:layout_weight="1.2" />
+
+                <include
+                    layout="@layout/tile_arrival"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_marginTop="@dimen/gap"
+                    android:layout_weight="1" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Full-width action row so both labels fit even in a 1:1 split window. -->
+        <include
+            layout="@layout/actions"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/btn_primary"
+            android:layout_marginTop="@dimen/gap" />
+
+        <include
+            layout="@layout/footer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp" />
+    </LinearLayout>
+
+    <include layout="@layout/overlays" />
+</FrameLayout>

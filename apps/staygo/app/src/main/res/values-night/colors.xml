@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pleos Connect 2.1.5 color tokens, Dark mode. See values/colors.xml. -->
+<resources>
+    <color name="color_surface_background_primary">#1D1E21</color>
+    <color name="color_surface_background_secondary">#131417</color>
+    <color name="color_surface_container">#1D1E21</color>
+    <color name="color_surface_container_high">#313236</color>
+    <color name="color_surface_accent">#44464E</color>
+    <color name="color_label_gray_primary">#FFFFFF</color>
+    <color name="color_label_gray_secondary">#D6FFFFFF</color>
+    <color name="color_label_gray_tertiary">#A3FFFFFF</color>
+    <color name="color_divider_secondary">#1AFFFFFF</color>
+    <color name="color_button_basic_enabled">#0DFFFFFF</color>
+    <color name="color_button_basic_pressed">#1AFFFFFF</color>
+    <color name="color_informative_positive">#0082FF</color>
+    <color name="color_informative_active">#00E074</color>
+    <color name="color_regulation_orange">#FF8A00</color>
+    <color name="color_basic_800">#F7F8FA</color>
+    <color name="color_basic_00">#131417</color>
+
+    <!-- Dark: app background is background/secondary so surface/basic cards stand out. -->
+    <color name="sg_bg">@color/color_surface_background_secondary</color>
+    <!-- informative/positive #0082FF is 4.47:1 on the dark card; a lighter tint keeps blue text >= 4.5:1. -->
+    <color name="sg_go_text">#3394FF</color>
+</resources>

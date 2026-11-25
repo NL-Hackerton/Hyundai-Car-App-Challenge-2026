@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Tall windows (portrait 840x1184, full app area): one big primary action and roomier hero. -->
+<resources>
+    <dimen name="btn_primary">128dp</dimen>
+    <dimen name="hero_pad">48dp</dimen>
+    <dimen name="hero_gap">36dp</dimen>
+    <dimen name="t_headline">60sp</dimen>
+    <dimen name="t_verdict">56sp</dimen>
+</resources>

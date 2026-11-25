@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Key number 3: arrival SOC vs reserve (stacked tile) -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/tileArrival"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_card"
+    android:orientation="vertical"
+    android:padding="@dimen/tile_pad">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="@dimen/tile_label_icon"
+            android:layout_height="@dimen/icon_s"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_flag"
+            android:tint="@color/sg_text_2" />
+
+        <TextView
+            style="@style/T.Label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/tile_label_gap"
+            android:singleLine="true"
+            android:text="@string/label_arrival"
+            android:textColor="@color/sg_text_2"
+            android:textSize="30sp" />
+
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:baselineAligned="true"
+        android:orientation="horizontal">
+        <TextView
+            android:id="@+id/arrivalText"
+            style="@style/T.Feature"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:text="--%"
+            android:textSize="@dimen/t_feature" />
+
+    </LinearLayout>
+    <ai.staygo.ui.SocBar
+        android:id="@+id/arrivalBar"
+        android:layout_width="match_parent"
+        android:layout_height="24dp"
+        android:layout_marginTop="20dp" />
+    <TextView
+        android:id="@+id/arrivalNote"
+        style="@style/T.Caption"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:text=" " />
+</LinearLayout>

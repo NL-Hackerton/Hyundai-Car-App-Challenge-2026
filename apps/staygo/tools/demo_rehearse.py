@@ -136,7 +136,7 @@ logcat.terminate()
 if go_at:
     # uiautomator dump fails on this image ("could not get idle state"); the Go button sits at a
     # fixed spot on the 2560x1440 head unit (right half of the bottom action row).
-    pos = (2100, 1120)
+    pos = (2100, 1165)
     if pos:
         sh(*ADB, "shell", "input", "tap", str(pos[0]), str(pos[1]))
         mark("tapped Go")
@@ -152,7 +152,10 @@ if go_at:
 live("stop")
 time.sleep(1)
 sh(*ADB, "shell", "am", "start", "-n", "ai.staygo.app/ai.staygo.MainActivity")
-mark("reopened StayGo")
+time.sleep(2)
+top = sh(*ADB, "shell", "dumpsys", "activity", "activities").stdout
+fg = re.search(r"topResumedActivity=.*? (\S+/\S+)", top)
+mark(f"reopened StayGo -> foreground {fg.group(1) if fg else '?'}" + ("" if fg and "staygo.app" in fg.group(1) else "  !! STAYGO NOT IN FRONT"))
 time.sleep(4)
 shot("06_back_in_app")
 live("drive")

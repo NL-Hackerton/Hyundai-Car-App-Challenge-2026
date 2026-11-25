@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Container: surface/basic, divider/secondary 2dp outline, radius level9 (32dp) -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="@color/sg_card" />
+    <stroke android:width="2dp" android:color="@color/sg_line" />
+    <corners android:radius="@dimen/radius_card" />
+</shape>

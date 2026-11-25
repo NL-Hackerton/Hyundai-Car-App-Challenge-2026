@@ -19,6 +19,9 @@ set -u
 ADB=${ADB:-adb}; SERIAL=${SERIAL:-emulator-5560}; B=${CONSOLE:-http://127.0.0.1:18088}
 A="$ADB -s $SERIAL"; CAP=77.4; START_KWH=${START_KWH:-57.3}; END_SOC=${END_SOC:-90}
 STOP=${TMPDIR:-/tmp}/staygo_demo_stop
+RAMP_PID=${TMPDIR:-/tmp}/staygo_demo_ramp.pid
+# Two ramps at once write two different battery levels; the app then never sees a steady rise (no charging).
+stop_ramp(){ if [ -f "$RAMP_PID" ] && kill -0 "$(cat "$RAMP_PID")" 2>/dev/null; then kill "$(cat "$RAMP_PID")"; echo "previous ramp stopped"; fi; rm -f "$RAMP_PID"; }
 DEST="부산광역시청 부산"
 HB_PID=${TMPDIR:-/tmp}/staygo_demo_hb.pid
 hb(){
@@ -33,20 +36,28 @@ case "${1:-}" in route|open|ramp|drive|park) hb;; esac
 case "${1:-}" in
   route)
     $A shell am force-stop ai.probe.staygo   # a running probe would keep its old intent (old destination)
-    $A logcat -c
     # Busan City Hall exactly as the navi's own search returns it (name, POI id, address, coordinates). With an
     # empty POI id the navi pops "경로 탐색 오류" over the route screen when StayGo's Go hands the route back.
     $A shell am start -W -n ai.probe.staygo/.MainActivity --ed destLat 35.18047777 --ed destLng 129.07445277 \
       --es destName "'$DEST'" --es destPoiId 3688dcq7hqkncm5nqhe4 --es destAddress "'연제구 연산동'" \
       --ez route true >/dev/null
-    # Right after boot the navi may not be ready and silently ignores the request: wait for the destination.
-    for _ in $(seq 1 30); do
-      sleep 1
-      if $A logcat -d -s StayOrGoProbe:I | grep -q "onDrivingInfo dest=name=$DEST dist=[1-9]"; then
+    # The request opens the navi's route preview; guidance starts after its ~5 s "안내 시작" countdown, which
+    # only runs while the navi is in front. Then poll: relaunch the probe without a route request (it only
+    # queries) until the navi reports the destination with a distance.
+    sleep 2; $A shell am start -n ai.umos.maps.android.navigation.app/.MainActivity >/dev/null 2>&1
+    for _ in 1 2 3 4 5 6; do
+      sleep 6
+      $A shell am force-stop ai.probe.staygo; $A logcat -c
+      $A shell am start -W -n ai.probe.staygo/.MainActivity --ed destLat 35.18047777 --ed destLng 129.07445277 >/dev/null
+      sleep 3
+      if $A logcat -d -s StayOrGoProbe:I | grep -q "onDestinationInfo name=$DEST remainDist=[1-9]"; then
+        $A shell am start -n ai.umos.maps.android.navigation.app/.MainActivity >/dev/null 2>&1
         echo "route OK: $DEST"; exit 0; fi
+      $A shell am start -n ai.umos.maps.android.navigation.app/.MainActivity >/dev/null 2>&1
     done
-    echo "ROUTE NOT SET after 30 s - run 'route' again (or set the destination in the navi)"; exit 1;;
+    echo "ROUTE NOT SET after 54 s - run 'route' again (or set the destination in the navi)"; exit 1;;
   open)
+    stop_ramp
     put "ev-battery?field=charge_port_open&value=false"
     put "ev-battery?field=battery_level&value=$START_KWH"
     put "ev-battery?field=soc&value=$(python3 -c "print(int($START_KWH/$CAP*100))")"
@@ -55,9 +66,10 @@ case "${1:-}" in
     $A shell am start -W -n ai.staygo.app/ai.staygo.MainActivity >/dev/null
     echo "StayGo opened at $START_KWH kWh";;
   ramp)
+    stop_ramp; echo $$ > "$RAMP_PID"
     rm -f "$STOP"
     put "ev-battery?field=charge_port_open&value=true"
-    python3 - "$B" "$START_KWH" "$CAP" "$STOP" "$END_SOC" <<'PY'
+    exec python3 - "$B" "$START_KWH" "$CAP" "$STOP" "$END_SOC" <<'PY'  # exec: $$ (RAMP_PID) is the feed itself
 import sys, time, urllib.request, datetime, os
 B, kwh, cap, stop, end = sys.argv[1], float(sys.argv[2]), float(sys.argv[3]), sys.argv[4], int(sys.argv[5])
 def put(field, value):
@@ -92,7 +104,7 @@ except KeyboardInterrupt:
 print("ramp stopped")
 PY
     ;;
-  stop) touch "$STOP"; echo "stop requested";;
+  stop) touch "$STOP"; stop_ramp; echo "stop requested";;
   hb-stop) [ -f "$HB_PID" ] && kill "$(cat "$HB_PID")" 2>/dev/null; rm -f "$HB_PID"; echo "heartbeat stopped";;
   drive)
     put "ev-battery?field=charge_port_open&value=false"

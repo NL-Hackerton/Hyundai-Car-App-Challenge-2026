@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Page navigation bar: app icon + title, charging status chip, destination chip (container height 80dp). -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/topbar"
+    android:gravity="center_vertical"
+    android:orientation="horizontal">
+
+    <ImageView
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:contentDescription="@null"
+        android:src="@mipmap/ic_launcher" />
+
+    <TextView
+        style="@style/T.Title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:text="StayGo"
+        android:textSize="40sp" />
+
+    <View
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_weight="1" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="64dp"
+        android:background="@drawable/bg_chip"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="28dp"
+        android:paddingEnd="32dp">
+
+        <View
+            android:id="@+id/statusDot"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:background="@drawable/bg_dot" />
+
+        <TextView
+            android:id="@+id/statusText"
+            style="@style/T.Label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:singleLine="true"
+            android:text="차량 신호 연결 중"
+            android:textSize="30sp" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/destChip"
+        style="@style/T.Label"
+        android:layout_width="wrap_content"
+        android:layout_height="64dp"
+        android:layout_marginStart="16dp"
+        android:background="@drawable/bg_chip_outline"
+        android:drawableStart="@drawable/ic_place"
+        android:drawablePadding="12dp"
+        android:drawableTint="@color/sg_text_2"
+        android:ellipsize="end"
+        android:gravity="center_vertical"
+        android:maxWidth="@dimen/dest_max"
+        android:paddingStart="24dp"
+        android:paddingEnd="32dp"
+        android:singleLine="true"
+        android:text="목적지 확인 중"
+        android:textSize="30sp" />
+</LinearLayout>
