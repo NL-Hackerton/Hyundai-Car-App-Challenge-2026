@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Filled primary button in the Go color: radius 32dp -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="@color/sg_go" />
+    <corners android:radius="@dimen/btn_radius" />
+</shape>

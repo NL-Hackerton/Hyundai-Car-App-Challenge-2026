@@ -16,7 +16,7 @@ import sys
 import urllib.parse
 import urllib.request
 
-URL = "http://apis.data.go.kr/B552584/EvCharger/getChargerInfo"
+URL = "https://apis.data.go.kr/B552584/EvCharger/getChargerInfo"
 PAGE = 9999
 MIN_FAST_KW = 50
 

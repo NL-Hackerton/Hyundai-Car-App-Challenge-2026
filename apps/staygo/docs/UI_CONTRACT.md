@@ -10,7 +10,7 @@ flowchart LR
     N[NaviSource<br/>내비] <--> E
     E[StayGoEngine<br/>순수 Kotlin] --> VM[StayGoViewModel]
     VM -- "state: StateFlow&lt;StayGoUiState&gt;<br/>notices: SharedFlow&lt;UiNotice&gt;" --> UI[화면]
-    UI -- "stay / go / confirmCharging<br/>adjustReserveSoc / adjustTargetSoc<br/>onPermissions / setVisible" --> VM
+    UI -- "stay / go / confirmCharging<br/>adjustReserveSoc / adjustTargetSoc<br/>acceptConsent / declineConsent / clearChargingHistory<br/>onPermissions / setVisible" --> VM
 ```
 
 - 화면은 `StayGoViewModel`만 참조한다. `core`, `decision`, `signal`, `vehicle`, `navi` 패키지의 코드는 화면에서 호출하지 않는다.
@@ -20,10 +20,11 @@ flowchart LR
 
 ## 수명주기
 
-- `onStart`에서 `setVisible(true)`, `onStop`에서 `setVisible(false)`를 부른다. 화면이 보이지 않는 동안 ViewModel은 차량·내비 구독과 1초 타이머를 모두 멈춘다. 앱에는 서비스가 없다.
-- 충전 세션(충전 확인 시각, 세션 최대 전력, 목표 SOC)은 화면이 가려진 동안 유지되고, 저장 상태(`SavedStateHandle`)로 프로세스 재생성 뒤에도 복원된다. 돌아왔을 때 배터리 잔량이 0.5 kWh 넘게 줄었거나 3시간이 지났으면 새 세션으로 본다.
+- `onStart`에서 `setVisible(true)`, `onStop`에서 `setVisible(false)`를 부른다. 화면이 보이지 않는 동안 ViewModel은 주행 제한 감시, 차량·내비 구독, 1초 타이머를 모두 멈춘다. 앱에는 서비스가 없다.
+- 화면이 보이는 동안 주행 제한 감시(`RestrictionSource`)는 권한·동의와 무관하게 항상 돈다. 차량·내비 구독은 권한이 있고 정보 이용 안내에 동의한 뒤에만 시작한다.
+- 충전 세션(충전 확인 시각, 세션 최대 전력, 목표 SOC)은 화면이 가려진 동안 유지되고, 저장 상태(`SavedStateHandle`)로 프로세스 재생성 뒤에도 복원된다. 돌아왔을 때 배터리 전력량이 0.5 kWh 넘게 줄었거나 45분이 지났으면 새 세션으로 본다. 복귀 직후에는 가려지기 전에 읽은 내비 값을 쓰지 않고 새 응답을 기다린다.
 - 뒤로 가기는 앱을 끝내지 않고 숨긴다(`moveTaskToBack`).
-- 권한이 없으면 화면이 먼저 이유를 보이고(`VEHICLE_LINK_UNAVAILABLE`, `PERMISSION_DENIED`), 「권한 허용」을 누를 때 시스템 권한 창을 연다. 시스템이 창을 더 띄우지 않으면 앱 설정 화면을 연다.
+- 권한이 없으면 화면이 먼저 이유를 보이고(`VEHICLE_LINK_UNAVAILABLE`, `PERMISSION_DENIED`), 「권한 허용」을 누를 때 시스템 권한 창을 연다. 시스템이 창을 더 띄우지 않으면 앱 설정 화면을 연다. 권한 창과 설정 화면은 잠금 해제 상태에서만 연다.
 
 ## 화면이 받는 값
 
@@ -31,41 +32,47 @@ flowchart LR
 
 | `screen` | 상황 | 표시 | 가능한 조작 |
 |---|---|---|---|
-| `DRIVING` | 주행 제한(DO) 상태. 다른 모든 화면보다 우선한다. | 조작 요소를 모두 가리고 요약 한 줄 | 없음 |
-| `VEHICLE_LINK_UNAVAILABLE` | 권한 거절, SOC 미지원, 차량 서비스 없음, 주행 제한 상태를 알 수 없음(`vehicleLinkFailure`) | 연동 불가 안내. 차량 값은 표시하지 않는다(`socPercent`가 null). | `PERMISSION_DENIED`일 때 권한 허용 |
+| `RESTRICTION_UNKNOWN` | 플랫폼이 주행 제한 상태를 아직 알려 주지 않았거나 읽지 못함. 다른 모든 화면보다 우선한다. | 잠금 화면(「주행 상태를 확인하는 중」). 차량·내비 값 없음 | 없음 |
+| `DRIVING` | 주행 제한(DO) 상태. `RESTRICTION_UNKNOWN` 다음으로 우선한다. | 잠금 화면. 차량·내비 값 없음 | 없음 |
+| `CONSENT_REQUIRED` | 정보 이용 안내에 아직 동의하지 않음 | 안내 전문과 동의·거부 버튼. 차량·내비를 읽지 않는다. | `acceptConsent()`, `declineConsent()` |
+| `VEHICLE_LINK_UNAVAILABLE` | 권한 거절, SOC 미지원, 차량 서비스 없음(`vehicleLinkFailure`) | 연동 불가 안내. 차량 값은 표시하지 않는다(`socPercent`가 null). | `PERMISSION_DENIED`일 때 권한 허용 |
 | `CONNECTING` | 시작·복귀 후 5초 안, 첫 차량 값 대기 | 확인 중 | 없음 |
 | `CHARGING_UNCONFIRMED` | 충전 상태와 배터리 전력량을 모두 읽지 못함 | 충전 상태 확인 불가 | `confirmCharging()` |
 | `NOT_CHARGING` | 정차, 충전 아님 | 「충전을 시작하면 판단합니다」 | 없음 |
-| `CHARGE_FINISHED` | 충전 완료 또는 충전기 상한 도달 | 충전 종료, 점유 고지(`occupancy`) | `go()` |
+| `CHARGE_FINISHED` | 충전 완료 또는 충전기 상한 도달 | 충전 종료, 점유 고지(`occupancy`). 도착 SOC가 예비 SOC 이상일 때만 Go를 강조하고, 미달이면 부족분을, 모르면 중립으로 보인다. | `go()` |
 | `NO_DESTINATION` | 충전 중, 내비 목적지 없음 | SOC·충전전력만, Go 잠금 | 없음(내비에서 목적지 설정) |
 | `TARGET_SOC_NEEDED` | 충전 중, 내비가 도착 예상 SOC를 주지 못함 | 목표 SOC 입력 | `adjustTargetSoc(±5)` |
 | `DECISION` | 충전 중, 판단 가능 | Stay·Go 분기 | `stay()`, `go()`, `adjustReserveSoc(±5)`, `adjustTargetSoc(±5)` |
 
 <p>표 1. 화면 종류와 조작.</p>
 
-주행 제한 상태는 플랫폼이 「제한 없음」을 알려 주기 전까지 잠금으로 본다. 알림이 오지 않으면 5초 뒤 `VEHICLE_LINK_UNAVAILABLE`이 되고 Go는 동작하지 않는다.
+주행 제한 상태는 플랫폼이 「제한 없음」을 알려 주기 전까지 잠금으로 본다(`RESTRICTION_UNKNOWN`). 조회가 null이거나 예외이면 제한으로 처리한다. 잠금 화면에서는 `screen.interactive`가 false이며 엔진이 모든 조작을 무시한다.
 
 | 필드 | 뜻 |
 |---|---|
 | `decision.rule` | 판단 규칙 번호(1~6). 입력을 기다리는 동안은 null |
 | `decision.emphasis` | `STAY`, `BOTH_STAY`(둘 다 보이고 Stay 기본 강조), `GO`, `NONE` |
-| `power` | 현재 충전전력. `estimated`가 true이면 「추정」 표시가 필요하다. `sessionMaxTrusted`가 false이면 SOC 기준(규칙 6)으로 판단 중이다. |
+| `power` | 현재 충전전력(30초 중앙값). `estimated`가 true이면 「추정」 표시가 필요하다. `sessionMaxKw`는 같은 계열(순간 충전전력 또는 전력량 변화)에서 구한 세션 최대다. `sessionMaxTrusted`가 false이면 SOC 기준(규칙 6)으로 판단 중이다. |
 | `powerHistory` | 세션 충전전력 기록(차트·추세용) |
 | `batteryLevelKwh`, `capacityKwh` | SOC 타일의 잔량·용량 |
-| `arrival` | 도착 예상. `basis`가 `NAVI_DIRECT`(내비 값), `NAVI_ROUTE_ENERGY`(경유 충전 없이 갈 때의 계산값), `DRIVER_TARGET`(목표 SOC 기준) 중 하나다. `deficitPct`는 부족분, `extraWaitMinutes`는 현재 전력 기준 대기 시간의 하한이다. |
+| `arrival` | 도착 예상. `basis`가 `NAVI_DIRECT`(내비 값), `NAVI_ROUTE_ENERGY`(경유 충전 없이 갈 때의 계산값), `DRIVER_TARGET`(목표 SOC 기준) 중 하나다. `deficitPct`는 부족분, `extraWaitMinutes`는 현재 전력 기준 대기 시간의 하한이다. 내비 응답이 90초 넘게 갱신되지 않고 요청이 두 번 연속 실패하면 null이 된다. |
 | `route` | `None`, `Direct`, `ViaStop`(경유지 이름, 경유지 도착 SOC, 최대 출력, 충전기 수, 비교 결과). `outputSource`가 `SNAPSHOT`이면 최대 출력·충전기 수는 앱에 넣어 둔 목록 값이므로 `snapshotAsOf`(기준일)를 함께 표시한다. |
 | `go` | `DIRECT`, `VIA_STOP`이면 Go 가능. `LOCKED_*`이면 잠금 사유 |
 | `socMismatch` | 차량 표시 SOC와 잔량 기준 SOC가 3%p 넘게 다를 때만 값이 있다. |
 | `occupancy` | 앱이 충전을 처음 확인한 뒤 지난 분. `warning`은 50분부터 true. 실제 충전 시작 시각이 아니다. |
 | `reserveSocPct`, `manualTargetSoc` | 예비 SOC(기기에 저장), 목표 SOC(세션 한정) |
+| `hasChargingHistory`, `consentDeclined`, `naviAvailable` | 설정 시트의 「충전 기록 지우기」 활성 여부, 동의 화면의 거부 안내 표시 여부, 내비 연결 여부 |
 
 <p>표 2. 판단 화면의 상태 필드.</p>
 
-`notices`는 한 번만 보여 줄 결과다: `GoRecommended`(충전 세션당 한 번), `RouteSent`, `RouteFailed`, `StayAcknowledged`, `DestinationRequired`, `NaviUnavailable`.
+`notices`는 한 번만 보여 줄 결과다: `GoRecommended`(충전 세션당 한 번), `RouteSent`, `RouteFailed`, `StayAcknowledged`, `DestinationRequired`, `NaviUnavailable`, `NotCharging`, `HistoryCleared`.
 
 ## 화면이 지켜야 하는 규칙
 
-- `screen == DRIVING`이면 조작 요소를 하나도 남기지 않는다. 알림과 설정 화면도 닫는다.
+- `screen.interactive`가 false이면 잠금 화면을 최상단에 두고 조작 요소를 하나도 남기지 않는다. 알림과 설정 화면을 닫고, 아래 화면은 접근성·포커스 대상에서 뺀다. 레이아웃의 기본 상태도 잠금이다.
+- 잠긴 버튼도 눌렀을 때 사유를 알림으로 보인다. 아무 반응이 없는 버튼을 두지 않는다.
+- 도착 SOC는 반올림으로 예비 SOC를 넘겨 보이지 않게 하고(`HeroPresenter.soc`), 0 미만은 「0% 미만」으로 적는다. `NAVI_ROUTE_ENERGY`일 때는 「경유 충전 없이」를 붙인다.
+- 판단 규칙 번호는 화면에 적지 않는다.
 - `vehicleLinkFailure`가 있으면 SOC·전력 등 차량 값을 그리지 않는다. 이전 값이 남아 보이면 안 된다.
 - `power.estimated`, `arrival.basis`, `comparison.expectedPowerEstimated`, `route.outputSource`가 뜻하는 「추정」·「계산값」·「자료 기준일」 구분을 화면에서 지우지 않는다.
 - 경유 충전 비교를 보일 때는 대기·고장 여부를 알 수 없다는 문구를 같은 화면에 둔다. 경유 충전이 더 빠르다고 계산되어도 Go를 단독 권장으로 강조하지 않는다.
@@ -97,8 +104,11 @@ adb shell am start -S -n ai.staygo.app/ai.staygo.MainActivity --es sim charge --
 | `unsupported` | SOC 미지원 |
 | `denied` | 권한 거절 |
 | `nosignal` | 충전 상태 확인 불가: 운전자 확인 |
-| `finish` | 충전기가 80%에서 종료 |
+| `finish` | 충전기가 80%에서 종료, 도착 SOC 충족 |
+| `stopshort` | 충전기가 일찍 종료, 도착 SOC 미달: Go를 강조하지 않음 |
 | `idle` | 충전 아님 |
+| `consent` | 첫 실행: 정보 이용 안내 |
+| `nolock` | 주행 제한 상태를 알 수 없음: 잠금 화면 |
 | `mismatch` | 차량 표시 SOC와 잔량 기준 SOC의 차이 |
 
 <p>표 3. 시뮬레이터 시나리오.</p>

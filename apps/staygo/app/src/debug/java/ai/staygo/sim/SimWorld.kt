@@ -6,6 +6,7 @@ import ai.staygo.core.ChargingStop
 import ai.staygo.core.Destination
 import ai.staygo.core.DestinationTrip
 import ai.staygo.core.NaviSource
+import ai.staygo.core.RestrictionSource
 import ai.staygo.core.VehicleLinkFailure
 import ai.staygo.core.VehicleSource
 import kotlin.math.max
@@ -38,10 +39,16 @@ enum class Scenario(val id: String, val config: Config) {
     /** Neither the charge state nor the battery level can be read: the driver confirms charging. */
     NO_CHARGE_SIGNALS("nosignal", Config(levelReadable = false)),
     /** The charger stops at 80 %. */
-    CHARGER_LIMIT("finish", Config(startKwh = 60.4, stopAtSoc = 80.0)),
+    CHARGER_LIMIT("finish", Config(startKwh = 58.0, stopAtSoc = 80.0)),
     NOT_CHARGING("idle", Config(plugAtS = null)),
     /** Pleos SOC reads 5 %p above the battery-level SOC. */
     SOC_MISMATCH("mismatch", Config(socOffset = 5)),
+    /** The charger stops early while the destination is still out of reach. */
+    STOPPED_SHORT("stopshort", Config(startKwh = 40.0, stopAtSoc = 61.0)),
+    /** The data notice has not been answered yet. */
+    CONSENT("consent", Config()),
+    /** The platform never reports the driving restriction: the screen stays locked. */
+    RESTRICTION_UNKNOWN("nolock", Config(restrictionReported = false)),
     PERMISSION_DENIED("denied", Config());
 
     fun seedBands(store: BandStore) {
@@ -81,12 +88,14 @@ data class Config(
     /** Active-route waypoint data (max power, charger count) delivered with the plan; null as on the emulator. */
     val waypoint: ActiveWaypoint? = null,
     val seedBand: Pair<Int, Double>? = null,
+    val restrictionReported: Boolean = true,
 )
 
 /** The simulated car and navigation. Plain Kotlin: [step] advances one virtual second. */
 class SimWorld(private val scenario: Scenario) {
     private val c = scenario.config
     private var vehicleListener: VehicleSource.Listener? = null
+    private var restrictionListener: ((Boolean) -> Unit)? = null
     private var naviListener: NaviSource.Listener? = null
     private val scheduled = ArrayList<Pair<Long, () -> Unit>>()
     private var levelKwh = c.startKwh
@@ -109,7 +118,6 @@ class SimWorld(private val scenario: Scenario) {
                 listener.onVehicleLinkFailed(VehicleLinkFailure.SOC_UNSUPPORTED, "simulated")
                 return
             }
-            listener.onDrivingRestricted(false)
             if (c.levelReadable) {
                 listener.onCapacityWh(c.capacityKwh * 1000.0)
                 listener.onBatteryLevelWh(levelKwh * 1000.0)
@@ -121,6 +129,17 @@ class SimWorld(private val scenario: Scenario) {
 
         override fun stop() {
             vehicleListener = null
+        }
+    }
+
+    val restrictions = object : RestrictionSource {
+        override fun start(onRestricted: (Boolean) -> Unit) {
+            restrictionListener = onRestricted
+            if (c.restrictionReported) onRestricted(driving)
+        }
+
+        override fun stop() {
+            restrictionListener = null
         }
     }
 
@@ -167,7 +186,7 @@ class SimWorld(private val scenario: Scenario) {
             after(8_000L) {
                 charging = false
                 driving = true
-                vehicleListener?.onDrivingRestricted(true)
+                restrictionListener?.invoke(true)
             }
         }
     }

@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Page navigation bar: app icon + title, charging status chip, destination chip (container height 80dp). -->
+<!-- Page navigation bar (container height 80dp): app icon, title (wide windows only), charging status chip,
+     destination chip, settings button. The settings button keeps its place in every window; the destination
+     chip is the element that shrinks. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="@dimen/topbar"
@@ -13,11 +15,13 @@
         android:src="@mipmap/ic_launcher" />
 
     <TextView
+        android:id="@+id/topTitle"
         style="@style/T.Title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
-        android:text="StayGo"
+        android:singleLine="true"
+        android:text="@string/app_title"
         android:textSize="40sp" />
 
     <View
@@ -28,6 +32,7 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="64dp"
+        android:layout_marginStart="16dp"
         android:background="@drawable/bg_chip"
         android:gravity="center_vertical"
         android:orientation="horizontal"
@@ -47,7 +52,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:singleLine="true"
-            android:text="차량 신호 연결 중"
+            android:text=" "
             android:textSize="30sp" />
     </LinearLayout>
 
@@ -67,7 +72,7 @@
         android:paddingStart="24dp"
         android:paddingEnd="32dp"
         android:singleLine="true"
-        android:text="목적지 확인 중"
+        android:text=" "
         android:textSize="30sp" />
 
     <ImageView

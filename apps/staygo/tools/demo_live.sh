@@ -65,6 +65,10 @@ case "${1:-}" in
     $A shell am force-stop ai.staygo.app
     $A shell run-as ai.staygo.app rm -rf shared_prefs >/dev/null 2>&1
     $A shell am start -W -n ai.staygo.app/ai.staygo.MainActivity >/dev/null
+    # First run shows the data notice; accept it the way a driver does so the sources start.
+    sleep 2; $A shell uiautomator dump /sdcard/staygo_ui.xml >/dev/null 2>&1
+    b=$($A shell cat /sdcard/staygo_ui.xml 2>/dev/null | tr '>' '\n' | grep 'text="동의하고 시작"' | grep -o 'bounds="\[[0-9]*,[0-9]*\]\[[0-9]*,[0-9]*\]"' | head -1)
+    if [ -n "$b" ]; then set -- $(echo "$b" | grep -o '[0-9]*'); $A shell input tap $(( ($1 + $3) / 2 )) $(( ($2 + $4) / 2 )); echo "data notice accepted"; fi
     echo "StayGo opened at $START_KWH kWh";;
   ramp)
     stop_ramp; echo $$ > "$RAMP_PID"

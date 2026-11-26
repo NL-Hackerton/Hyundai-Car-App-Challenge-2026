@@ -1,6 +1,7 @@
 package ai.staygo.sim
 
 import ai.staygo.core.NaviSource
+import ai.staygo.core.RestrictionSource
 import ai.staygo.core.VehicleSource
 import android.os.Handler
 import android.os.Looper
@@ -37,4 +38,5 @@ class Simulator(scenario: Scenario, private val speed: Int) {
     }
 
     val navi: NaviSource get() = world.navi
+    val restrictions: RestrictionSource get() = world.restrictions
 }

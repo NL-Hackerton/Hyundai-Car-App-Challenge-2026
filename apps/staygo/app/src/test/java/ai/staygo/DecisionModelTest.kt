@@ -102,6 +102,35 @@ class DecisionModelTest {
     @Test fun waitsForNaviBeforeDeciding() {
         val d = DecisionModel.decide(inputs(a = null))
         assertEquals(Decision.State.WAITING_NAVI, d.state)
-        assertNotNull(d)
+        assertEquals(Emphasis.NONE, d.emphasis)
+        assertNull(d.rule)
+    }
+
+    @Test fun zeroPowerIsTreatedAsUnknownPower() {
+        val below = DecisionModel.decide(inputs(a = 9.0, power = 0.0))
+        assertEquals(2, below.rule)
+        assertNull("no wait estimate without power", below.extraWaitMinutes)
+        val met = DecisionModel.decide(inputs(a = 20.0, soc = 70, power = 0.0))
+        assertEquals(6, met.rule)
+        assertEquals(Emphasis.BOTH_STAY, met.emphasis)
+    }
+
+    @Test fun fullBatteryWithoutPowerLeansGo() {
+        val d = DecisionModel.decide(inputs(a = 40.0, soc = 100, power = null, pmax = null))
+        assertEquals(6, d.rule)
+        assertEquals(Emphasis.GO, d.emphasis)
+    }
+
+    @Test fun emptyBatteryFarBelowReserveStaysWithTheWholeDeficit() {
+        val d = DecisionModel.decide(inputs(a = -60.0, soc = 0, power = 100.0))
+        assertEquals(Emphasis.STAY, d.emphasis)
+        assertEquals(75.0, d.deficitPct!!, 1e-9)
+        assertEquals(34.83, d.extraWaitMinutes!!, 0.01) // 75 % of 77.4 kWh at 100 kW
+    }
+
+    @Test fun missingSocWithoutPowerDoesNotRecommendGo() {
+        val d = DecisionModel.decide(inputs(a = 20.0, soc = null, power = null, pmax = null))
+        assertEquals(6, d.rule)
+        assertEquals(Emphasis.BOTH_STAY, d.emphasis)
     }
 }

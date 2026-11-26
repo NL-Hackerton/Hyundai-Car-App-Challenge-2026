@@ -23,29 +23,49 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
+import kotlin.math.abs
 
 /**
- * NaviHelper wrapper. Trip requests are serialized because onTripInfo does not say which request it answers:
- * one in flight at a time, the destination trip first and then the trip to the charging stop the navigation inserted.
- * A request without an answer within [REQUEST_TIMEOUT_MS] is reported as failed and the queue moves on.
+ * NaviHelper wrapper.
+ *
+ * onTripInfo does not say which request it answers, so trip requests are serialized: one in flight at a time,
+ * the destination trip first and then the trip to the charging stop the navigation inserted. Three guards keep
+ * an answer from being credited to the wrong request:
+ * - a request without an answer within [REQUEST_TIMEOUT_MS] is reported as failed, and the next request waits
+ *   another [DRAIN_MS] so that a late answer is swallowed instead of being read as the next one's;
+ * - a request whose destination changed while it was in flight is abandoned the same way;
+ * - an answer is accepted only when its distance fits the request (the destination's remaining distance, or
+ *   the stop's share of the route).
+ *
+ * Every start() opens a new generation; callbacks of a stopped generation are ignored.
  */
 class NaviClient(private val context: Context) : NaviSource {
 
     private enum class Kind { DESTINATION, STOP }
-    private data class Pending(val kind: Kind, val stop: ChargingStop?, val sentAtMs: Long)
+    private data class Pending(val kind: Kind, val destination: Destination, val stop: ChargingStop?)
 
     private val main = Handler(Looper.getMainLooper())
+    private var generation = 0
     private var helper: NaviHelper? = null
     private var listener: NaviSource.Listener? = null
     private var ready = false
     private var destination: Destination? = null
     private var inFlight: Pending? = null
+    /** A request that was given up; its answer may still come and must not be read as another's. */
+    private var draining = false
     private var destinationTripQueued = false
     private var stopTripQueued: ChargingStop? = null
     private var destinationDistanceM = 0
-    private val timeoutCheck = Runnable { onTimeoutCheck() }
+    private var lastGoAtMs = 0L
+    private var lastGoVia: ChargingStop? = null
+    private val timeoutCheck = Runnable { onTimeout() }
+    private val drainDone = Runnable { draining = false; pump() }
 
-    private val events = object : NaviHelperEventListener {
+    private inner class Events(private val gen: Int) : NaviHelperEventListener {
+        private inline fun post(crossinline block: () -> Unit) {
+            main.post { if (gen == generation) block() }
+        }
+
         override fun onDestinationInfo(destinationInfo: DestinationInfo) = post {
             val d = destinationInfo.takeIf { it.latitude != 0.0 || it.longitude != 0.0 }
                 ?.let {
@@ -55,32 +75,47 @@ class NaviClient(private val context: Context) : NaviSource {
                         it.displayLatitude, it.displayLongitude,
                     )
                 }
+            if (d == null || !d.samePlaceAs(destination)) abandonInFlight()
             destination = d
             listener?.onDestination(d)
         }
 
         override fun onDestinationChanged() = post { helper?.getDestinationInfo() }
         override fun onRouteStarted(routeStartInfo: RouteStartInfo) = post { helper?.getDestinationInfo() }
-        override fun onRouteCancelled() = post { destination = null; listener?.onDestination(null) }
+        override fun onRouteCancelled() = post {
+            abandonInFlight()
+            destination = null
+            listener?.onDestination(null)
+        }
 
         override fun onTripInfo(tripInfo: TripInfo) = post {
+            if (draining) {
+                // The late answer of an abandoned request.
+                draining = false
+                main.removeCallbacks(drainDone)
+                pump()
+                return@post
+            }
             val p = inFlight ?: return@post
             inFlight = null
             main.removeCallbacks(timeoutCheck)
             when (p.kind) {
                 Kind.DESTINATION -> {
-                    val stop = tripInfo.summary.routePoints.firstOrNull { it.poiType == RoutePointPoiType.EV_CHARGING }
-                        ?.let { ChargingStop(it.poiName, it.latitude, it.longitude, it.ratioOnRoute) }
-                    destinationDistanceM = tripInfo.distance
-                    listener?.onDestinationTrip(DestinationTrip(tripInfo.estimatedSocAtDest, tripInfo.energyConsumption, tripInfo.distance, stop))
-                    stopTripQueued = stop
+                    if (!plausibleDestinationDistance(tripInfo.distance, p.destination.remainDistanceM)) {
+                        listener?.onTripFailed("answer does not match the destination")
+                    } else {
+                        val stop = tripInfo.summary.routePoints.firstOrNull { it.poiType == RoutePointPoiType.EV_CHARGING }
+                            ?.let { ChargingStop(it.poiName, it.latitude, it.longitude, it.ratioOnRoute) }
+                        destinationDistanceM = tripInfo.distance
+                        listener?.onDestinationTrip(DestinationTrip(tripInfo.estimatedSocAtDest, tripInfo.energyConsumption, tripInfo.distance, stop))
+                        stopTripQueued = stop
+                    }
                 }
                 Kind.STOP -> p.stop?.let {
-                    // A late answer to an earlier, timed-out destination request would be read as the stop's.
                     if (plausibleStopDistance(tripInfo.distance, it.ratioOnRoute, destinationDistanceM)) {
                         listener?.onChargingStopTrip(it, tripInfo.estimatedSocAtDest)
                     } else {
-                        listener?.onTripFailed("stop answer does not match the stop")
+                        listener?.onTripFailed("answer does not match the stop")
                     }
                 }
             }
@@ -95,8 +130,12 @@ class NaviClient(private val context: Context) : NaviSource {
         }
 
         override fun onError(errorCode: NaviErrorCode) = post {
-            // Route-search errors belong to go(); only a pending trip request is failed here.
-            if (inFlight != null) {
+            val routeError = errorCode != NaviErrorCode.CAUSE_SEARCH_TRIP && SystemClock.elapsedRealtime() - lastGoAtMs < ROUTE_ERROR_WINDOW_MS
+            if (routeError) {
+                // The route the app handed over was refused; the trip request in flight is not affected.
+                lastGoAtMs = 0L
+                listener?.onRouteResult(lastGoVia, false, errorCode.toString())
+            } else if (inFlight != null) {
                 inFlight = null
                 main.removeCallbacks(timeoutCheck)
                 listener?.onTripFailed(errorCode.toString())
@@ -105,31 +144,44 @@ class NaviClient(private val context: Context) : NaviSource {
         }
     }
 
+    private var events: Events? = null
+
     override fun start(listener: NaviSource.Listener) {
+        val gen = ++generation
         this.listener = listener
         try {
             val h = NaviHelper(context)
             helper = h
             h.initialize({
-                post {
+                main.post {
+                    if (gen != generation) return@post
                     ready = true
-                    h.addListener(events)
+                    val e = Events(gen)
+                    events = e
+                    h.addListener(e)
                     h.getDestinationInfo()
                     this.listener?.onNaviReady()
                 }
-            }, { e -> post { this.listener?.onNaviUnavailable("initialize: ${e.message}") } })
+            }, { e -> main.post { if (gen == generation) this.listener?.onNaviUnavailable("initialize: ${e.message}") } })
         } catch (t: Throwable) {
             listener.onNaviUnavailable("${t.javaClass.simpleName}: ${t.message}")
         }
     }
 
     override fun stop() {
+        generation++
         main.removeCallbacksAndMessages(null)
         listener = null
         ready = false
+        destination = null
         inFlight = null
-        try { helper?.removeListener(events) } catch (_: Throwable) {}
+        draining = false
+        destinationTripQueued = false
+        stopTripQueued = null
+        destinationDistanceM = 0
+        try { events?.let { helper?.removeListener(it) } } catch (_: Throwable) {}
         try { helper?.release() } catch (_: Throwable) {}
+        events = null
         helper = null
     }
 
@@ -148,6 +200,8 @@ class NaviClient(private val context: Context) : NaviSource {
         }
         val route = routeFor(d)
         try {
+            lastGoAtMs = SystemClock.elapsedRealtime()
+            lastGoVia = viaStop
             if (viaStop == null) {
                 h.requestRoute(route)
             } else {
@@ -156,24 +210,24 @@ class NaviClient(private val context: Context) : NaviSource {
             }
             listener?.onRouteResult(viaStop, true, null)
         } catch (t: Throwable) {
+            lastGoAtMs = 0L
             listener?.onRouteResult(viaStop, false, "${t.javaClass.simpleName}: ${t.message}")
         }
     }
 
     private fun pump() {
-        if (inFlight != null) return
+        if (inFlight != null || draining) return
         val h = helper ?: return
         val d = destination ?: return
-        val now = SystemClock.elapsedRealtime()
         val next = when {
             destinationTripQueued -> {
                 destinationTripQueued = false
-                Pending(Kind.DESTINATION, null, now)
+                Pending(Kind.DESTINATION, d, null)
             }
             else -> {
                 val stop = stopTripQueued ?: return
                 stopTripQueued = null
-                Pending(Kind.STOP, stop, now)
+                Pending(Kind.STOP, d, stop)
             }
         }
         try {
@@ -188,17 +242,37 @@ class NaviClient(private val context: Context) : NaviSource {
         }
     }
 
-    private fun onTimeoutCheck() {
+    private fun onTimeout() {
         val p = inFlight ?: return
         inFlight = null
+        drain()
         listener?.onTripFailed("timeout ${p.kind}")
-        pump()
     }
 
-    private inline fun post(crossinline block: () -> Unit) { main.post { block() } }
+    /** Gives up the request in flight (its destination is gone); its answer, if any, is swallowed. */
+    private fun abandonInFlight() {
+        destinationTripQueued = false
+        stopTripQueued = null
+        if (inFlight == null) return
+        inFlight = null
+        main.removeCallbacks(timeoutCheck)
+        drain()
+    }
+
+    private fun drain() {
+        draining = true
+        main.removeCallbacks(drainDone)
+        main.postDelayed(drainDone, DRAIN_MS)
+    }
 
     companion object {
         private const val REQUEST_TIMEOUT_MS = 5_000L
+        private const val DRAIN_MS = 5_000L
+        private const val ROUTE_ERROR_WINDOW_MS = 10_000L
+
+        /** The trip to the destination is about as long as the navigation says the destination is away. */
+        fun plausibleDestinationDistance(distanceM: Int, remainDistanceM: Int): Boolean =
+            remainDistanceM <= 0 || abs(distanceM - remainDistanceM) <= 0.15 * remainDistanceM
 
         /**
          * The stop lies at [ratioOnRoute] of the destination route, so the trip to it is about that share of
@@ -209,7 +283,7 @@ class NaviClient(private val context: Context) : NaviSource {
             val ratio = if (ratioOnRoute > 1.0) ratioOnRoute / 100.0 else ratioOnRoute
             if (destinationDistanceM <= 0 || ratio <= 0.0 || ratio >= 1.0) return true
             val expected = ratio * destinationDistanceM
-            return kotlin.math.abs(distanceM - expected) <= 0.15 * destinationDistanceM && distanceM < 0.97 * destinationDistanceM
+            return abs(distanceM - expected) <= 0.15 * destinationDistanceM && distanceM < 0.97 * destinationDistanceM
         }
 
         /** The navigation route request for [d], carrying its POI identity (see [Destination]). */

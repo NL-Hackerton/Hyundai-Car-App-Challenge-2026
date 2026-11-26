@@ -26,6 +26,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/tile_label_gap"
             android:singleLine="true"
+            android:id="@+id/powerLabel"
             android:text="@string/label_power"
             android:textColor="@color/sg_text_2"
             android:textSize="30sp" />

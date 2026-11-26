@@ -11,7 +11,12 @@ data class Destination(
     val name: String, val latitude: Double, val longitude: Double, val remainDistanceM: Int,
     val poiId: String = "", val poiSubId: String = "", val address: String = "", val poiProvider: String = "",
     val displayLatitude: Double? = null, val displayLongitude: Double? = null,
-)
+) {
+    /** Two destinations with the same name are different places unless they are at the same point. */
+    fun samePlaceAs(other: Destination?): Boolean =
+        other != null && name == other.name && poiId == other.poiId &&
+            kotlin.math.abs(latitude - other.latitude) < 1e-4 && kotlin.math.abs(longitude - other.longitude) < 1e-4
+}
 
 /** Charging stop the navigation inserted on the planned route. */
 data class ChargingStop(val name: String, val latitude: Double, val longitude: Double, val ratioOnRoute: Double)
@@ -20,6 +25,17 @@ data class DestinationTrip(val estimatedSoc: Int, val energyWh: Double, val dist
 
 /** Charging waypoint of the route the navigation is actively guiding. */
 data class ActiveWaypoint(val name: String, val maxPowerKw: Int, val chargerCount: Int)
+
+/**
+ * The platform's driving restriction (distraction optimization required or not). It needs no permission and no
+ * consent, and it runs whenever the screen is visible: every other part of the app stays locked until it says
+ * "not restricted". Delivered on the main thread.
+ */
+interface RestrictionSource {
+    /** [onRestricted] gets true while distraction optimization is required, and also when that cannot be read. */
+    fun start(onRestricted: (Boolean) -> Unit)
+    fun stop()
+}
 
 /** Vehicle inputs. Every listener call is delivered on the main thread. */
 interface VehicleSource {
@@ -30,7 +46,6 @@ interface VehicleSource {
         fun onChargeState(state: Int)
         fun onInstantaneousRateKw(kw: Double)
         fun onCapacityWh(wh: Double)
-        fun onDrivingRestricted(restricted: Boolean)
     }
 
     fun start(listener: Listener)
@@ -70,10 +85,16 @@ interface NaviSource {
 interface BandStore {
     fun record(soc: Int, kw: Double)
     fun max(soc: Int): Double?
+    fun clear()
+    fun isEmpty(): Boolean
 }
 
 interface SettingsStore {
     var reserveSocPct: Int
+    /** The driver's answer to the data notice: null until the stored answer is loaded or while none was given. */
+    var consent: Boolean?
+    /** False while the stored values are still being loaded. */
+    val loaded: Boolean
 }
 
 class InMemoryBandStore : BandStore {
@@ -83,10 +104,14 @@ class InMemoryBandStore : BandStore {
         if (kw > (bands[k] ?: 0.0)) bands[k] = kw
     }
     override fun max(soc: Int): Double? = bands[bandOf(soc)]
+    override fun clear() = bands.clear()
+    override fun isEmpty(): Boolean = bands.isEmpty()
 
     companion object {
         fun bandOf(soc: Int): Int = Math.floorDiv(soc, 5) * 5
     }
 }
 
-class InMemorySettingsStore(override var reserveSocPct: Int = 15) : SettingsStore
+class InMemorySettingsStore(override var reserveSocPct: Int = 15, override var consent: Boolean? = true) : SettingsStore {
+    override val loaded: Boolean get() = true
+}

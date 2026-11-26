@@ -68,6 +68,8 @@ data class Decision(
     enum class State {
         NOT_CHARGING,
         CHARGE_FINISHED,
+        /** Charging stopped, but leaving now would arrive below the reserve (charger fault, early stop, limit). */
+        CHARGE_STOPPED_SHORT,
         NO_DESTINATION,
         WAITING_NAVI,
         SHORT_OF_RESERVE,
@@ -83,7 +85,16 @@ object DecisionModel {
     fun decide(i: Inputs): Decision {
         val p = i.params
         when (i.charging) {
-            ChargingStatus.FINISHED -> return Decision(1, Emphasis.GO, Decision.State.CHARGE_FINISHED)
+            // Rule 1. Go is emphasized only when it is known to be enough: a charger that stopped early must
+            // not send the driver off below the reserve.
+            ChargingStatus.FINISHED -> {
+                val a = i.arrivalSoc?.takeIf { i.hasDestination }
+                return when {
+                    a == null -> Decision(1, Emphasis.NONE, Decision.State.CHARGE_FINISHED)
+                    a < p.reserveSocPct -> Decision(1, Emphasis.NONE, Decision.State.CHARGE_STOPPED_SHORT, deficitPct = p.reserveSocPct - a)
+                    else -> Decision(1, Emphasis.GO, Decision.State.CHARGE_FINISHED)
+                }
+            }
             ChargingStatus.NOT_CHARGING, ChargingStatus.UNKNOWN ->
                 return Decision(1, Emphasis.NONE, Decision.State.NOT_CHARGING)
             ChargingStatus.CHARGING -> Unit

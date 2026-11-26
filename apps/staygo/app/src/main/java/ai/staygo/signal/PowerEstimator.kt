@@ -17,7 +17,8 @@ class PowerEstimator(
     private val medianMs: Long = 30_000L,
     private val trustWindowMs: Long = 60_000L,
     private val chargingRiseMs: Long = 30_000L,
-    private val stallToleranceMs: Long = 6_000L,
+    private val stallToleranceMs: Long = 10_000L,
+    private val signalLostMs: Long = 60_000L,
     private val maxPlausibleKw: Double = 400.0,
     private val sustainMs: Long = 10_000L,
 ) {
@@ -38,12 +39,20 @@ class PowerEstimator(
     private var riseStartMs: Long? = null
     private var lastRiseMs: Long? = null
     private var lastLevel: Double? = null
+    private var lastSampleMs: Long? = null
+    private var stalled = false
 
-    /** True when the battery level kept rising for 30 s (charging fallback when EV_CHARGE_STATE is unusable). */
+    /**
+     * True when the battery level kept rising for 30 s (charging fallback when EV_CHARGE_STATE is unusable).
+     * Charging ends on evidence, not on silence: samples that show no rise for [stallToleranceMs] end it, a
+     * pause in the samples does not (level updates stall for 20-30 s on a busy head unit). Only when nothing
+     * arrives for [signalLostMs] is the signal considered lost.
+     */
     fun isRising(nowMs: Long): Boolean {
         val start = riseStartMs ?: return false
-        val last = lastRiseMs ?: return false
-        return nowMs - start >= chargingRiseMs && nowMs - last <= stallToleranceMs
+        val rise = lastRiseMs ?: return false
+        val sample = lastSampleMs ?: return false
+        return !stalled && rise - start >= chargingRiseMs && nowMs - sample <= signalLostMs
     }
 
     /** Restores what a recreated process still needs from the session: the maximum and whether it is trusted. */
@@ -62,6 +71,8 @@ class PowerEstimator(
         powerKw = null
         trustDecided = true
         lastLevel = wh
+        lastSampleMs = nowMs
+        stalled = false
         levels.addLast(nowMs to wh)
         if (rose) {
             if (riseStartMs == null) riseStartMs = nowMs - chargingRiseMs
@@ -74,13 +85,17 @@ class PowerEstimator(
 
     fun addLevel(nowMs: Long, wh: Double) {
         val prev = lastLevel
+        lastSampleMs = nowMs
         if (prev != null) {
             when {
                 wh > prev + 1e-6 -> {
-                    if (riseStartMs == null || (lastRiseMs != null && nowMs - lastRiseMs!! > stallToleranceMs)) riseStartMs = nowMs
+                    // A rise after a pause in the samples continues the same rise; only a stall restarts it.
+                    if (riseStartMs == null || stalled) riseStartMs = nowMs
+                    stalled = false
                     lastRiseMs = nowMs
                 }
-                wh < prev - 1e-6 -> { riseStartMs = null; lastRiseMs = null }
+                wh < prev - 1e-6 -> { riseStartMs = null; lastRiseMs = null; stalled = false }
+                else -> if (lastRiseMs?.let { nowMs - it > stallToleranceMs } == true) stalled = true
             }
         }
         lastLevel = wh

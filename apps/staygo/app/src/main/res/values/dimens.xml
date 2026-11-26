@@ -39,5 +39,5 @@
     <dimen name="tile_label_icon">0dp</dimen>
     <dimen name="tile_label_gap">0dp</dimen>
     <item name="hero_weight" format="float" type="dimen">1.25</item>
-    <dimen name="dest_max">400dp</dimen>           <!-- destination chip ellipsizes in narrow windows -->
+    <dimen name="dest_max">300dp</dimen>           <!-- destination chip ellipsizes in narrow windows -->
 </resources>

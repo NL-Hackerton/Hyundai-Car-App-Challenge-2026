@@ -1,47 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Drawn above the content, bottom to top: toast, settings sheet, data notice, driving lock (always on top). -->
 <merge xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- CarUxRestrictions: while distraction optimization is required, only one summary line remains. -->
-    <LinearLayout
-        android:id="@+id/drivingOverlay"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/color_overlay_driving"
-        android:clickable="true"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:padding="@dimen/page_pad"
-        android:visibility="gone">
+    <!-- Pleos toast (max width 792dp, padding 40/24, 48dp icon). Its position is set per window in MainActivity:
+         inside the hero card in wide windows, over the top bar in narrow ones; never over the numbers or buttons. -->
+    <TextView
+        android:id="@+id/toast"
+        style="@style/T.Label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginStart="@dimen/toast_margin"
+        android:layout_marginEnd="@dimen/toast_margin"
+        android:layout_marginBottom="@dimen/toast_above_actions"
+        android:background="@drawable/bg_toast"
+        android:drawablePadding="20dp"
+        android:drawableTint="@color/sg_on_toast"
+        android:elevation="8dp"
+        android:gravity="center_vertical"
+        android:maxWidth="@dimen/toast_max"
+        android:paddingStart="@dimen/toast_pad_h"
+        android:paddingTop="@dimen/toast_pad_v"
+        android:paddingEnd="@dimen/toast_pad_h"
+        android:paddingBottom="@dimen/toast_pad_v"
+        android:textColor="@color/sg_on_toast"
+        android:textSize="34sp"
+        android:visibility="gone" />
 
-        <ImageView
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:contentDescription="@null"
-            android:src="@drawable/ic_lock"
-            android:tint="#A3FFFFFF" />
-
-        <TextView
-            style="@style/T.Headline"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:gravity="center"
-            android:text="주행 중에는 조작할 수 없습니다"
-            android:textColor="@color/color_static_light_100" />
-
-        <TextView
-            android:id="@+id/drivingSummary"
-            style="@style/T.BodyL"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:gravity="center"
-            android:text=" "
-            android:textColor="#D6FFFFFF"
-            android:textSize="40sp" />
-    </LinearLayout>
-
-    <!-- Reserve SOC setting, and what the app reads, stores and sends and how far its advice can be trusted. -->
+    <!-- Settings sheet: reserve SOC, charging history, and what the app reads, stores and hands over. -->
     <FrameLayout
         android:id="@+id/infoOverlay"
         android:layout_width="match_parent"
@@ -56,7 +42,7 @@
             android:layout_height="match_parent"
             android:background="@drawable/bg_card"
             android:orientation="vertical"
-            android:padding="@dimen/card_pad">
+            android:padding="@dimen/hero_pad">
 
             <TextView
                 style="@style/T.Title"
@@ -88,10 +74,10 @@
                     style="@style/T.Title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="32dp"
-                    android:layout_marginEnd="32dp"
-                    android:minWidth="120dp"
+                    android:layout_marginStart="24dp"
+                    android:layout_marginEnd="24dp"
                     android:gravity="center"
+                    android:minWidth="120dp"
                     android:text="15%" />
 
                 <TextView
@@ -105,81 +91,227 @@
                     android:focusable="true"
                     android:gravity="center"
                     android:text="+" />
-
-                <TextView
-                    style="@style/T.Caption"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="32dp"
-                    android:layout_weight="1"
-                    android:maxLines="2"
-                    android:text="@string/reserve_help"
-                    android:textSize="28sp" />
             </LinearLayout>
 
             <TextView
-                style="@style/T.Label"
+                style="@style/T.Caption"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="28dp"
-                android:text="@string/info_title"
-                android:textColor="@color/sg_text_2" />
+                android:layout_marginTop="12dp"
+                android:text="@string/reserve_help"
+                android:textColor="@color/sg_text_2"
+                android:textSize="28sp" />
 
             <ScrollView
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
+                android:layout_marginTop="20dp"
+                android:layout_weight="1">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/T.Label"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/info_title" />
+
+                    <TextView
+                        android:id="@+id/infoBody"
+                        style="@style/T.BodyL"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:lineSpacingExtra="10sp"
+                        android:text="@string/info_body"
+                        android:textSize="28sp" />
+                </LinearLayout>
+            </ScrollView>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/clearHistory"
+                    style="@style/T.Label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/step_size"
+                    android:background="@drawable/bg_chip_outline"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:paddingStart="@dimen/btn_pad_h"
+                    android:paddingEnd="@dimen/btn_pad_h"
+                    android:text="@string/history_clear" />
+
+                <TextView
+                    android:id="@+id/consentRevoke"
+                    style="@style/T.Label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/step_size"
+                    android:layout_marginStart="16dp"
+                    android:background="@drawable/bg_chip_outline"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:paddingStart="@dimen/btn_pad_h"
+                    android:paddingEnd="@dimen/btn_pad_h"
+                    android:text="@string/consent_revoke" />
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:id="@+id/infoClose"
+                    style="@style/T.Label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/step_size"
+                    android:background="@drawable/bg_chip_outline"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:paddingStart="@dimen/btn_pad_h"
+                    android:paddingEnd="@dimen/btn_pad_h"
+                    android:text="@string/info_close"
+                    android:textColor="@color/sg_go_text" />
+            </LinearLayout>
+        </LinearLayout>
+    </FrameLayout>
+
+    <!-- Data notice shown before anything is read from the vehicle or the navigation. Only its two buttons answer it. -->
+    <FrameLayout
+        android:id="@+id/consentOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/sg_bg"
+        android:clickable="true"
+        android:padding="@dimen/page_pad"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/bg_card"
+            android:orientation="vertical"
+            android:padding="@dimen/hero_pad">
+
+            <TextView
+                style="@style/T.Title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/consent_title" />
+
+            <TextView
+                android:id="@+id/consentStatus"
+                style="@style/T.Label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
+                android:text="@string/consent_declined"
+                android:textColor="@color/sg_text_2"
+                android:visibility="gone" />
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginTop="16dp"
                 android:layout_weight="1">
 
                 <TextView
-                    android:id="@+id/infoBody"
                     style="@style/T.BodyL"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:lineSpacingExtra="10sp"
-                    android:text="@string/info_body"
+                    android:text="@string/consent_body"
                     android:textSize="28sp" />
             </ScrollView>
 
-            <TextView
-                android:id="@+id/infoClose"
-                style="@style/T.Label"
-                android:layout_width="wrap_content"
-                android:layout_height="@dimen/step_size"
-                android:layout_gravity="end"
-                android:background="@drawable/bg_chip_outline"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center"
-                android:paddingStart="@dimen/btn_pad_h"
-                android:paddingEnd="@dimen/btn_pad_h"
-                android:text="@string/info_close"
-                android:textColor="@color/sg_go_text" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/btn_large"
+                android:layout_marginTop="16dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/consentDecline"
+                    style="@style/T.Label"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_btn_basic"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:text="@string/consent_decline"
+                    android:textSize="@dimen/t_btn" />
+
+                <TextView
+                    android:id="@+id/consentAccept"
+                    style="@style/T.Label"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="@dimen/gap"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_btn_go"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:text="@string/consent_accept"
+                    android:textColor="@color/sg_on_go"
+                    android:textSize="@dimen/t_btn" />
+            </LinearLayout>
         </LinearLayout>
     </FrameLayout>
 
-    <!-- Pleos toast (24dp side margin, max width 792dp, padding 40/24, 48dp icon), lifted above the
-         Stay/Go action row so it never covers the buttons. -->
-    <TextView
-        android:id="@+id/toast"
-        style="@style/T.Label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|center_horizontal"
-        android:layout_marginStart="@dimen/toast_margin"
-        android:layout_marginEnd="@dimen/toast_margin"
-        android:layout_marginBottom="@dimen/toast_above_actions"
-        android:background="@drawable/bg_toast"
-        android:drawablePadding="20dp"
-        android:drawableTint="@color/sg_on_toast"
-        android:elevation="8dp"
-        android:gravity="center_vertical"
-        android:maxWidth="@dimen/toast_max"
-        android:paddingStart="@dimen/toast_pad_h"
-        android:paddingTop="@dimen/toast_pad_v"
-        android:paddingEnd="@dimen/toast_pad_h"
-        android:paddingBottom="@dimen/toast_pad_v"
-        android:textColor="@color/sg_on_toast"
-        android:textSize="34sp"
-        android:visibility="gone" />
+    <!-- CarUxRestrictions: while distraction optimization is required, or its state is unknown, this covers
+         everything else. One static line; no values and no controls. -->
+    <LinearLayout
+        android:id="@+id/drivingOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/color_overlay_driving"
+        android:clickable="true"
+        android:elevation="16dp"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="@dimen/page_pad"
+        android:visibility="visible">
+
+        <ImageView
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_lock"
+            android:tint="#A3FFFFFF" />
+
+        <TextView
+            android:id="@+id/drivingTitle"
+            style="@style/T.Headline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:gravity="center"
+            android:text="@string/lock_checking"
+            android:textColor="@color/color_static_light_100" />
+
+        <TextView
+            android:id="@+id/drivingSummary"
+            style="@style/T.BodyL"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:gravity="center"
+            android:text=" "
+            android:textColor="#D6FFFFFF"
+            android:textSize="40sp" />
+    </LinearLayout>
 </merge>

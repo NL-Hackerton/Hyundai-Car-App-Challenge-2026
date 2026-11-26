@@ -23,16 +23,20 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /**
- * Owns the vehicle and navigation sources and the engine. The UI collects [state] and [notices] and calls the
- * action methods; nothing else.
+ * Owns the sources and the engine. The UI collects [state] and [notices] and calls the action methods;
+ * nothing else.
  *
- * The sources run only while the screen is visible and the vehicle permissions are granted: in the background
- * the app holds no listeners, timers or services. The charging session (first seen, session maximum, target
- * SOC) is kept across that gap and, through the saved state, across process recreation.
+ * What runs when:
+ * - the driving restriction: whenever the screen is visible. It needs no permission and no consent, and every
+ *   other part of the app stays locked until it reports "not restricted";
+ * - the vehicle and navigation sources: only while the screen is visible, the driver has agreed to the data
+ *   notice and the vehicle permissions are granted.
+ * In the background the app holds no listeners, timers or services. The charging session (first seen, session
+ * maximum, target SOC) is kept across that gap and, through the saved state, across process recreation.
  */
 class StayGoViewModel(app: Application, private val handle: SavedStateHandle) : AndroidViewModel(app) {
 
-    private val sources: Sources = SourceProvider.create(app, handle)
+    private val sources: Sources = SourceProvider.create(app, handle) { viewModelScope.launch { sync(); publish() } }
     private val verbose = app.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0
     private val _notices = MutableSharedFlow<UiNotice>(extraBufferCapacity = 8, onBufferOverflow = BufferOverflow.DROP_OLDEST)
     private val engine = StayGoEngine(
@@ -41,14 +45,15 @@ class StayGoViewModel(app: Application, private val handle: SavedStateHandle) : 
         settings = sources.settings,
         clock = sources.clock,
         notify = { _notices.tryEmit(it) },
-        // Battery values and place names stay out of release logs unless a developer enables the tag
-        // (`adb shell setprop log.tag.StayGo DEBUG`).
+        // Release builds stay silent unless a developer enables the tag (`adb shell setprop log.tag.StayGo DEBUG`).
+        // The lines carry battery figures for diagnosis and never a place name.
         log = { if (verbose || Log.isLoggable(TAG, Log.DEBUG)) Log.i(TAG, it) },
         onChange = ::publish,
     )
     private val _state: MutableStateFlow<StayGoUiState>
     private var granted = false
     private var visible = false
+    private var watching = false
     private var ticker: Job? = null
 
     val state: StateFlow<StayGoUiState> get() = _state
@@ -56,7 +61,8 @@ class StayGoViewModel(app: Application, private val handle: SavedStateHandle) : 
     val permissionMode: PermissionMode get() = sources.permissions
 
     init {
-        handle.get<Bundle>(KEY_SESSION)?.let { engine.restore(it.toSession()) }
+        // A session that cannot be read back is dropped; the app then starts a new one.
+        runCatching { handle.get<Bundle>(KEY_SESSION)?.let { engine.restore(it.toSession()) } }
         handle.setSavedStateProvider(KEY_SESSION) { engine.sessionState().toBundle() }
         engine.start()
         _state = MutableStateFlow(engine.snapshot())
@@ -79,7 +85,7 @@ class StayGoViewModel(app: Application, private val handle: SavedStateHandle) : 
         }
     }
 
-    /** Result of the vehicle permission check. Signals run only while the permissions are granted. */
+    /** Result of the vehicle permission check. */
     fun onPermissions(granted: Boolean) {
         this.granted = granted
         if (granted) engine.onPermissionGranted() else engine.onPermissionDenied()
@@ -92,14 +98,29 @@ class StayGoViewModel(app: Application, private val handle: SavedStateHandle) : 
         sync()
     }
 
+    fun acceptConsent() {
+        engine.acceptConsent()
+        sync()
+    }
+
+    fun declineConsent() {
+        engine.declineConsent()
+        sync()
+    }
+
     fun stay() = engine.stay()
     fun go() = engine.go()
     fun confirmCharging() = engine.confirmCharging()
     fun adjustReserveSoc(deltaPct: Int) = engine.adjustReserveSoc(deltaPct)
     fun adjustTargetSoc(deltaPct: Int) = engine.adjustTargetSoc(deltaPct)
+    fun clearChargingHistory() = engine.clearChargingHistory()
 
     private fun sync() {
-        val run = granted && visible
+        if (visible && !watching) {
+            watching = true
+            sources.restrictions.start(engine::onDrivingRestricted)
+        }
+        val run = visible && granted && engine.consentGiven
         if (run && ticker == null) {
             engine.resume()
             sources.vehicle.start(engine)
@@ -117,8 +138,13 @@ class StayGoViewModel(app: Application, private val handle: SavedStateHandle) : 
             sources.vehicle.stop()
             sources.navi.stop()
             engine.suspend()
-            publish()
         }
+        if (!visible && watching) {
+            watching = false
+            sources.restrictions.stop()
+            engine.onRestrictionUnknown()
+        }
+        publish()
     }
 
     private fun publish() {
@@ -130,6 +156,7 @@ class StayGoViewModel(app: Application, private val handle: SavedStateHandle) : 
             sources.vehicle.stop()
             sources.navi.stop()
         }
+        if (watching) sources.restrictions.stop()
     }
 
     private fun StayGoEngine.SessionState.toBundle() = Bundle().apply {

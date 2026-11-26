@@ -16,6 +16,7 @@ import ai.staygo.core.StayGoEngine
 import ai.staygo.core.UiNotice
 import ai.staygo.core.VehicleLinkFailure
 import ai.staygo.decision.ChargingStatus
+import ai.staygo.decision.Decision
 import ai.staygo.decision.Emphasis
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -35,18 +36,21 @@ class StayGoEngineTest {
         override fun go(viaStop: ChargingStop?) { routes += viaStop }
     }
 
-    private class Rig(reserve: Int = 15) {
+    private class Rig(reserve: Int = 15, consent: Boolean? = true) {
         var now = 0L
         val navi = FakeNavi()
         val bands = InMemoryBandStore()
+        val settings = InMemorySettingsStore(reserve, consent)
         val notices = ArrayList<UiNotice>()
-        val engine = StayGoEngine(navi, bands, InMemorySettingsStore(reserve), { now }, notify = { notices += it })
+        val engine = StayGoEngine(navi, bands, settings, { now }, notify = { notices += it })
         var levelWh = 57_300.0
 
         init { engine.start() }
 
+        fun parked() = engine.onDrivingRestricted(false)
+
         fun vehicle(soc: Int = 74) {
-            engine.onDrivingRestricted(false)
+            parked()
             engine.onCapacityWh(CAPACITY_WH)
             engine.onBatteryLevelWh(levelWh)
             engine.onChargeState(2) // the emulator reports FULLY_CHARGED whatever the charger does
@@ -76,6 +80,8 @@ class StayGoEngineTest {
         fun state() = engine.snapshot()
     }
 
+    // ---- Decision screens ----
+
     @Test fun chargingWithArrivalEstimateShowsTheDecision() {
         val r = Rig()
         r.vehicle(); r.navi()
@@ -95,12 +101,33 @@ class StayGoEngineTest {
         val r = Rig()
         r.vehicle(); r.navi()
         r.engine.onChargeState(1)
-        r.engine.onInstantaneousRateKw(180.0)
+        repeat(15) { r.now += 1_000L; r.engine.onInstantaneousRateKw(180.0) }
         val s = r.state()
         assertEquals(ChargingStatus.CHARGING, s.charging)
         assertEquals(ChargingBasis.CHARGE_STATE, s.chargingBasis)
         assertFalse(s.power!!.estimated)
         assertEquals(180.0, s.power!!.kw, 1e-9)
+    }
+
+    @Test fun rateOnlyCarJudgesPowerAgainstTheMaximumOfTheSameSeries() {
+        val r = Rig()
+        r.parked()
+        r.engine.onCapacityWh(CAPACITY_WH)
+        r.engine.onSoc(70)
+        r.engine.onChargeState(1)
+        r.navi()
+        r.engine.onDestinationTrip(DestinationTrip(20, 48_800.0, 375_000, null))
+        repeat(70) { r.now += 1_000L; r.engine.onInstantaneousRateKw(200.0); r.engine.tick() }
+        var s = r.state()
+        assertEquals(200.0, s.power!!.sessionMaxKw!!, 1e-9)
+        assertEquals(3, s.decision.rule)
+        // One low reading does not flip the advice: the power is the median of the last 30 s.
+        r.now += 1_000L; r.engine.onInstantaneousRateKw(40.0)
+        assertEquals(3, r.state().decision.rule)
+        repeat(40) { r.now += 1_000L; r.engine.onInstantaneousRateKw(80.0); r.engine.tick() }
+        s = r.state()
+        assertEquals(4, s.decision.rule)
+        assertTrue(s.power!!.kw <= s.power!!.sessionMaxKw!!)
     }
 
     @Test fun noDestinationLocksGo() {
@@ -115,17 +142,45 @@ class StayGoEngineTest {
         assertEquals(listOf<UiNotice>(UiNotice.DestinationRequired), r.notices)
     }
 
-    @Test fun chargerStoppingEndsTheSessionWithGoEmphasized() {
+    @Test fun chargerStoppingWithEnoughToArriveEmphasizesGo() {
         val r = Rig()
         r.vehicle(); r.navi()
         r.engine.onDestinationTrip(DestinationTrip(20, 48_800.0, 375_000, null))
         r.charge(45, 150.0)
-        r.idle(10)
+        r.idle(15)
         val s = r.state()
         assertEquals(Screen.CHARGE_FINISHED, s.screen)
         assertEquals(Emphasis.GO, s.decision.emphasis)
         assertNull(s.power)
         assertNotNull(s.occupancy)
+    }
+
+    @Test fun chargerStoppingBelowTheReserveDoesNotSendTheDriverOff() {
+        val r = Rig()
+        r.vehicle(); r.navi()
+        r.engine.onDestinationTrip(DestinationTrip(9, 48_800.0, 375_000, null))
+        r.charge(45, 150.0)
+        r.state()
+        r.idle(15)
+        val s = r.state()
+        assertEquals(Screen.CHARGE_FINISHED, s.screen)
+        assertEquals(Decision.State.CHARGE_STOPPED_SHORT, s.decision.state)
+        assertEquals(Emphasis.NONE, s.decision.emphasis)
+        assertEquals(6.0, s.decision.deficitPct!!, 1e-9)
+        assertTrue(r.notices.none { it is UiNotice.GoRecommended })
+    }
+
+    @Test fun pauseInLevelUpdatesDoesNotEndCharging() {
+        val r = Rig()
+        r.vehicle(); r.navi()
+        r.engine.onDestinationTrip(DestinationTrip(12, 48_800.0, 375_000, null))
+        r.charge(60, 230.0)
+        // 25 s without any level sample (measured on a busy head unit), then the backlog arrives.
+        repeat(25) { r.now += 1_000L; r.engine.tick(); assertEquals(ChargingStatus.CHARGING, r.state().charging) }
+        r.levelWh += 25 * 230.0 * 1000.0 / 3600.0
+        r.engine.onBatteryLevelWh(r.levelWh)
+        assertEquals(ChargingStatus.CHARGING, r.state().charging)
+        assertTrue(r.notices.none { it is UiNotice.GoRecommended })
     }
 
     @Test fun parkedWithoutChargingIsNotCharging() {
@@ -136,6 +191,9 @@ class StayGoEngineTest {
         assertEquals(Screen.NOT_CHARGING, s.screen)
         assertEquals(Emphasis.NONE, s.decision.emphasis)
         assertEquals(GoAvailability.LOCKED_NOT_CHARGING, s.go)
+        r.engine.go()
+        r.engine.stay()
+        assertEquals(listOf<UiNotice>(UiNotice.NotCharging, UiNotice.NotCharging), r.notices)
     }
 
     @Test fun powerThatOnlyFellInTheFirstMinuteFallsBackToTheSocRule() {
@@ -150,6 +208,39 @@ class StayGoEngineTest {
         assertEquals(Emphasis.GO, s.decision.emphasis)
     }
 
+    // ---- Driving restriction: locked unless the platform says "not restricted" ----
+
+    @Test fun screenStaysLockedUntilTheDrivingRestrictionIsKnown() {
+        val r = Rig()
+        r.engine.onCapacityWh(CAPACITY_WH)
+        r.engine.onSoc(74)
+        r.navi()
+        r.engine.onDestinationTrip(DestinationTrip(20, 48_800.0, 375_000, null))
+        r.charge(45, 230.0) // level rises, but nothing says the car is parked
+        val s = r.state()
+        assertEquals(Screen.RESTRICTION_UNKNOWN, s.screen)
+        assertNull(s.socPercent)
+        assertNull(s.arrival)
+        assertNull(s.destination)
+        assertEquals(GoAvailability.LOCKED_NOT_CHARGING, s.go)
+        r.engine.go(); r.engine.stay(); r.engine.adjustReserveSoc(5); r.engine.confirmCharging()
+        assertTrue(r.navi.routes.isEmpty())
+        assertTrue(r.notices.isEmpty())
+        assertEquals(15, r.state().reserveSocPct)
+    }
+
+    @Test fun lockComesBeforeConsentAndPermission() {
+        val r = Rig(consent = null)
+        r.engine.onPermissionDenied()
+        assertEquals(Screen.RESTRICTION_UNKNOWN, r.state().screen)
+        r.engine.onDrivingRestricted(true)
+        assertEquals(Screen.DRIVING, r.state().screen)
+        r.parked()
+        assertEquals(Screen.CONSENT_REQUIRED, r.state().screen)
+        r.engine.acceptConsent()
+        assertEquals(Screen.VEHICLE_LINK_UNAVAILABLE, r.state().screen)
+    }
+
     @Test fun drivingHidesEverythingAndEndsTheSession() {
         val r = Rig()
         r.vehicle(); r.navi()
@@ -160,7 +251,8 @@ class StayGoEngineTest {
         assertEquals(ChargingStatus.NOT_CHARGING, driving.charging)
         assertTrue(driving.powerHistory.isEmpty())
         assertNull(driving.occupancy)
-        r.engine.onDrivingRestricted(false)
+        assertNull(driving.socPercent)
+        r.parked()
         assertEquals(Screen.NOT_CHARGING, r.state().screen)
     }
 
@@ -169,13 +261,44 @@ class StayGoEngineTest {
         r.vehicle(); r.navi()
         r.engine.onDrivingRestricted(true)
         r.charge(60, 40.0) // level rises downhill
-        r.engine.onDrivingRestricted(false)
+        r.parked()
         r.idle(1)
         assertEquals(ChargingStatus.NOT_CHARGING, r.state().charging)
     }
 
+    // ---- Consent ----
+
+    @Test fun nothingIsShownBeforeTheDataNoticeIsAccepted() {
+        val r = Rig(consent = null)
+        r.parked()
+        var s = r.state()
+        assertEquals(Screen.CONSENT_REQUIRED, s.screen)
+        assertFalse(r.engine.consentGiven)
+        assertFalse(s.consentDeclined)
+        r.engine.declineConsent()
+        s = r.state()
+        assertEquals(Screen.CONSENT_REQUIRED, s.screen)
+        assertTrue(s.consentDeclined)
+        r.engine.acceptConsent()
+        assertTrue(r.engine.consentGiven)
+        assertEquals(Screen.CONNECTING, r.state().screen)
+    }
+
+    @Test fun chargingHistoryCanBeDeleted() {
+        val r = Rig()
+        r.vehicle(); r.navi()
+        r.charge(45, 230.0)
+        assertTrue(r.state().hasChargingHistory)
+        r.engine.clearChargingHistory()
+        assertFalse(r.state().hasChargingHistory)
+        assertEquals(UiNotice.HistoryCleared, r.notices.last())
+    }
+
+    // ---- Vehicle link ----
+
     @Test fun deniedPermissionShowsNoVehicleValues() {
         val r = Rig()
+        r.parked()
         r.engine.onPermissionDenied()
         r.engine.onSoc(74)
         val s = r.state()
@@ -188,6 +311,7 @@ class StayGoEngineTest {
 
     @Test fun unsupportedSocStopsTheVehicleLink() {
         val r = Rig()
+        r.parked()
         r.engine.onVehicleLinkFailed(VehicleLinkFailure.SOC_UNSUPPORTED, "accessType=NONE")
         val s = r.state()
         assertEquals(Screen.VEHICLE_LINK_UNAVAILABLE, s.screen)
@@ -196,10 +320,39 @@ class StayGoEngineTest {
 
     @Test fun transientLinkFailureClearsWhenSocArrives() {
         val r = Rig()
+        r.parked()
         r.engine.onVehicleLinkFailed(VehicleLinkFailure.UNAVAILABLE, "get: timeout")
         r.engine.onSoc(74)
         assertNull(r.state().vehicleLinkFailure)
     }
+
+    @Test fun outOfRangeValuesAreIgnored() {
+        val r = Rig()
+        r.vehicle(soc = 74)
+        r.engine.onSoc(250)
+        r.engine.onBatteryLevelWh(-1.0)
+        val s = r.state()
+        assertEquals(74, s.socPercent)
+        assertEquals(57.3, s.batteryLevelKwh!!, 1e-9)
+    }
+
+    @Test fun unreadableChargeSignalsNeedDriverConfirmation() {
+        val r = Rig()
+        r.parked()
+        r.engine.onSoc(74)
+        r.navi()
+        r.engine.onDestinationTrip(DestinationTrip(20, 48_800.0, 375_000, null))
+        assertEquals(Screen.CONNECTING, r.state().screen)
+        r.now += 6_000L
+        assertEquals(Screen.CHARGING_UNCONFIRMED, r.state().screen)
+        r.engine.confirmCharging()
+        val s = r.state()
+        assertEquals(Screen.DECISION, s.screen)
+        assertEquals(ChargingBasis.DRIVER_CONFIRMED, s.chargingBasis)
+        assertEquals(6, s.decision.rule) // no power: SOC rule
+    }
+
+    // ---- Arrival estimate ----
 
     @Test fun naviDownAsksForATargetSocAndDecidesOnIt() {
         val r = Rig()
@@ -208,7 +361,7 @@ class StayGoEngineTest {
         r.charge(45, 230.0)
         assertEquals(Screen.TARGET_SOC_NEEDED, r.state().screen)
 
-        r.engine.adjustTargetSoc(5) // first press sets the default 80 %
+        r.engine.adjustTargetSoc(-5) // the first tap, whichever button, sets the starting value
         var s = r.state()
         assertEquals(80, s.manualTargetSoc)
         assertEquals(Screen.DECISION, s.screen)
@@ -225,6 +378,17 @@ class StayGoEngineTest {
         r.engine.go()
         assertTrue(r.navi.routes.isEmpty())
         assertEquals(UiNotice.NaviUnavailable, r.notices.last())
+    }
+
+    @Test fun targetStartsAboveTheCurrentSocAndStaysInRange() {
+        val r = Rig()
+        r.vehicle(soc = 88)
+        r.engine.onNaviUnavailable("down")
+        r.charge(45, 100.0)
+        r.engine.adjustTargetSoc(5)
+        assertEquals(90, r.state().manualTargetSoc)
+        repeat(10) { r.engine.adjustTargetSoc(5) }
+        assertEquals(StayGoEngine.TARGET_MAX, r.state().manualTargetSoc)
     }
 
     @Test fun repeatedTripFailuresAskForATargetSocUntilTheNaviAnswers() {
@@ -245,20 +409,20 @@ class StayGoEngineTest {
         assertEquals(ArrivalBasis.NAVI_DIRECT, s.arrival!!.basis)
     }
 
-    @Test fun unreadableChargeSignalsNeedDriverConfirmation() {
+    @Test fun oldEstimateIsDroppedWhenTheNaviKeepsFailing() {
         val r = Rig()
-        r.engine.onDrivingRestricted(false)
-        r.engine.onSoc(74)
-        r.navi()
+        r.vehicle(); r.navi()
         r.engine.onDestinationTrip(DestinationTrip(20, 48_800.0, 375_000, null))
-        assertEquals(Screen.CONNECTING, r.state().screen)
-        r.now += 6_000L
-        assertEquals(Screen.CHARGING_UNCONFIRMED, r.state().screen)
-        r.engine.confirmCharging()
+        r.charge(45, 230.0)
+        r.engine.onTripFailed("timeout DESTINATION")
+        r.engine.onTripFailed("timeout DESTINATION")
+        assertEquals("a fresh estimate is still used", Screen.DECISION, r.state().screen)
+        r.charge(100, 230.0)
         val s = r.state()
-        assertEquals(Screen.DECISION, s.screen)
-        assertEquals(ChargingBasis.DRIVER_CONFIRMED, s.chargingBasis)
-        assertEquals(6, s.decision.rule) // no power: SOC rule
+        assertEquals(Screen.TARGET_SOC_NEEDED, s.screen)
+        assertNull(s.arrival)
+        r.engine.adjustTargetSoc(5)
+        assertEquals(ArrivalBasis.DRIVER_TARGET, r.state().arrival!!.basis)
     }
 
     @Test fun insertedStopMakesArrivalComeFromRouteEnergy() {
@@ -271,6 +435,19 @@ class StayGoEngineTest {
         assertEquals(ArrivalBasis.NAVI_ROUTE_ENERGY, s.arrival!!.basis)
         assertEquals(6.98, s.arrival!!.socPct!!, 0.01)
         assertTrue(s.route is RouteState.ViaStop)
+    }
+
+    @Test fun insertedStopWithoutBatteryLevelFallsBackToTheTargetSoc() {
+        val r = Rig()
+        r.parked()
+        r.engine.onSoc(60)
+        r.engine.onChargeState(1)
+        r.navi()
+        r.engine.onDestinationTrip(DestinationTrip(10, 54_600.0, 375_000, STOP))
+        val s = r.state()
+        assertEquals(Screen.TARGET_SOC_NEEDED, s.screen)
+        assertNull(s.arrival)
+        assertEquals(RouteState.None, s.route)
     }
 
     @Test fun fasterStopAheadSendsTheRouteThroughIt() {
@@ -305,6 +482,16 @@ class StayGoEngineTest {
         assertNull((s.route as RouteState.ViaStop).comparison)
     }
 
+    @Test fun sameNameAtAnotherPlaceIsANewDestination() {
+        val r = Rig()
+        r.vehicle(); r.navi()
+        r.engine.onDestinationTrip(DestinationTrip(20, 48_800.0, 375_000, null))
+        val before = r.navi.tripRequests
+        r.engine.onDestination(BUSAN.copy(latitude = 37.5, longitude = 127.0))
+        assertNull(r.state().arrival)
+        assertEquals(before + 1, r.navi.tripRequests)
+    }
+
     @Test fun socMismatchAboveThreePointsIsReported() {
         val r = Rig()
         r.vehicle(soc = 79) // level is 57.3 / 77.4 = 74.0 %
@@ -328,6 +515,8 @@ class StayGoEngineTest {
         assertEquals(4.0, s.arrival!!.deficitPct!!, 1e-9)
         repeat(20) { r.engine.adjustReserveSoc(5) }
         assertEquals(StayGoEngine.RESERVE_MAX, r.state().reserveSocPct)
+        repeat(20) { r.engine.adjustReserveSoc(-5) }
+        assertEquals(StayGoEngine.RESERVE_MIN, r.state().reserveSocPct)
     }
 
     @Test fun destinationClearedByTheRequestedRerouteKeepsTheDecision() {
@@ -364,24 +553,6 @@ class StayGoEngineTest {
         assertEquals(50, o.minutesObserved)
     }
 
-    @Test fun screenStaysLockedUntilTheDrivingRestrictionIsKnown() {
-        val r = Rig()
-        r.engine.onCapacityWh(CAPACITY_WH)
-        r.engine.onSoc(74)
-        r.navi()
-        r.engine.onDestinationTrip(DestinationTrip(20, 48_800.0, 375_000, null))
-        assertEquals(Screen.CONNECTING, r.state().screen)
-        r.charge(45, 230.0) // level rises, but nothing says the car is parked
-        r.engine.go()
-        assertTrue(r.navi.routes.isEmpty())
-        r.now += 6_000L
-        val s = r.state()
-        assertEquals(Screen.VEHICLE_LINK_UNAVAILABLE, s.screen)
-        assertEquals(VehicleLinkFailure.UNAVAILABLE, s.vehicleLinkFailure)
-        assertNull(s.socPercent)
-        assertEquals(GoAvailability.LOCKED_NOT_CHARGING, s.go)
-    }
-
     @Test fun goNoticeIsSentOncePerSession() {
         val r = Rig()
         r.vehicle(); r.navi()
@@ -397,28 +568,75 @@ class StayGoEngineTest {
         assertEquals(1, r.notices.count { it is UiNotice.GoRecommended })
     }
 
+    // ---- Background and process recreation ----
+
     @Test fun sessionContinuesWhenTheScreenComesBackWhileStillCharging() {
         val r = Rig()
         r.vehicle(); r.navi()
         r.engine.onDestinationTrip(DestinationTrip(20, 48_800.0, 375_000, null))
         r.charge(120, 230.0)
+        r.state()
+        r.charge(60, 95.0)
+        r.state()
+        assertEquals(1, r.notices.count { it is UiNotice.GoRecommended })
         val max = r.state().power!!.sessionMaxKw!!
         r.engine.suspend()
-        assertEquals(GoAvailability.LOCKED_NOT_CHARGING, r.state().go)
+        r.engine.onRestrictionUnknown()
+        var s = r.state()
+        assertEquals(Screen.RESTRICTION_UNKNOWN, s.screen)
+        assertNull("nothing read before the gap is shown", s.arrival)
 
         r.now += 120_000L
         r.levelWh += 3_000.0 // charging went on while another app was in front
         r.engine.resume()
-        r.engine.onNaviReady()
-        r.engine.onDrivingRestricted(false)
+        r.parked()
+        r.engine.onSoc(84)
+        r.navi()
+        r.engine.onDestinationTrip(DestinationTrip(21, 48_800.0, 375_000, null))
         r.engine.onBatteryLevelWh(r.levelWh)
-        var s = r.state()
+        s = r.state()
         assertEquals(ChargingStatus.CHARGING, s.charging)
-        assertEquals(3, s.occupancy!!.minutesObserved) // counted from the first sighting, across the gap
+        assertEquals(4, s.occupancy!!.minutesObserved) // counted from the first sighting, across the gap
         r.charge(20, 95.0)
         s = r.state()
         assertEquals(max, s.power!!.sessionMaxKw!!, 1e-9)
         assertEquals(4, s.decision.rule)
+        assertEquals("no second Go notice after coming back", 1, r.notices.count { it is UiNotice.GoRecommended })
+    }
+
+    @Test fun levelThatArrivedBeforeTheRestrictionDecidesTheSessionOnceParked() {
+        val r = Rig()
+        r.vehicle(); r.navi()
+        r.charge(120, 230.0)
+        r.engine.suspend()
+        r.engine.onRestrictionUnknown()
+        r.now += 30_000L
+        r.levelWh += 1_000.0
+        r.engine.resume()
+        r.engine.onBatteryLevelWh(r.levelWh) // the car reports the level only on change, and it came first
+        r.parked()
+        assertEquals(ChargingStatus.CHARGING, r.state().charging)
+    }
+
+    @Test fun staleValuesAreNotShownAfterComingBackToADeadNavi() {
+        val r = Rig()
+        r.vehicle(); r.navi()
+        r.engine.onDestinationTrip(DestinationTrip(20, 48_800.0, 375_000, null))
+        r.charge(120, 230.0)
+        r.engine.suspend()
+        r.now += 60_000L
+        r.levelWh += 2_000.0
+        r.engine.resume()
+        r.engine.onSoc(79)
+        r.engine.onBatteryLevelWh(r.levelWh)
+        r.engine.onNaviUnavailable("initialize: bind failed")
+        var s = r.state()
+        assertEquals(Screen.TARGET_SOC_NEEDED, s.screen)
+        assertNull(s.arrival)
+        r.engine.adjustTargetSoc(5)
+        s = r.state()
+        assertEquals(Screen.DECISION, s.screen)
+        assertEquals(ArrivalBasis.DRIVER_TARGET, s.arrival!!.basis)
     }
 
     @Test fun sessionEndsWhenTheCarDroveWhileTheScreenWasAway() {
@@ -429,7 +647,6 @@ class StayGoEngineTest {
         r.now += 30 * 60_000L
         r.levelWh -= 6_000.0
         r.engine.resume()
-        r.engine.onDrivingRestricted(false)
         r.engine.onBatteryLevelWh(r.levelWh)
         val s = r.state()
         assertEquals(ChargingStatus.NOT_CHARGING, s.charging)
@@ -440,7 +657,6 @@ class StayGoEngineTest {
         val first = Rig()
         first.vehicle(); first.navi()
         first.charge(120, 230.0)
-        first.engine.adjustTargetSoc(5)
         first.engine.suspend()
         val saved = first.engine.sessionState()
 
@@ -449,16 +665,33 @@ class StayGoEngineTest {
         r.levelWh = first.levelWh + 500.0
         r.engine.restore(saved)
         r.engine.resume()
+        r.parked()
         r.engine.onCapacityWh(CAPACITY_WH)
         r.engine.onSoc(84)
-        r.engine.onDrivingRestricted(false)
         r.engine.onBatteryLevelWh(r.levelWh)
-        val s = r.state()
-        assertEquals(ChargingStatus.CHARGING, s.charging)
-        assertEquals(80, s.manualTargetSoc)
+        assertEquals(ChargingStatus.CHARGING, r.state().charging)
         assertEquals(saved.chargingSinceMs, r.engine.sessionState().chargingSinceMs)
         r.charge(20, 95.0)
         assertEquals(saved.sessionMaxKw!!, r.state().power!!.sessionMaxKw!!, 1e-9)
+    }
+
+    @Test fun restoredValuesTheEngineCouldNotHaveProducedAreDropped() {
+        val r = Rig()
+        r.now = 100_000L
+        r.engine.restore(
+            StayGoEngine.SessionState(
+                chargingSinceMs = 9_000_000L, wasCharging = true, sessionMaxKw = 1e9, pmaxTrusted = true,
+                manualTargetSoc = 500, goNoticeSent = false, suspendedAtMs = -5L, levelAtSuspendWh = -1.0, chargingAtSuspend = true,
+            )
+        )
+        val s = r.engine.sessionState()
+        assertNull(s.chargingSinceMs)
+        assertFalse(s.wasCharging)
+        assertNull(s.sessionMaxKw)
+        assertNull(s.manualTargetSoc)
+        assertNull(s.suspendedAtMs)
+        r.vehicle()
+        assertEquals(Screen.NOT_CHARGING, r.state().screen)
     }
 
     @Test fun plannedStopMatchesActiveWaypointByLeadingName() {

@@ -20,13 +20,14 @@ class PrefsBandStore(context: Context, io: Executor) : BandStore {
         io.execute {
             for ((key, value) in prefs.all) {
                 val band = key.removePrefix(PREFIX).toIntOrNull() ?: continue
-                val kw = (value as? Float)?.toDouble() ?: continue
+                val kw = (value as? Float)?.toDouble()?.takeIf { it > 0.0 && it <= MAX_KW } ?: continue
                 bands.merge(band, kw) { a, b -> maxOf(a, b) }
             }
         }
     }
 
     override fun record(soc: Int, kw: Double) {
+        if (kw <= 0.0 || kw > MAX_KW) return
         val band = InMemoryBandStore.bandOf(soc)
         if (kw <= (bands[band] ?: 0.0)) return
         bands[band] = kw
@@ -35,21 +36,39 @@ class PrefsBandStore(context: Context, io: Executor) : BandStore {
 
     override fun max(soc: Int): Double? = bands[InMemoryBandStore.bandOf(soc)]?.takeIf { it > 0.0 }
 
+    override fun clear() {
+        bands.clear()
+        prefs.edit().clear().apply()
+    }
+
+    override fun isEmpty(): Boolean = bands.isEmpty()
+
     private companion object {
         const val PREFIX = "band_"
+        const val MAX_KW = 400.0
     }
 }
 
-/** The reserve SOC is served from memory (15 %p until the stored value has been loaded on [io]). */
-class PrefsSettingsStore(context: Context, io: Executor, onLoaded: () -> Unit = {}) : SettingsStore {
+/**
+ * The reserve SOC and the answer to the data notice, served from memory. Until the stored values have been
+ * loaded on [io], [loaded] is false and the consent is unknown, so nothing is read from the vehicle.
+ */
+class PrefsSettingsStore(context: Context, io: Executor, private val onLoaded: () -> Unit = {}) : SettingsStore {
     private val prefs by lazy { context.getSharedPreferences("settings", Context.MODE_PRIVATE) }
     @Volatile private var reserve = DEFAULT_RESERVE
-    @Volatile private var changed = false
+    @Volatile private var reserveChanged = false
+    @Volatile private var consentValue: Boolean? = null
+    @Volatile private var consentChanged = false
+    @Volatile override var loaded = false
+        private set
 
     init {
         io.execute {
-            val stored = prefs.getInt(KEY_RESERVE, DEFAULT_RESERVE)
-            if (!changed) reserve = stored
+            val storedReserve = prefs.getInt(KEY_RESERVE, DEFAULT_RESERVE)
+            val storedConsent = if (prefs.contains(KEY_CONSENT)) prefs.getBoolean(KEY_CONSENT, false) else null
+            if (!reserveChanged) reserve = storedReserve
+            if (!consentChanged) consentValue = storedConsent
+            loaded = true
             onLoaded()
         }
     }
@@ -57,13 +76,22 @@ class PrefsSettingsStore(context: Context, io: Executor, onLoaded: () -> Unit = 
     override var reserveSocPct: Int
         get() = reserve
         set(value) {
-            changed = true
+            reserveChanged = true
             reserve = value
             prefs.edit().putInt(KEY_RESERVE, value).apply()
         }
 
+    override var consent: Boolean?
+        get() = consentValue
+        set(value) {
+            consentChanged = true
+            consentValue = value
+            prefs.edit().apply { if (value == null) remove(KEY_CONSENT) else putBoolean(KEY_CONSENT, value) }.apply()
+        }
+
     private companion object {
         const val KEY_RESERVE = "reserve_soc_pct"
+        const val KEY_CONSENT = "data_notice_accepted"
         const val DEFAULT_RESERVE = 15
     }
 }

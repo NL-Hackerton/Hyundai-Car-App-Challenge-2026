@@ -9,22 +9,27 @@ import ai.staygo.core.VehicleLinkFailure
 import ai.staygo.decision.Decision
 import ai.staygo.decision.Emphasis
 import ai.staygo.decision.Params
+import kotlin.math.floor
 import kotlin.math.roundToInt
 
 /**
  * The glanceable hero: one verdict word, one headline and one reason line (Pleos guide: grasp in 1–2 s,
- * one message per line). Pure function of the decision so the copy is unit-tested.
+ * one message per line). Pure function of the state so the copy is unit-tested.
+ *
+ * One term per concept: "SOC" for the charge level in percent, "예비 SOC" for the reserve at the destination,
+ * "도착 SOC" for the arrival estimate, "충전 전력" for power, "이번 충전 최대" for the session maximum.
  */
 object HeroPresenter {
 
-    enum class Verdict { STAY, GO, WAIT }
+    /** CHOICE: two options are offered with equal weight. WAIT: no verdict; [Hero.label] says why. */
+    enum class Verdict { STAY, GO, CHOICE, WAIT }
 
     /** Tone of the small status chip under the reason. */
     enum class Tone { POSITIVE, WARNING, NEUTRAL }
 
     data class Hero(
         val verdict: Verdict,
-        /** True when the verdict is the app's recommendation (filled primary action), false for a soft lean. */
+        /** True when the verdict is the app's recommendation (filled pill), false for a soft lean. */
         val strong: Boolean,
         val headline: String,
         val reason: String,
@@ -32,37 +37,52 @@ object HeroPresenter {
         val chipTone: Tone,
         /** The one thing the driver can do about a blocked state; null when Stay/Go are the actions. */
         val action: Action? = null,
+        /** The word in the verdict pill. */
+        val label: String = when (verdict) { Verdict.STAY -> "STAY"; Verdict.GO -> "GO"; Verdict.CHOICE -> "선택"; Verdict.WAIT -> "대기" },
     )
 
     enum class Action(val label: String) {
         GRANT_PERMISSION("권한 허용"),
-        CONFIRM_CHARGING("충전 중입니다"),
+        CONFIRM_CHARGING("충전 중으로 확인"),
     }
 
     enum class Trend { UP, FLAT, DOWN }
 
+    /**
+     * An SOC for the screen. Below zero the car would not arrive, so the number itself is not shown; below
+     * [reserve] it is rounded down so that 14.6 % never reads as "15 %, below the 15 % reserve".
+     */
+    fun soc(value: Double, reserve: Double = Double.NEGATIVE_INFINITY): String = when {
+        value < 0.0 -> "0% 미만"
+        value < reserve -> "${floor(value).toInt()}%"
+        else -> "${value.roundToInt()}%"
+    }
+
     /** Hero for the whole screen state: blocked states first, then the Stay/Go decision. */
     fun present(s: StayGoUiState): Hero = when (s.screen) {
+        Screen.RESTRICTION_UNKNOWN, Screen.DRIVING ->
+            Hero(Verdict.WAIT, false, "주행 중에는 조작할 수 없습니다", " ", null, Tone.NEUTRAL, label = "잠김")
+        Screen.CONSENT_REQUIRED ->
+            Hero(Verdict.WAIT, false, "정보 이용 안내를 확인해 주세요", "동의한 뒤에 차량과 내비 정보를 읽습니다", null, Tone.NEUTRAL, label = "동의 필요")
         Screen.VEHICLE_LINK_UNAVAILABLE -> when (s.vehicleLinkFailure) {
             VehicleLinkFailure.PERMISSION_DENIED -> Hero(
-                Verdict.WAIT, false, "차량 정보 권한이 필요합니다", "배터리 잔량·충전 상태를 읽어 Stay·Go를 판단합니다 · 기기 밖으로 보내지 않습니다",
-                "차량 값 표시 안 함", Tone.WARNING, Action.GRANT_PERMISSION,
+                Verdict.WAIT, false, "차량 정보 권한이 필요합니다", "SOC와 충전 상태를 읽어 Stay·Go를 판단합니다",
+                null, Tone.NEUTRAL, Action.GRANT_PERMISSION, label = "권한 필요",
             )
             VehicleLinkFailure.SOC_UNSUPPORTED -> Hero(
-                Verdict.WAIT, false, "이 차량은 SOC 조회를 지원하지 않습니다", "차량 연동을 멈췄습니다", "차량 값 표시 안 함", Tone.WARNING,
+                Verdict.WAIT, false, "이 차량에서는 사용할 수 없습니다", "차량이 SOC 조회를 지원하지 않습니다", null, Tone.NEUTRAL, label = "사용 불가",
             )
             else -> Hero(
-                Verdict.WAIT, false, "차량과 연결할 수 없습니다", "차량 연동을 멈췄습니다 · 연결되면 다시 판단합니다", "차량 값 표시 안 함", Tone.WARNING,
+                Verdict.WAIT, false, "차량과 연결할 수 없습니다", "연결되면 자동으로 다시 판단합니다", null, Tone.NEUTRAL, label = "연결 안 됨",
             )
         }
-        Screen.CONNECTING -> Hero(Verdict.WAIT, false, "차량 정보를 확인하는 중", "잠시만 기다려 주세요", null, Tone.NEUTRAL)
+        Screen.CONNECTING -> Hero(Verdict.WAIT, false, "차량 정보를 확인하는 중", "잠시만 기다려 주세요", null, Tone.NEUTRAL, label = "확인 중")
         Screen.CHARGING_UNCONFIRMED -> Hero(
-            Verdict.WAIT, false, "충전 상태를 확인할 수 없습니다", "지금 급속충전 중이면 직접 확인해 주세요",
-            "충전 신호 없음", Tone.WARNING, Action.CONFIRM_CHARGING,
+            Verdict.WAIT, false, "충전 상태를 읽을 수 없습니다", "지금 급속충전 중이면 아래 버튼으로 알려 주세요",
+            null, Tone.NEUTRAL, Action.CONFIRM_CHARGING, label = "확인 필요",
         )
         Screen.TARGET_SOC_NEEDED -> Hero(
-            Verdict.WAIT, false, "목표 SOC를 정해 주세요", "내비에서 도착 예상 SOC를 받지 못해 목표 SOC로 판단합니다",
-            "내비 응답 없음", Tone.WARNING,
+            Verdict.WAIT, false, "목표 SOC를 정해 주세요", "도착 SOC를 계산할 수 없어 목표 SOC로 판단합니다", null, Tone.NEUTRAL, label = "입력 필요",
         )
         else -> {
             val a = s.arrival
@@ -71,14 +91,70 @@ object HeroPresenter {
             when {
                 a?.basis == ArrivalBasis.DRIVER_TARGET -> presentTarget(s)
                 s.decision.rule == 5 && via != null && gain > 0.0 -> presentFasterStop(s, via, gain)
-                else -> present(s.decision, a?.socPct, s.socPercent, Params(reserveSocPct = s.reserveSocPct.toDouble()))
+                else -> present(
+                    s.decision, a?.socPct, s.socPercent, Params(reserveSocPct = s.reserveSocPct.toDouble()),
+                    withoutStop = a?.basis == ArrivalBasis.NAVI_ROUTE_ENERGY,
+                )
             }
         }
     }
 
     /**
-     * Rule 5: filling the deficit at the stop the navigation planned is faster than staying. It is offered next
-     * to Stay, not instead of it, and always with what is unknown: the stop's queue and faults.
+     * Hero for a decision. [withoutStop] marks an arrival SOC computed for driving on without the charging
+     * stop the navigation planned; the wording must say so, because the navigation's own figure includes it.
+     */
+    fun present(d: Decision, arrivalSoc: Double?, soc: Int?, params: Params = Params(), withoutStop: Boolean = false): Hero {
+        val reserveValue = params.reserveSocPct
+        val reserve = reserveValue.roundToInt()
+        val a = arrivalSoc?.let { soc(it, reserveValue) } ?: "--%"
+        val ratio = d.powerRatio?.let { (it * 100).roundToInt() }
+        val leaving = if (withoutStop) "경유 충전 없이 가면" else "지금 가면"
+        val met = arrivalSoc?.let { "예비 $reserve% 충족 (+${floor(it - reserveValue).toInt().coerceAtLeast(0)}%p)" } ?: "예비 $reserve% 충족"
+        return when (d.state) {
+            Decision.State.NOT_CHARGING -> Hero(
+                Verdict.WAIT, false, "충전을 시작하면 판단합니다", "Stay·Go는 급속충전 중에만 안내합니다", null, Tone.NEUTRAL, label = "충전 전",
+            )
+            Decision.State.NO_DESTINATION -> Hero(
+                Verdict.WAIT, false, "내비에 목적지를 설정하세요", "목적지가 없어 도착 SOC를 계산할 수 없습니다", null, Tone.NEUTRAL, label = "목적지 필요",
+            )
+            Decision.State.WAITING_NAVI -> Hero(
+                Verdict.WAIT, false, "도착 SOC 계산 중", "내비가 현재 배터리로 경로를 계산하고 있습니다", null, Tone.NEUTRAL, label = "계산 중",
+            )
+            Decision.State.CHARGE_FINISHED ->
+                if (d.emphasis == Emphasis.GO) {
+                    Hero(Verdict.GO, true, "충전이 끝났습니다", "지금 출발하면 목적지 도착 SOC $a", met, Tone.POSITIVE)
+                } else {
+                    Hero(Verdict.WAIT, false, "충전이 끝났습니다", "도착 SOC를 알 수 없습니다 · 내비에서 경로를 확인하세요", null, Tone.NEUTRAL, label = "충전 종료")
+                }
+            Decision.State.CHARGE_STOPPED_SHORT -> Hero(
+                Verdict.WAIT, false, "충전이 멈췄습니다", "$leaving 목적지 도착 SOC $a · 예비 $reserve% 미달",
+                "${"%.1f".format(d.deficitPct ?: 0.0)}%p 부족", Tone.WARNING, label = "확인 필요",
+            )
+            Decision.State.SHORT_OF_RESERVE -> Hero(
+                Verdict.STAY, true, "조금 더 충전하세요", "$leaving 목적지 도착 SOC $a · 예비 $reserve% 미달",
+                "${"%.1f".format(d.deficitPct ?: 0.0)}%p 부족" + (d.extraWaitMinutes?.let { " · 최소 ${"%.1f".format(it)}분" } ?: ""),
+                Tone.WARNING,
+            )
+            Decision.State.RESERVE_MET_POWER_HIGH -> Hero(
+                Verdict.STAY, false, "아직 빠르게 충전되는 중",
+                "도착 SOC $a · 충전 전력이 이번 충전 최대의 ${ratio ?: "--"}%", met, Tone.POSITIVE,
+            )
+            Decision.State.RESERVE_MET_POWER_LOW -> Hero(
+                Verdict.GO, true, "지금 출발하세요",
+                "도착 SOC $a · 충전 전력이 이번 충전 최대의 ${ratio ?: "--"}%", met, Tone.POSITIVE,
+            )
+            Decision.State.RESERVE_MET_SOC_FALLBACK_HIGH -> Hero(
+                Verdict.GO, true, "지금 출발하세요", "도착 SOC $a · SOC ${soc ?: "--"}%로 충전 후반", met, Tone.POSITIVE,
+            )
+            Decision.State.RESERVE_MET_SOC_FALLBACK_LOW -> Hero(
+                Verdict.STAY, false, "아직 빠르게 충전되는 구간", "도착 SOC $a · SOC ${soc ?: "--"}%", met, Tone.POSITIVE,
+            )
+        }.let { if (d.emphasis == Emphasis.NONE) it.copy(strong = false) else it }
+    }
+
+    /**
+     * Rule 5: filling the deficit at the stop the navigation planned is faster than staying. Both options are
+     * offered with equal weight, and always with what is unknown: the stop's queue and faults.
      */
     private fun presentFasterStop(s: StayGoUiState, via: RouteState.ViaStop, gainMinutes: Double): Hero {
         val d = s.decision
@@ -88,7 +164,7 @@ object HeroPresenter {
             else -> ""
         }
         return Hero(
-            Verdict.STAY, false,
+            Verdict.CHOICE, false,
             "경유 충전이 약 ${gainMinutes.roundToInt()}분 빠릅니다",
             "${shortStopName(via.stopName)} 최대 ${via.maxPowerKw?.roundToInt() ?: "--"} kW · ${via.chargerCount ?: "--"}기$source · 대기·고장은 알 수 없습니다",
             "${"%.1f".format(d.deficitPct ?: 0.0)}%p 부족" + (d.extraWaitMinutes?.let { " · 여기서 최소 ${"%.1f".format(it)}분" } ?: ""),
@@ -107,71 +183,18 @@ object HeroPresenter {
         val strong = s.decision.emphasis != Emphasis.NONE
         return when {
             a?.reserveMet == true && s.decision.emphasis == Emphasis.GO -> Hero(
-                Verdict.GO, strong, "목표 SOC에 도달했습니다", "현재 ${soc ?: "--"}% · 목표 ${target ?: "--"}% · 충전 속도가 느려졌습니다",
+                Verdict.GO, strong, "목표 SOC에 도달했습니다", "SOC ${soc ?: "--"}% · 목표 SOC ${target ?: "--"}% · 충전 전력이 줄었습니다",
                 "목표 SOC 충족", Tone.POSITIVE,
             )
             a?.reserveMet == true -> Hero(
-                Verdict.STAY, false, "목표 도달 · 아직 빠르게 충전 중", "현재 ${soc ?: "--"}% · 목표 ${target ?: "--"}%", "목표 SOC 충족", Tone.POSITIVE,
+                Verdict.STAY, false, "목표 SOC 도달 · 아직 빠르게 충전 중", "SOC ${soc ?: "--"}% · 목표 SOC ${target ?: "--"}%", "목표 SOC 충족", Tone.POSITIVE,
             )
             else -> Hero(
-                Verdict.STAY, strong, "목표까지 더 충전하세요", "현재 ${soc ?: "--"}% · 목표 ${target ?: "--"}% (내비 도착 예상 없음)",
+                Verdict.STAY, strong, "목표 SOC까지 더 충전하세요", "SOC ${soc ?: "--"}% · 목표 SOC ${target ?: "--"}% (도착 SOC 계산 불가)",
                 "${a?.deficitPct?.roundToInt() ?: "--"}%p 남음" + (a?.extraWaitMinutes?.let { " · 최소 ${"%.1f".format(it)}분" } ?: ""),
                 Tone.WARNING,
             )
         }
-    }
-
-    fun present(d: Decision, arrivalSoc: Double?, soc: Int?, params: Params = Params()): Hero {
-        val a = arrivalSoc?.roundToInt()
-        val reserve = params.reserveSocPct.roundToInt()
-        val ratio = d.powerRatio?.let { (it * 100).roundToInt() }
-        return when (d.state) {
-            Decision.State.NOT_CHARGING -> Hero(
-                Verdict.WAIT, false, "충전을 시작하면 판단합니다", "Stay·Go는 급속충전 중에만 보여 드립니다", null, Tone.NEUTRAL,
-            )
-            Decision.State.NO_DESTINATION -> Hero(
-                Verdict.WAIT, false, "내비에 목적지를 설정하세요", "도착 예상 SOC를 알 수 없어 Go를 잠갔습니다", "목적지 없음", Tone.WARNING,
-            )
-            Decision.State.WAITING_NAVI -> Hero(
-                Verdict.WAIT, false, "도착 예상 SOC 계산 중", "내비에 현재 배터리로 다시 묻고 있습니다", null, Tone.NEUTRAL,
-            )
-            Decision.State.CHARGE_FINISHED -> Hero(
-                Verdict.GO, true, "충전이 끝났습니다",
-                a?.let { "지금 출발하면 목적지에 $it%로 도착" } ?: "케이블을 뽑고 출발하세요", null, Tone.POSITIVE,
-            )
-            Decision.State.SHORT_OF_RESERVE -> {
-                val deficit = d.deficitPct ?: 0.0
-                val viaFaster = d.rule == 5 && (d.comparison?.gainMinutes ?: 0.0) > 0.0
-                Hero(
-                    // A faster stop ahead is offered next to Stay, not instead of it: its queue and faults are unknown.
-                    Verdict.STAY, !viaFaster,
-                    if (viaFaster) "경유 충전이 약 ${d.comparison!!.gainMinutes.roundToInt()}분 빠릅니다" else "조금 더 충전하세요",
-                    "지금 가면 목적지에 ${a ?: "--"}%로 도착 · 예비 $reserve% 미달",
-                    "${"%.1f".format(deficit)}%p 부족" + (d.extraWaitMinutes?.let { " · 최소 ${"%.1f".format(it)}분" } ?: ""),
-                    Tone.WARNING,
-                )
-            }
-            Decision.State.RESERVE_MET_POWER_HIGH -> Hero(
-                Verdict.STAY, false, "아직 빠르게 충전되는 중",
-                "목적지 ${a ?: "--"}% 도착 가능 · 전력이 세션 최대의 ${ratio ?: "--"}%",
-                "예비 SOC 충족", Tone.POSITIVE,
-            )
-            Decision.State.RESERVE_MET_POWER_LOW -> Hero(
-                Verdict.GO, true, "지금 출발하세요",
-                "목적지 ${a ?: "--"}% 도착 · 충전 속도가 최대의 ${ratio ?: "--"}%",
-                "예비 SOC $reserve%p 충족", Tone.POSITIVE,
-            )
-            Decision.State.RESERVE_MET_SOC_FALLBACK_HIGH -> Hero(
-                Verdict.GO, true, "지금 출발하세요",
-                "목적지 ${a ?: "--"}% 도착 · SOC ${soc ?: "--"}% 충전 후반",
-                "예비 SOC $reserve%p 충족", Tone.POSITIVE,
-            )
-            Decision.State.RESERVE_MET_SOC_FALLBACK_LOW -> Hero(
-                Verdict.STAY, false, "아직 빠르게 충전되는 구간",
-                "목적지 ${a ?: "--"}% 도착 가능 · SOC ${soc ?: "--"}%",
-                "예비 SOC 충족", Tone.POSITIVE,
-            )
-        }.let { if (d.emphasis == Emphasis.NONE) it.copy(strong = false) else it }
     }
 
     /**

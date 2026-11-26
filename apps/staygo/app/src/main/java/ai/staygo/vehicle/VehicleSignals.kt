@@ -14,11 +14,12 @@ import java.lang.reflect.Proxy
 
 /**
  * Vehicle inputs for the decision model.
- * - Pleos Vehicle SDK: integer SOC (capability check, query, subscription). Without it the vehicle link is reported as failed.
+ * - Pleos Vehicle SDK: integer SOC. The capability is checked first; the value is queried and subscribed only
+ *   when the vehicle reports read access. Without it the vehicle link is reported as failed.
  * - AAOS CarPropertyManager (reflection, android.car is provided by the platform): battery level (Wh),
- *   charge state, instantaneous charge rate (mW), battery capacity (Wh). These are optional: when they cannot
- *   be read the engine falls back to driver confirmation and the SOC-based rule.
- * - CarUxRestrictionsManager: whether the current driving state requires distraction optimization.
+ *   charge state, instantaneous charge rate (mW), battery capacity (Wh). Each property is used only when the
+ *   vehicle has a configuration for it, and a value only when its status is "available". These are optional:
+ *   when they cannot be read the engine falls back to driver confirmation and the SOC-based rule.
  *
  * SDK and binder callbacks arrive on arbitrary threads; everything is forwarded on the main thread.
  */
@@ -32,13 +33,11 @@ class VehicleSignals(private val context: Context) : VehicleSource {
     private var car: Any? = null
     private var cpm: Any? = null
     private var propertyCallback: Any? = null
-    private var uxManager: Any? = null
 
     override fun start(listener: VehicleSource.Listener) {
         this.listener = listener
         startPleosSoc()
         startAaos()
-        startUxRestrictions()
     }
 
     override fun stop() {
@@ -54,9 +53,8 @@ class VehicleSignals(private val context: Context) : VehicleSource {
                 m.javaClass.getMethod("unregisterCallback", cbClass).invoke(m, cb)
             }
         } catch (_: Throwable) {}
-        try { uxManager?.let { it.javaClass.getMethod("unregisterListener").invoke(it) } } catch (_: Throwable) {}
         try { car?.let { it.javaClass.getMethod("disconnect").invoke(it) } } catch (_: Throwable) {}
-        vehicle = null; socListener = null; car = null; cpm = null; propertyCallback = null; uxManager = null
+        vehicle = null; socListener = null; car = null; cpm = null; propertyCallback = null
     }
 
     private inline fun emit(crossinline block: VehicleSource.Listener.() -> Unit) {
@@ -77,22 +75,28 @@ class VehicleSignals(private val context: Context) : VehicleSource {
                 val access = config.accessType
                 if (access != AccessType.READ && access != AccessType.READ_WRITE) {
                     emit { onVehicleLinkFailed(VehicleLinkFailure.SOC_UNSUPPORTED, "accessType=$access") }
+                    return@checkEvBatteryStateOfChargeCapabilities
                 }
-            }, { e -> Log.w(TAG, "SOC capability check failed: ${e.message}") })
-            battery.getEvBatteryStateOfCharge(
-                { soc -> if (soc != null) emit { onSoc(soc) } },
-                { e -> emit { onVehicleLinkFailed(socFailure(e), "get: ${e.message}") } },
-            )
-            val l = object : EvBatteryStateOfChargeListener {
-                override fun onEvBatteryStateOfChargeUpdated(value: Int?) {
-                    if (value != null) emit { onSoc(value) }
+                // Supported: only now query and subscribe.
+                try {
+                    battery.getEvBatteryStateOfCharge(
+                        { soc -> if (soc != null) emit { onSoc(soc) } },
+                        { e -> emit { onVehicleLinkFailed(socFailure(e), "get: ${e.message}") } },
+                    )
+                    val l = object : EvBatteryStateOfChargeListener {
+                        override fun onEvBatteryStateOfChargeUpdated(value: Int?) {
+                            if (value != null) emit { onSoc(value) }
+                        }
+                        override fun onFailed(e: Exception) {
+                            emit { onVehicleLinkFailed(socFailure(e), "listener: ${e.message}") }
+                        }
+                    }
+                    socListener = l
+                    battery.registerEvBatteryStateOfCharge(l)
+                } catch (t: Throwable) {
+                    emit { onVehicleLinkFailed(socFailure(t), "${t.javaClass.simpleName}: ${t.message}") }
                 }
-                override fun onFailed(e: Exception) {
-                    emit { onVehicleLinkFailed(socFailure(e), "listener: ${e.message}") }
-                }
-            }
-            socListener = l
-            battery.registerEvBatteryStateOfCharge(l)
+            }, { e -> emit { onVehicleLinkFailed(socFailure(e), "capability: ${e.message}") } })
         } catch (t: Throwable) {
             emit { onVehicleLinkFailed(socFailure(t), "${t.javaClass.simpleName}: ${t.message}") }
         }
@@ -109,10 +113,16 @@ class VehicleSignals(private val context: Context) : VehicleSource {
             cpm = m
             val ids = Class.forName("android.car.VehiclePropertyIds")
             fun id(n: String) = ids.getField(n).getInt(null)
+            val getConfig = m.javaClass.getMethod("getCarPropertyConfig", Int::class.javaPrimitiveType)
+            /** A property the vehicle has no configuration for is not read and not subscribed. */
+            fun supported(n: String): Boolean = try {
+                getConfig.invoke(m, id(n)) != null
+            } catch (t: Throwable) {
+                Log.w(TAG, "config $n: ${cause(t).javaClass.simpleName}"); false
+            }
             val getProperty = m.javaClass.getMethod("getProperty", Int::class.javaPrimitiveType, Int::class.javaPrimitiveType)
             fun read(n: String): Any? = try {
-                val v = getProperty.invoke(m, id(n), 0)
-                v?.javaClass?.getMethod("getValue")?.invoke(v)
+                if (!supported(n)) null else availableValue(getProperty.invoke(m, id(n), 0))
             } catch (t: Throwable) {
                 Log.w(TAG, "read $n: ${cause(t).javaClass.simpleName}"); null
             }
@@ -133,7 +143,7 @@ class VehicleSignals(private val context: Context) : VehicleSource {
                     "onChangeEvent" -> {
                         val ev = args?.getOrNull(0)
                         val pid = ev?.javaClass?.getMethod("getPropertyId")?.invoke(ev) as? Int
-                        val value = ev?.javaClass?.getMethod("getValue")?.invoke(ev)
+                        val value = availableValue(ev)
                         when (pid) {
                             levelId -> (value as? Float)?.let { emit { onBatteryLevelWh(it.toDouble()) } }
                             stateId -> (value as? Int)?.let { emit { onChargeState(it) } }
@@ -145,50 +155,30 @@ class VehicleSignals(private val context: Context) : VehicleSource {
             }
             propertyCallback = cb
             val register = m.javaClass.getMethod("registerCallback", cbClass, Int::class.javaPrimitiveType, Float::class.javaPrimitiveType)
-            for (pid in listOf(levelId, stateId, rateId)) {
-                try { register.invoke(m, cb, pid, 1f) } catch (t: Throwable) {
-                    Log.w(TAG, "register $pid: ${cause(t).javaClass.simpleName}")
+            for (n in listOf("EV_BATTERY_LEVEL", "EV_CHARGE_STATE", "EV_BATTERY_INSTANTANEOUS_CHARGE_RATE")) {
+                if (!supported(n)) continue
+                try { register.invoke(m, cb, id(n), 1f) } catch (t: Throwable) {
+                    Log.w(TAG, "register $n: ${cause(t).javaClass.simpleName}")
                 }
             }
         } catch (t: Throwable) {
-            Log.w(TAG, "AAOS car properties unavailable: ${cause(t).javaClass.simpleName}: ${cause(t).message}")
+            Log.w(TAG, "AAOS car properties unavailable: ${cause(t).javaClass.simpleName}")
         }
     }
 
-    private fun startUxRestrictions() {
-        val c = car ?: return
-        try {
-            val name = c.javaClass.getField("CAR_UX_RESTRICTION_SERVICE").get(null) as String
-            val manager = c.javaClass.getMethod("getCarManager", String::class.java).invoke(c, name) ?: return
-            uxManager = manager
-            fun requiresDo(r: Any?): Boolean =
-                (r?.javaClass?.getMethod("isRequiresDistractionOptimization")?.invoke(r) as? Boolean) ?: false
-            val current = requiresDo(manager.javaClass.getMethod("getCurrentCarUxRestrictions").invoke(manager))
-            emit { onDrivingRestricted(current) }
-            val lClass = Class.forName("android.car.drivingstate.CarUxRestrictionsManager\$OnUxRestrictionsChangedListener")
-            val l = Proxy.newProxyInstance(lClass.classLoader, arrayOf(lClass)) { self, method, args ->
-                when (method.name) {
-                    "hashCode" -> System.identityHashCode(self)
-                    "equals" -> self === args?.get(0)
-                    "toString" -> "StayGoUxListener"
-                    else -> {
-                        if (method.name == "onUxRestrictionsChanged") {
-                            val required = requiresDo(args?.get(0))
-                            emit { onDrivingRestricted(required) }
-                        }
-                        null
-                    }
-                }
-            }
-            manager.javaClass.getMethod("registerListener", lClass).invoke(manager, l)
-        } catch (t: Throwable) {
-            Log.w(TAG, "UX restrictions unavailable: ${cause(t).message}")
-        }
+    /** The value of a CarPropertyValue, or null when its status is not "available" (error, unavailable). */
+    private fun availableValue(propertyValue: Any?): Any? {
+        if (propertyValue == null) return null
+        val status = propertyValue.javaClass.getMethod("getStatus").invoke(propertyValue) as? Int
+        if (status != STATUS_AVAILABLE) return null
+        return propertyValue.javaClass.getMethod("getValue").invoke(propertyValue)
     }
 
     private fun cause(t: Throwable): Throwable = (t as? InvocationTargetException)?.targetException ?: t
 
     companion object {
         const val TAG = "StayGo"
+        /** android.car.hardware.CarPropertyValue.STATUS_AVAILABLE */
+        private const val STATUS_AVAILABLE = 0
     }
 }

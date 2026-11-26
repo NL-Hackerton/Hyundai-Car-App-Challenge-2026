@@ -65,13 +65,17 @@ class PowerChart @JvmOverloads constructor(context: Context, attrs: AttributeSet
         pathEffect = DashPathEffect(floatArrayOf(dp(8f), dp(6f)), 0f)
     }
     private val label = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = ContextCompat.getColor(context, R.color.sg_text_3); textSize = sp(24f); typeface = font; textAlign = Paint.Align.RIGHT
+        color = ContextCompat.getColor(context, R.color.sg_text_2); textSize = sp(24f); typeface = font; textAlign = Paint.Align.LEFT
     }
     private val empty = Paint(label).apply { textAlign = Paint.Align.CENTER }
 
     private val points = ArrayList<Pair<Long, Double>>()
     private var pmax: Double? = null
     private var lateRatio = 0.5
+
+    /** Shown while there is no curve yet; empty when the car is not charging. */
+    var emptyText: String = ""
+        set(v) { if (field != v) { field = v; invalidate() } }
     private val path = Path()
     private val fillPath = Path()
 
@@ -84,7 +88,7 @@ class PowerChart @JvmOverloads constructor(context: Context, attrs: AttributeSet
         val pad = dp(8f)
         val top = pad; val bottom = h - pad
         if (points.size < 2) {
-            canvas.drawText("충전전력 기록을 모으는 중", w / 2, h / 2 + label.textSize / 3, empty)
+            canvas.drawText(emptyText, w / 2, h / 2 + label.textSize / 3, empty)
             return
         }
         val maxY = ((pmax ?: points.maxOf { it.second }) * 1.1).coerceAtLeast(10.0)
@@ -95,9 +99,10 @@ class PowerChart @JvmOverloads constructor(context: Context, attrs: AttributeSet
         pmax?.let {
             val yl = y(it * lateRatio)
             canvas.drawLine(0f, yl, w, yl, late)
-            val full = "판정선 %.0f kW".format(it * lateRatio)
+            // Under the line at the left end: the curve starts above the line there and never crosses the label.
+            val full = "느려짐 기준 %.0f kW".format(it * lateRatio)
             val text = if (label.measureText(full) <= w * 0.9f) full else "%.0f kW".format(it * lateRatio)
-            canvas.drawText(text, w, yl - dp(8f), label)
+            canvas.drawText(text, pad, yl + label.textSize + dp(4f), label)
         }
         path.reset(); fillPath.reset()
         points.forEachIndexed { i, (t, v) ->

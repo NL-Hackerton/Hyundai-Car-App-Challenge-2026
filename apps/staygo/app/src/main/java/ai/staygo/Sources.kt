@@ -2,6 +2,7 @@ package ai.staygo
 
 import ai.staygo.core.BandStore
 import ai.staygo.core.NaviSource
+import ai.staygo.core.RestrictionSource
 import ai.staygo.core.SettingsStore
 import ai.staygo.core.VehicleSource
 
@@ -13,6 +14,7 @@ enum class PermissionMode { REQUEST, GRANTED, DENIED }
  * the debug build can replace them with a simulator (see SourceProvider in src/debug).
  */
 class Sources(
+    val restrictions: RestrictionSource,
     val vehicle: VehicleSource,
     val navi: NaviSource,
     /** Monotonic milliseconds. */

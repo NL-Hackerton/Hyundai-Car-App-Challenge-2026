@@ -31,6 +31,11 @@ data class StayGoUiState(
     val capacityKwh: Double?,
     val lateRatio: Double,
     val stopOverheadMin: Double,
+    /** True when the history of maximum charging power per SOC band has entries the driver can delete. */
+    val hasChargingHistory: Boolean = false,
+    /** True when the driver answered the data notice with "no"; the notice stays up and can still be accepted. */
+    val consentDeclined: Boolean = false,
+    val naviAvailable: Boolean = true,
 ) {
     val stayEmphasized: Boolean get() = decision.emphasis == Emphasis.STAY || decision.emphasis == Emphasis.BOTH_STAY
     val goEmphasized: Boolean get() = decision.emphasis == Emphasis.GO
@@ -38,8 +43,15 @@ data class StayGoUiState(
 
 /** One entry per row of the proposal's vehicle-state table. DRIVING overrides every other screen. */
 enum class Screen {
+    /**
+     * The platform has not said yet whether distraction optimization is required, or it cannot be read.
+     * Treated like driving: no values, no controls.
+     */
+    RESTRICTION_UNKNOWN,
     /** Driving restriction is on: no controls, one summary line. */
     DRIVING,
+    /** The data notice has not been answered (or was declined): nothing is read from the vehicle or the navigation. */
+    CONSENT_REQUIRED,
     /** Permission denied, SOC unsupported, or vehicle services missing. No vehicle values are shown. */
     VEHICLE_LINK_UNAVAILABLE,
     /** First vehicle values have not arrived yet. */
@@ -54,7 +66,12 @@ enum class Screen {
     /** Charging, the navigation gives no arrival SOC: the driver enters a target SOC. */
     TARGET_SOC_NEEDED,
     /** Charging with an arrival estimate: the Stay/Go decision. */
-    DECISION,
+    DECISION;
+
+    /** False for the screens on which no vehicle value is shown and Stay/Go do nothing. */
+    val interactive: Boolean
+        get() = this != RESTRICTION_UNKNOWN && this != DRIVING && this != CONSENT_REQUIRED &&
+            this != VEHICLE_LINK_UNAVAILABLE && this != CONNECTING
 }
 
 enum class ChargingBasis { CHARGE_STATE, BATTERY_LEVEL_RISE, DRIVER_CONFIRMED }
@@ -126,6 +143,9 @@ sealed interface UiNotice {
     data object StayAcknowledged : UiNotice
     data object DestinationRequired : UiNotice
     data object NaviUnavailable : UiNotice
+    /** Stay or Go was tapped while the car is not charging. */
+    data object NotCharging : UiNotice
+    data object HistoryCleared : UiNotice
     /** The recommendation turned to Go while parked; sent once per charging session. */
     data class GoRecommended(val arrivalSocPct: Double?) : UiNotice
 }

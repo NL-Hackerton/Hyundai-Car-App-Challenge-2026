@@ -39,7 +39,13 @@ class PowerEstimatorTest {
         assertFalse(e.isRising(24_000L))
         feed(e, 25_000L, 10, 55_700.0, 100.0)
         assertTrue(e.isRising(34_000L))
-        assertFalse(e.isRising(60_000L))
+        // Charging ends on evidence, not on silence: a pause in the samples keeps it, a level that stays
+        // flat for more than 10 s ends it, and only a full minute without any sample counts as lost.
+        assertTrue(e.isRising(60_000L))
+        assertFalse(e.isRising(100_000L))
+        val level = 55_700.0 + 9 * 100.0 * 1000.0 / 3600.0
+        for (s in 35..47) e.addLevel(s * 1000L, level)
+        assertFalse(e.isRising(47_000L))
     }
 
     @Test fun pmaxIsDistrustedWhenPowerOnlyFellAfterOpening() {
