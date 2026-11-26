@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Generate the StayGo adaptive launcher icon (foreground, background, monochrome).
+"""SUPERSEDED (2026-11-26): the launcher icon is now design option A (design/icon/icon_final.png,
+bolt + fork), shipped as PNG layers in res/mipmap-*dpi. Running this script would overwrite the
+adaptive-icon XML with the old plug design - don't, unless the owner goes back to it.
+
+Generate the StayGo adaptive launcher icon (foreground, background, monochrome).
 
 Motif: a charging plug whose cable forks into two arrows - the dim left arrow is
 "Stay" (keep charging), the bright right arrow is "Go". All geometry sits inside

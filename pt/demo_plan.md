@@ -304,6 +304,8 @@ apps/staygo/tools/demo_live.sh route && apps/staygo/tools/demo_live.sh open
 
 ## release APK와 서명 키 (2026-11-25 변경)
 
+- **2026-11-26 앱 아이콘 교체(시안 A, `design/icon/icon_final.png` 번개+갈림길):** 소스(`res/mipmap-*`, adaptive + monochrome)만 바뀌었고 `apk/StayGo_release.apk`는 **아직 예전 아이콘**이다. 서명 키가 시연 데스크톱에만 있어 Windows PC에서는 release를 다시 만들지 않았다. 같은 PC에서 debug 빌드와 단위 테스트 24건은 통과했다(JDK 17, `assembleDebug`). 시연 전에 데스크톱에서 `./gradlew :app:assembleRelease`로 다시 빌드해 `apk/`에 넣고 `adb uninstall`→`install`로 확인할 것.
+
 - 11/7 제출본은 팀 키(CN=StayGo, SHA-256 `41d4a3c0…be85`)로 서명됐지만 그 키를 찾지 못해, 소유자 결정(옵션 B)에 따라 **새 키로 다시 서명했다.**
 - 새 인증서: CN=StayGo, O=StayGo, C=KR · RSA 4096 · 유효 30년 · **SHA-256 `75d23ed785849d41120302e36934be41334c48bc5c9e57ca40cd7662358dc7cf`** (APK Signature Scheme v2, `apksigner verify --print-certs`로 확인).
 - **인증서가 바뀌었으므로 예전 빌드가 깔린 기기는 업데이트 설치가 안 된다. 먼저 `adb uninstall ai.staygo.app` 후 설치한다.** (앱 데이터는 기기에 남길 것이 없다: 대역별 최대 전력 기록만 지워진다.)
