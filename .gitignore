@@ -17,5 +17,8 @@ apps/pleos-stayorgo-probe/**/*.keystore
 apps/pleos-stayorgo-probe/**/.env
 apps/pleos-stayorgo-probe/**/.env.*
 
-# PT build intermediates: 2x slide PNGs exported from Figma (embedded in the PPTX)
+# Figma 3x slide export: visual reference only (icons are cropped into pt/assets/icons; the PPTX is native)
 pt/slides/
+
+# PT build output (pt/tools/build_deck.py -> finalize.ps1)
+pt/build/
