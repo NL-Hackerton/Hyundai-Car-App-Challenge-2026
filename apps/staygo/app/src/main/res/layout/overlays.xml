@@ -2,8 +2,8 @@
 <!-- Drawn above the content, bottom to top: toast, settings sheet, data notice, driving lock (always on top). -->
 <merge xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Pleos toast (max width 792dp, padding 40/24, 48dp icon). Its position is set per window in MainActivity:
-         inside the hero card in wide windows, over the top bar in narrow ones; never over the numbers or buttons. -->
+    <!-- Pleos toast (max width 792dp, padding 40/24, 48dp icon). MainActivity places it inside the hero card;
+         narrow windows show the notice in the hero's chip slot instead. Never over the numbers or buttons. -->
     <TextView
         android:id="@+id/toast"
         style="@style/T.Label"

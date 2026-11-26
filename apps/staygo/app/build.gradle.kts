@@ -20,8 +20,8 @@ android {
         applicationId = "ai.staygo.app"
         minSdk = 28
         targetSdk = 34
-        versionCode = 4
-        versionName = "1.2.1"
+        versionCode = 5
+        versionName = "1.2.2"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -29,6 +29,7 @@ android {
         if (keystoreProps.isNotEmpty()) {
             create("release") {
                 // v3 keeps the door open for key rotation with a recorded lineage.
+                enableV2Signing = true
                 enableV3Signing = true
                 storeFile = rootProject.file(keystoreProps.getProperty("storeFile"))
                 storePassword = keystoreProps.getProperty("storePassword")

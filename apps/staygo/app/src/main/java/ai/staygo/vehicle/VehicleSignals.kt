@@ -42,6 +42,8 @@ class VehicleSignals(private val context: Context) : VehicleSource {
     }
 
     override fun stop() {
+        // First, so a callback that runs during the teardown is already recognised as stale.
+        generation++
         listener = null
         main.removeCallbacksAndMessages(null)
         try { socListener?.let { vehicle?.getEvBattery()?.unregisterEvBatteryStateOfCharge(it) } } catch (_: Throwable) {}
@@ -56,7 +58,6 @@ class VehicleSignals(private val context: Context) : VehicleSource {
         } catch (_: Throwable) {}
         try { car?.let { it.javaClass.getMethod("disconnect").invoke(it) } } catch (_: Throwable) {}
         vehicle = null; socListener = null; car = null; cpm = null; propertyCallback = null
-        generation++
     }
 
     private inline fun emit(crossinline block: VehicleSource.Listener.() -> Unit) {

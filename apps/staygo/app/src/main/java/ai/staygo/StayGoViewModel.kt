@@ -140,6 +140,7 @@ class StayGoViewModel(app: Application, private val handle: SavedStateHandle) : 
             sources.navi.start(engine)
             ticker = viewModelScope.launch {
                 var seconds = 0
+                retries = 0
                 while (true) {
                     engine.tick()
                     publish()

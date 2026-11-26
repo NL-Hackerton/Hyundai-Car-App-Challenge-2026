@@ -754,6 +754,21 @@ class StayGoEngineTest {
         assertEquals(Screen.CHARGING_UNCONFIRMED, r.state().screen)
         assertNull(r.state().occupancy)
 
+        // A recreated process no longer has the driver's word: it asks again instead of showing "finished".
+        r.engine.confirmCharging()
+        assertEquals(ChargingStatus.CHARGING, r.state().charging)
+        r.engine.suspend()
+        val saved = r.engine.sessionState()
+        val again = Rig()
+        again.now = r.now + 20_000L
+        again.engine.restore(saved)
+        again.engine.resume()
+        again.parked()
+        again.engine.onSoc(63)
+        again.now += 6_000L
+        again.engine.tick()
+        assertEquals(Screen.CHARGING_UNCONFIRMED, again.state().screen)
+
         // The same car with a readable charge state needs no confirmation.
         r.engine.suspend()
         r.now += 60_000L

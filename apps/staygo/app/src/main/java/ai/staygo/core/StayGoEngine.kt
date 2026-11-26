@@ -617,11 +617,12 @@ class StayGoEngine(
             resumePending = false
             val since = suspendedAtMs
             suspendedAtMs = null
-            // The driver's word covers a short look away, not a gap in which the car may have driven: after a
-            // longer one a car with no charging signal starts a new session and the driver is asked again.
-            val longGap = since == null || now - since > SHORT_GAP_MS
-            if (longGap && driverConfirmedCharging && chargeState == null) endSession()
-            if (longGap) driverConfirmedCharging = false
+            // The driver's word covers a short look away, not a gap in which the car may have driven. After a
+            // longer one, or in a recreated process that no longer has it, a car with no charging signal
+            // starts a new session and the driver is asked again instead of being told the charge finished.
+            val confirmed = driverConfirmedCharging && since != null && now - since <= SHORT_GAP_MS
+            if (chargeState == null && !confirmed) endSession()
+            driverConfirmedCharging = confirmed
             if (since != null && now - since > SESSION_MAX_GAP_MS) endSession() else trend.resume()
         }
         val signalsReadable = chargeState != null || levelWh != null
@@ -651,6 +652,7 @@ class StayGoEngine(
 
     /** Driving away ends the charging session; the next stop starts a new one. */
     private fun endSession() {
+        levelAtSuspendWh = null
         estimator = PowerEstimator()
         trend = PowerTrend()
         goNoticeSent = false

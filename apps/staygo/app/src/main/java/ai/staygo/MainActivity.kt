@@ -179,6 +179,9 @@ class MainActivity : ComponentActivity() {
     private fun missingPermissions(): List<String> =
         VEHICLE_PERMISSIONS.filter { ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED }
 
+    /** The charger stopped while the arrival SOC is still below the reserve: never worded as a finished charge. */
+    private fun StayGoUiState.stoppedShort() = decision.state == ai.staygo.decision.Decision.State.CHARGE_STOPPED_SHORT
+
     private fun StayGoUiState.usesTargetSoc() = screen == Screen.TARGET_SOC_NEEDED || arrival?.basis == ArrivalBasis.DRIVER_TARGET
 
     // ---- Rendering ----
@@ -249,12 +252,14 @@ class MainActivity : ComponentActivity() {
         (findViewById<View>(R.id.statusDot).background.mutate() as GradientDrawable).setColor(color(when {
             !linked -> R.color.sg_warn
             s.charging == ChargingStatus.CHARGING -> R.color.sg_stay
+            s.stoppedShort() -> R.color.sg_warn
             s.charging == ChargingStatus.FINISHED -> R.color.sg_go
             else -> R.color.sg_text_3
         }))
         text(R.id.statusText, when {
             !linked -> "차량 연동 안 됨"
             s.charging == ChargingStatus.CHARGING -> if (narrow) "급속충전 중" else "급속충전 중 · 정차"
+            s.stoppedShort() -> if (narrow) "충전 멈춤" else "충전 멈춤 · 정차"
             s.charging == ChargingStatus.FINISHED -> if (narrow) "충전 종료" else "충전 종료 · 정차"
             s.screen == Screen.CHARGING_UNCONFIRMED -> "충전 상태 읽기 실패"
             s.charging == ChargingStatus.UNKNOWN -> "확인 중"
@@ -353,6 +358,7 @@ class MainActivity : ComponentActivity() {
             !s.screen.interactive -> " "
             mismatch != null -> "차량 표시 SOC ${mismatch.pleosSoc}% · 전력량 기준 ${mismatch.levelSoc.roundToInt()}%(내비 기준)"
             charging -> s.batteryLevelKwh?.let { level -> "${"%.1f".format(level)} / ${s.capacityKwh?.roundToInt() ?: "--"} kWh" } ?: " "
+            s.stoppedShort() -> "충전이 멈췄습니다"
             s.charging == ChargingStatus.FINISHED -> "충전이 끝났습니다"
             s.screen == Screen.CHARGING_UNCONFIRMED -> "충전 여부를 읽지 못했습니다"
             else -> "충전을 시작하면 판단합니다"
@@ -446,6 +452,7 @@ class MainActivity : ComponentActivity() {
         text(R.id.footText, when {
             !s.screen.interactive -> " "
             o == null -> "Stay·Go는 급속충전 중에만 안내합니다"
+            s.stoppedShort() -> "충전 멈춤 · 급속충전구역 주차는 ${limit}시간까지"
             s.charging == ChargingStatus.FINISHED -> "충전 종료 · 급속충전구역 주차는 ${limit}시간까지"
             o.warning -> "앱에서 충전 확인 후 ${o.minutesObserved}분 · ${limit}시간까지 ${(o.limitMinutes - o.minutesObserved).coerceAtLeast(0)}분"
             else -> "앱에서 충전 확인 후 ${o.minutesObserved}분 · 급속충전구역 주차는 ${limit}시간까지"
@@ -487,7 +494,7 @@ class MainActivity : ComponentActivity() {
             when {
                 primary -> titleColor
                 !on -> color(R.color.sg_text_3)
-                else -> color(if (fill == R.color.sg_go) R.color.sg_go_text else R.color.sg_text_2)
+                else -> color(R.color.sg_text_2)
             }
         )
     }
@@ -504,7 +511,10 @@ class MainActivity : ComponentActivity() {
 
     private fun showNotice(notice: UiNotice) {
         when (notice) {
-            is UiNotice.GoRecommended -> showToast("지금 출발해도 됩니다 · 예비 SOC 충족", R.drawable.ic_navigate)
+            is UiNotice.GoRecommended -> showToast(
+                if (viewModel.state.value.usesTargetSoc()) "지금 출발해도 됩니다 · 목표 SOC 충족" else "지금 출발해도 됩니다 · 예비 SOC 충족",
+                R.drawable.ic_navigate,
+            )
             is UiNotice.RouteSent -> showToast(
                 if (notice.viaStopName == null) "목적지 경로를 내비에 전달했습니다" else "${HeroPresenter.shortStopName(notice.viaStopName)} 경유 경로를 내비에 전달했습니다",
                 R.drawable.ic_navigate,

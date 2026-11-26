@@ -15,7 +15,7 @@
 - SOC 차이: Pleos SOC와 배터리 잔량 기준 SOC가 3%p 넘게 다르면 두 값을 함께 표시한다. 내비의 도착 예상 SOC는 잔량을 따른다.
 - 경유지 출력: 활성 경로의 `onDrivingInfo`가 경유지 최대 출력을 주지 않으면 앱에 넣어 둔 급속충전소 목록(`assets/stations.tsv`)에서 경유지 좌표 300 m 안의 충전소를 찾아 최대 출력·충전기 수를 쓴다. 조회는 기기 안에서 하며 좌표를 외부로 보내지 않는다. 화면에는 목록의 기준일을 함께 표시한다. 목록은 `tools/build_station_snapshot.py`가 한국환경공단 전기자동차 충전소 정보 OpenAPI로 만든다(해당 API 활용신청이 된 인증키 필요). 목록 파일이 없으면 이 조회를 건너뛴다. 현재 저장소에는 목록 파일이 없다.
 - 판단: `decision/DecisionModel.kt`의 규칙 1~6(기획서 3항). 예비 SOC 15%p(화면에서 5%p 단위로 조정, 기기에 저장), 후반 판정 비율 0.5, 경유 정차 부가시간 5분이 기본값이다.
-- Go: 목적지 경로(규칙 5에서 경유지가 더 빠르면 경유지 포함 경로)를 내비에 요청한다.
+- Go: 목적지 경로를 내비에 요청한다. 내비 경로에 충전 경유지가 있으면 그 경유지를 유지한 경로를 요청하고, 경유 없이 가도 예비 SOC를 채운다고 판단해 Go를 권할 때만 경유지 없는 경로를 요청한다.
 - 주행 중: `CarUxRestrictionsManager`가 「제한 없음」을 알려 주기 전에는 잠금 화면만 보인다. 제한 상태를 읽지 못하거나 값이 없어도 잠금이다. 잠금은 권한·동의·설정 화면보다 우선하며, 잠금 화면에는 차량·내비 값과 조작 요소가 없다.
 - 정보 이용 안내: 첫 실행 때 읽는 값·목적·보관·전달·거부 시 제한을 보이고 동의를 받는다. 동의 전에는 차량과 내비를 읽지 않는다. 설정 시트에서 충전 기록을 지우거나 동의를 철회할 수 있다.
 - 기기에는 SOC 5%p 구간별 최대 충전전력, 예비 SOC 설정, 동의 여부만 저장하며 위치·시각·충전소는 담지 않는다. 외부 통신은 없고 네트워크 권한도 없다. 로그는 `log.tag.StayGo`를 DEBUG로 켰을 때만 판단 수치를 남기며 장소 이름은 남기지 않는다.
@@ -69,13 +69,13 @@ Pleos Connect 에뮬레이터 v2.1.0에서 확인했다. `tools/demo_charge.sh`�
 
 에뮬레이터의 충전 상태 값은 충전 스위치를 켜도 바뀌지 않고 순간 충전전력은 0이므로, 시연 화면의 충전 인식과 충전전력은 배터리 잔량 변화로 계산한 값이다.
 
-버전 1.2.1은 서명한 release 빌드를 Pleos Connect v2.1.0 에뮬레이터에서 `tools/pleos_checks.sh`로 점검했다(결과는 `docs/PRODUCTION_READINESS.md`). 가상 콘솔 쓰기는 브라우저 세션 신호(`POST /browser/session?client=<id>`, 1초 간격)가 살아 있어야 200을 돌려준다. 권한 거절·SOC 미지원·내비 실패 등 나머지 상태는 JVM 테스트와 디버그 빌드 시뮬레이터로 확인했다. 저장소의 `apk/StayGo_release.apk`와 시연 영상은 1.0.0이며 이 문서가 설명하는 1.2.1이 아니다. 1.2.1 APK는 저장소에 넣지 않았다.
+버전 1.2.2는 서명한 release 빌드를 Pleos Connect v2.1.0 에뮬레이터에서 `tools/pleos_checks.sh`로 점검했다(결과는 `docs/PRODUCTION_READINESS.md`). 가상 콘솔 쓰기는 브라우저 세션 신호(`POST /browser/session?client=<id>`, 1초 간격)가 살아 있어야 200을 돌려준다. 권한 거절·SOC 미지원·내비 실패 등 나머지 상태는 JVM 테스트와 디버그 빌드 시뮬레이터로 확인했다. 저장소의 `apk/StayGo_release.apk`와 시연 영상은 1.0.0이며 이 문서가 설명하는 1.2.2가 아니다. 1.2.2 APK는 저장소에 넣지 않았다.
 
 ## 출시 점검
 
 `tools/pleos_checks.sh APK OUT_DIR`은 Pleos Connect 에뮬레이터에서 release APK를 점검하고 항목마다 PASS·FAIL·INFO 한 줄을 남긴다. 서명·debuggable·공개 컴포넌트·네트워크 권한(정적), 권한 없이 설치한 뒤의 안내·거부·동의와 시스템 권한 창, 로그의 수치·장소 이름, 콜드 스타트, CPU·메모리, 주행 잠금과 해제, 주행 중 실행, 백그라운드 정지, 프로세스 재생성 뒤 세션 복원, monkey 600회, 삭제 뒤 잔여 파일을 본다. `BUILD_TOOLS`(aapt, apksigner 위치)가 필요하다.
 
-버전 1.2.1의 점검 결과와 평가 이력, 에뮬레이터로 확인할 수 없는 항목은 [`docs/PRODUCTION_READINESS.md`](docs/PRODUCTION_READINESS.md)에 있다.
+버전 1.2.2의 점검 결과와 평가 이력, 에뮬레이터로 확인할 수 없는 항목은 [`docs/PRODUCTION_READINESS.md`](docs/PRODUCTION_READINESS.md)에 있다.
 
 ## 라이선스
 
