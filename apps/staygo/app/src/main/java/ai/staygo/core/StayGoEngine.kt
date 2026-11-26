@@ -140,6 +140,13 @@ class StayGoEngine(
         chargingAtSuspend = charging == ChargingStatus.CHARGING
         // Until the first battery level after the gap, the session is neither continued nor ended.
         resumePending = true
+        if (!consentGiven) {
+            // Nothing is carried over a gap once consent is withdrawn or was never given.
+            suspendedAtMs = null
+            levelAtSuspendWh = null
+            chargingAtSuspend = false
+            resumePending = false
+        }
         // Nothing read before the gap is shown as current afterwards.
         soc = null
         levelWh = null
@@ -191,20 +198,23 @@ class StayGoEngine(
     }
 
     /**
-     * Declining, or withdrawing an earlier consent. Withdrawal deletes what the notice says is kept: the
-     * charging history, the session and the reserve setting.
+     * Declining, or withdrawing an earlier consent. Either way everything the notice says is kept is deleted:
+     * the charging history, the session, the values read so far and the reserve setting. An answer given to
+     * an older notice may have left data behind, so the deletion does not depend on the current answer.
      */
     fun declineConsent() {
         if (!unlocked) return
-        if (settings.consent == true) {
-            bands.clear()
-            endSession()
-            suspendedAtMs = null
-            levelAtSuspendWh = null
-            chargingAtSuspend = false
-            resumePending = false
-            settings.reserveSocPct = Params().reserveSocPct.roundToInt()
-        }
+        bands.clear()
+        soc = null
+        levelWh = null
+        chargeState = null
+        instantaneousKw = null
+        endSession()
+        suspendedAtMs = null
+        levelAtSuspendWh = null
+        chargingAtSuspend = false
+        resumePending = false
+        settings.reserveSocPct = Params().reserveSocPct.roundToInt()
         settings.consent = false
         onChange()
     }
@@ -299,7 +309,18 @@ class StayGoEngine(
         levelWh = wh
         // A rising level while driving is regeneration, not charging.
         if (unlocked) {
-            if (resumePending) continueOrEndSession(now, wh) else estimator.addLevel(now, wh)
+            if (resumePending) {
+                continueOrEndSession(now, wh)
+            } else {
+                // A level that arrives after the gap was settled on time alone still tells whether the car drove.
+                val before = levelAtSuspendWh
+                levelAtSuspendWh = null
+                if (before != null && wh < before - DROVE_AWAY_WH) {
+                    log("session ended while away")
+                    endSession()
+                }
+                estimator.addLevel(now, wh)
+            }
             advance(now)
             recordPower(now)
         }
@@ -577,8 +598,9 @@ class StayGoEngine(
         charging != ChargingStatus.CHARGING && charging != ChargingStatus.FINISHED -> GoAvailability.LOCKED_NOT_CHARGING
         naviUnavailable || !naviReady -> GoAvailability.LOCKED_NAVI_UNAVAILABLE
         destination == null -> GoAvailability.LOCKED_NO_DESTINATION
-        // A charging stop on the route is the navigation's own plan: Go keeps it, whichever rule applies.
-        !arrivalUnavailable && destinationTrip?.chargingStop != null -> GoAvailability.VIA_STOP
+        // A charging stop on the route is the navigation's own plan, and Go keeps it unless the arrival
+        // without that stop is known to meet the reserve (a Go verdict on the navigation's own figures).
+        destinationTrip?.chargingStop != null && (arrivalUnavailable || d.emphasis != Emphasis.GO) -> GoAvailability.VIA_STOP
         else -> GoAvailability.DIRECT
     }
 
@@ -595,7 +617,11 @@ class StayGoEngine(
             resumePending = false
             val since = suspendedAtMs
             suspendedAtMs = null
-            levelAtSuspendWh = null
+            // The driver's word covers a short look away, not a gap in which the car may have driven: after a
+            // longer one a car with no charging signal starts a new session and the driver is asked again.
+            val longGap = since == null || now - since > SHORT_GAP_MS
+            if (longGap && driverConfirmedCharging && chargeState == null) endSession()
+            if (longGap) driverConfirmedCharging = false
             if (since != null && now - since > SESSION_MAX_GAP_MS) endSession() else trend.resume()
         }
         val signalsReadable = chargeState != null || levelWh != null

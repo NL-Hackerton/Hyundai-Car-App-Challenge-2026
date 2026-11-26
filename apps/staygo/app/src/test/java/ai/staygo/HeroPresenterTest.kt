@@ -65,7 +65,8 @@ class HeroPresenterTest {
         val h = HeroPresenter.present(Decision(1, Emphasis.NONE, Decision.State.CHARGE_STOPPED_SHORT, deficitPct = 6.0), 9.0, 60)
         assertEquals(Verdict.WAIT, h.verdict)
         assertEquals("충전이 멈췄습니다", h.headline)
-        assertEquals("6%p 부족", h.chip)
+        assertEquals("6%p 부족 · 충전기를 확인하세요", h.chip)
+        assertEquals("15%p 넘게 부족", HeroPresenter.shortfall(-13.0, 15))
         val unknown = HeroPresenter.present(Decision(1, Emphasis.NONE, Decision.State.CHARGE_FINISHED), null, 80)
         assertEquals(Verdict.WAIT, unknown.verdict)
     }

@@ -103,6 +103,9 @@ class MainActivity : ComponentActivity() {
     /** Picks the layout for the current window (narrow/portrait vs wide) and day/night colors. */
     private fun inflate() {
         setContentView(R.layout.activity_main)
+        // The fresh layout shows the default lock text again; the delayed "cannot confirm" note is re-armed.
+        lockUnknownNote?.let { main.removeCallbacks(it) }
+        lockUnknownNote = null
         tap(R.id.infoButton) { showInfo(true) }
         tap(R.id.infoClose) { showInfo(false) }
         // On a blocked screen neither button can act; a tap answers with why.
@@ -138,6 +141,8 @@ class MainActivity : ComponentActivity() {
         listOf(R.id.socBar, R.id.powerChart, R.id.arrivalBar).forEach { show(it, !compact) }
         (findViewById<View>(R.id.routeText).parent as View).visibility = if (compact) View.GONE else View.VISIBLE
         (findViewById<View>(R.id.footText).parent as View).visibility = if (compact) View.GONE else View.VISIBLE
+        // Narrow windows: the parking-limit caption gets the whole line; the hero already states the basis.
+        show(R.id.ruleText, !narrow)
         findViewById<TextView>(R.id.reasonText).maxLines = if (compact) 1 else 2
         show(R.id.infoOverlay, infoShown)
     }
@@ -324,7 +329,7 @@ class MainActivity : ComponentActivity() {
             !s.screen.interactive -> " "
             !s.naviAvailable -> "내비 응답 없음"
             s.destination == null -> "내비 목적지 없음"
-            s.usesTargetSoc() -> "내비 응답 없음 · 목표 SOC로 판단"
+            s.usesTargetSoc() -> "내비가 도착 SOC를 주지 않음 · 목표 SOC로 판단"
             else -> "내비 경로 계산 중"
         }
         RouteState.Direct -> "내비 경로 · 충전 경유 없이 직행"
@@ -371,7 +376,7 @@ class MainActivity : ComponentActivity() {
         val pmax = power?.sessionMaxKw
         text(R.id.powerNote, when {
             !charging -> " "
-            power == null -> "충전 전력을 읽지 못해 SOC 기준으로 판단"
+            power == null -> "충전 전력 측정 중 · SOC 기준으로 판단"
             pmax == null -> "배터리 전력량 변화로 계산합니다"
             !power.sessionMaxTrusted -> "이번 충전 최대를 알 수 없어 SOC 기준으로 판단"
             else -> "이번 충전 최대 ${pmax.roundToInt()} kW의 ${(power.kw / pmax * 100).roundToInt().coerceAtMost(100)}%"
@@ -396,7 +401,7 @@ class MainActivity : ComponentActivity() {
             !s.screen.interactive -> " "
             target || s.screen == Screen.TARGET_SOC_NEEDED -> "도착 SOC 계산 불가 · 목표 SOC로 판단"
             a?.socPct != null && a.reserveMet -> "예비 SOC ${s.reserveSocPct}% 충족"
-            a?.socPct != null -> "예비 SOC ${s.reserveSocPct}%까지 ${HeroPresenter.deficit(a.socPct, s.reserveSocPct)}%p 부족"
+            a?.socPct != null -> "예비 SOC ${s.reserveSocPct}%까지 ${HeroPresenter.shortfall(a.socPct, s.reserveSocPct)}"
             s.destination == null -> "내비 목적지 없음"
             else -> "내비 경로 계산 중"
         })
@@ -425,7 +430,7 @@ class MainActivity : ComponentActivity() {
             s.go == GoAvailability.LOCKED_NO_DESTINATION -> "목적지 없음 · 잠김"
             s.go == GoAvailability.LOCKED_NAVI_UNAVAILABLE -> "내비 응답 없음 · 잠김"
             s.go == GoAvailability.LOCKED_NOT_CHARGING -> "충전 중에만 사용"
-            s.go == GoAvailability.VIA_STOP -> "${HeroPresenter.shortStopName(via?.stopName ?: "")} 경유 경로를 내비로"
+            s.go == GoAvailability.VIA_STOP -> via?.let { "${HeroPresenter.shortStopName(it.stopName)} 경유 경로를 내비로" } ?: "충전 경유지 포함 경로를 내비로"
             else -> "목적지 경로를 내비로"
         })
         // A locked button still answers a tap with the reason (toast), so it stays enabled for touch.
@@ -532,6 +537,7 @@ class MainActivity : ComponentActivity() {
             gravity = Gravity.BOTTOM or Gravity.START
             bottomMargin = (root.height - (at[1] - origin[1] + anchor.height) + dp(24)).coerceAtLeast(dp(16))
             marginStart = at[0] - origin[0] + dp(24)
+            leftMargin = marginStart
             marginEnd = dp(24)
         }
         t.maxWidth = (anchor.width - dp(48)).coerceAtLeast(dp(320))

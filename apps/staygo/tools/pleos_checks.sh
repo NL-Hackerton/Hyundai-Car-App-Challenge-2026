@@ -62,7 +62,7 @@ print(" ".join(sorted(c["name"] for c in out if c["exported"] and not c["permiss
 ')
 [ "$open" = "ai.staygo.MainActivity" ] && res R7.components PASS "exported without permission: launcher activity only" || res R7.components FAIL "exported without permission: $open"
 echo "$manifest" | grep -q 'android.permission.INTERNET' && res R7.network FAIL "INTERNET permission declared" || res R7.network PASS "no network permission"
-res R7.permissions INFO "$(echo "$manifest" | grep -A1 'E: uses-permission' | grep -o '"[^"]*permission[^"]*"' | tr -d '"' | sort -u | tr '\n' ' ')"
+res R7.permissions INFO "$(echo "$manifest" | grep -A1 'E: uses-permission' | grep 'android:name' | grep -o '="[^"]*"' | tr -d '="' | sort -u | tr '\n' ' ')"
 
 # ---- install without granting, then the consent and permission path a driver takes ----
 $A uninstall $PKG >/dev/null 2>&1

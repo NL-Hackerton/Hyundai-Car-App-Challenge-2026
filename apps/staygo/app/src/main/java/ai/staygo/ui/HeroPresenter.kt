@@ -63,9 +63,11 @@ object HeroPresenter {
      * Shortfall against the reserve in whole points, taken from the arrival SOC as it is displayed, so the
      * two numbers on the screen always add up. [fallback] is the engine's figure when no arrival is shown.
      */
-    fun deficit(arrivalSoc: Double?, reserve: Int, fallback: Double? = null): Int = when {
-        arrivalSoc != null -> (reserve - floor(arrivalSoc).toInt()).coerceAtLeast(1)
-        else -> ceil(fallback ?: 0.0).toInt()
+    fun shortfall(arrivalSoc: Double?, reserve: Int, fallback: Double? = null): String = when {
+        // Below zero no arrival figure is shown, so the shortfall is stated against the whole reserve.
+        arrivalSoc != null && arrivalSoc < 0.0 -> "$reserve%p 넘게 부족"
+        arrivalSoc != null -> "${(reserve - floor(arrivalSoc).toInt()).coerceAtLeast(1)}%p 부족"
+        else -> "${ceil(fallback ?: 0.0).toInt()}%p 부족"
     }
 
     /** Waiting times are lower bounds, so they round up to whole minutes. */
@@ -126,7 +128,7 @@ object HeroPresenter {
         val ratio = d.powerRatio?.let { (it * 100).roundToInt() }
         val leaving = if (withoutStop) "경유 충전 없이 가면" else "지금 가면"
         val met = arrivalSoc?.let { "예비 $reserve% 충족 (+${(it.roundToInt() - reserve).coerceAtLeast(0)}%p)" } ?: "예비 $reserve% 충족"
-        val short = "${deficit(arrivalSoc, reserve, d.deficitPct)}%p 부족"
+        val short = shortfall(arrivalSoc, reserve, d.deficitPct)
         return when (d.state) {
             Decision.State.NOT_CHARGING -> Hero(
                 Verdict.WAIT, false, "충전을 시작하면 판단합니다", "Stay·Go는 급속충전 중에만 안내합니다", null, Tone.NEUTRAL, label = "충전 전",
@@ -145,7 +147,7 @@ object HeroPresenter {
                 }
             Decision.State.CHARGE_STOPPED_SHORT -> Hero(
                 Verdict.WAIT, false, "충전이 멈췄습니다", "$leaving 목적지 도착 SOC $a · 예비 $reserve% 미달",
-                short, Tone.WARNING, label = "확인 필요",
+                "$short · 충전기를 확인하세요", Tone.WARNING, label = "충전 멈춤",
             )
             Decision.State.SHORT_OF_RESERVE -> Hero(
                 Verdict.STAY, true, "조금 더 충전하세요", "$leaving 목적지 도착 SOC $a · 예비 $reserve% 미달",
@@ -154,7 +156,7 @@ object HeroPresenter {
             )
             Decision.State.RESERVE_MET_POWER_HIGH -> Hero(
                 Verdict.STAY, false, "아직 빠르게 충전되는 중",
-                if (slowdownKw != null) "도착 SOC $a · ${slowdownKw.roundToInt()} kW 아래로 줄면 출발 안내"
+                if (slowdownKw != null) "도착 SOC $a · ${slowdownKw.roundToInt()}\u00A0kW 아래로 줄면 출발 안내"
                 else "도착 SOC $a · 충전 전력이 이번 충전 최대의 ${ratio ?: "--"}%",
                 met, Tone.POSITIVE,
             )
@@ -186,7 +188,7 @@ object HeroPresenter {
             Verdict.CHOICE, false,
             "경유 충전이 약 ${gainMinutes.roundToInt()}분 빠릅니다",
             "${shortStopName(via.stopName)} 최대 ${via.maxPowerKw?.roundToInt() ?: "--"} kW · ${via.chargerCount ?: "--"}기$source · 대기·고장은 알 수 없습니다",
-            "${deficit(s.arrival?.socPct, s.reserveSocPct, d.deficitPct)}%p 부족" + (d.extraWaitMinutes?.let { " · 여기서 최소 ${minutes(it)}분" } ?: ""),
+            shortfall(s.arrival?.socPct, s.reserveSocPct, d.deficitPct) + (d.extraWaitMinutes?.let { " · 여기서 최소 ${minutes(it)}분" } ?: ""),
             Tone.WARNING,
         )
     }

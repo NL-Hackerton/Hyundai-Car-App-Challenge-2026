@@ -473,6 +473,10 @@ class StayGoEngineTest {
         assertEquals(Screen.TARGET_SOC_NEEDED, s.screen)
         assertNull(s.arrival)
         assertEquals(RouteState.None, s.route)
+        // The arrival without the stop cannot be computed, so Go must not take the stop out of the route.
+        assertEquals(GoAvailability.VIA_STOP, s.go)
+        r.engine.go()
+        assertEquals(listOf<ChargingStop?>(STOP), r.navi.routes)
     }
 
     @Test fun fasterStopAheadSendsTheRouteThroughIt() {
@@ -731,7 +735,7 @@ class StayGoEngineTest {
         r.engine.confirmCharging()
         assertEquals(ChargingStatus.CHARGING, r.state().charging)
         r.engine.suspend()
-        r.now += 60_000L
+        r.now += 30_000L
         r.engine.resume()
         r.engine.onSoc(62)
         r.now += 6_000L
@@ -739,6 +743,16 @@ class StayGoEngineTest {
         // No level sample will ever settle the session: past the grace it continues on the driver's word.
         assertEquals(ChargingStatus.CHARGING, r.state().charging)
         assertEquals(ChargingBasis.DRIVER_CONFIRMED, r.state().chargingBasis)
+
+        // A longer gap may hide a drive: the driver is asked again instead of trusted.
+        r.engine.suspend()
+        r.now += 20 * 60_000L
+        r.engine.resume()
+        r.engine.onSoc(62)
+        r.now += 6_000L
+        r.engine.tick()
+        assertEquals(Screen.CHARGING_UNCONFIRMED, r.state().screen)
+        assertNull(r.state().occupancy)
 
         // The same car with a readable charge state needs no confirmation.
         r.engine.suspend()

@@ -165,13 +165,17 @@ class StayGoViewModel(app: Application, private val handle: SavedStateHandle) : 
     }
 
     /** A link that failed to come up is opened again while the screen stays visible. */
+    private var retries = 0
+
     private fun retryFailedLinks() {
         val s = _state.value
+        retries++
         if (s.vehicleLinkFailure == VehicleLinkFailure.UNAVAILABLE) {
             sources.vehicle.stop()
             sources.vehicle.start(engine)
         }
-        if (!s.naviAvailable && s.screen.interactive) {
+        // The navigation gets 30 s per attempt: a start still in progress is not cut off.
+        if (!s.naviAvailable && s.screen.interactive && retries % 3 == 0) {
             sources.navi.stop()
             sources.navi.start(engine)
         }

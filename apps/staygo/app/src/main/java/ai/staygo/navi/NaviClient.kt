@@ -187,9 +187,18 @@ class NaviClient(private val context: Context) : NaviSource {
 
     override fun requestDestinationTrip() {
         if (!ready || destination == null) return
+        // Answers are checked against the remaining distance, which shrinks while driving: refresh it now and
+        // then so a later stop on the same route is not judged against the distance at departure.
+        val now = SystemClock.elapsedRealtime()
+        if (now - destinationAskedAtMs > DESTINATION_REFRESH_MS) {
+            destinationAskedAtMs = now
+            try { helper?.getDestinationInfo() } catch (_: Throwable) {}
+        }
         destinationTripQueued = true
         pump()
     }
+
+    private var destinationAskedAtMs = 0L
 
     override fun go(viaStop: ChargingStop?) {
         val h = helper
@@ -269,6 +278,7 @@ class NaviClient(private val context: Context) : NaviSource {
         private const val REQUEST_TIMEOUT_MS = 5_000L
         private const val DRAIN_MS = 5_000L
         private const val ROUTE_ERROR_WINDOW_MS = 10_000L
+        private const val DESTINATION_REFRESH_MS = 60_000L
 
         /** The trip to the destination is about as long as the navigation says the destination is away. */
         fun plausibleDestinationDistance(distanceM: Int, remainDistanceM: Int): Boolean =

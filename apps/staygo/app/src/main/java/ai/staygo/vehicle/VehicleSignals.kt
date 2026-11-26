@@ -29,6 +29,7 @@ class VehicleSignals(private val context: Context) : VehicleSource {
     @Volatile private var listener: VehicleSource.Listener? = null
 
     private var vehicle: Vehicle? = null
+    @Volatile private var generation = 0
     private var socListener: EvBatteryStateOfChargeListener? = null
     private var car: Any? = null
     private var cpm: Any? = null
@@ -55,6 +56,7 @@ class VehicleSignals(private val context: Context) : VehicleSource {
         } catch (_: Throwable) {}
         try { car?.let { it.javaClass.getMethod("disconnect").invoke(it) } } catch (_: Throwable) {}
         vehicle = null; socListener = null; car = null; cpm = null; propertyCallback = null
+        generation++
     }
 
     private inline fun emit(crossinline block: VehicleSource.Listener.() -> Unit) {
@@ -71,7 +73,10 @@ class VehicleSignals(private val context: Context) : VehicleSource {
             vehicle = v
             v.initialize()
             val battery = v.getEvBattery()
+            // A callback from a link that stop() already released must not subscribe or report again.
+            val gen = generation
             battery.checkEvBatteryStateOfChargeCapabilities({ config ->
+                if (gen != generation) return@checkEvBatteryStateOfChargeCapabilities
                 val access = config.accessType
                 if (access != AccessType.READ && access != AccessType.READ_WRITE) {
                     emit { onVehicleLinkFailed(VehicleLinkFailure.SOC_UNSUPPORTED, "accessType=$access") }
@@ -80,15 +85,15 @@ class VehicleSignals(private val context: Context) : VehicleSource {
                 // Supported: only now query and subscribe.
                 try {
                     battery.getEvBatteryStateOfCharge(
-                        { soc -> if (soc != null) emit { onSoc(soc) } },
-                        { e -> emit { onVehicleLinkFailed(socFailure(e), "get: ${e.message}") } },
+                        { soc -> if (soc != null && gen == generation) emit { onSoc(soc) } },
+                        { e -> if (gen == generation) emit { onVehicleLinkFailed(socFailure(e), "get: ${e.message}") } },
                     )
                     val l = object : EvBatteryStateOfChargeListener {
                         override fun onEvBatteryStateOfChargeUpdated(value: Int?) {
-                            if (value != null) emit { onSoc(value) }
+                            if (value != null && gen == generation) emit { onSoc(value) }
                         }
                         override fun onFailed(e: Exception) {
-                            emit { onVehicleLinkFailed(socFailure(e), "listener: ${e.message}") }
+                            if (gen == generation) emit { onVehicleLinkFailed(socFailure(e), "listener: ${e.message}") }
                         }
                     }
                     socListener = l
@@ -96,7 +101,7 @@ class VehicleSignals(private val context: Context) : VehicleSource {
                 } catch (t: Throwable) {
                     emit { onVehicleLinkFailed(socFailure(t), "${t.javaClass.simpleName}: ${t.message}") }
                 }
-            }, { e -> emit { onVehicleLinkFailed(socFailure(e), "capability: ${e.message}") } })
+            }, { e -> if (gen == generation) emit { onVehicleLinkFailed(socFailure(e), "capability: ${e.message}") } })
         } catch (t: Throwable) {
             emit { onVehicleLinkFailed(socFailure(t), "${t.javaClass.simpleName}: ${t.message}") }
         }

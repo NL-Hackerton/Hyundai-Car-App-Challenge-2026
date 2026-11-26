@@ -30,7 +30,9 @@
 | `pleos.car.permission.NAVI_ROUTE` | 목적지 조회, 경로 안내 정보, Go 경로 요청 |
 | `pleos.car.permission.NAVI_ROUTE_SEARCH` | 도착 예상 SOC 요청(`requestTrip`) |
 
-<p>표 1. 선언한 권한 5개와 용도. 이 밖의 권한은 없다.</p>
+<p>표 1. 앱이 선언한 권한 5개와 용도.</p>
+
+빌드된 APK에는 라이브러리가 더한 권한 두 개가 더 들어 있다. `ai.pleos.playground.service.vehicle.VEHICLE_BINDING`은 Pleos Vehicle SDK가 차량 서비스에 연결할 때 쓰고, `ai.staygo.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION`은 androidx가 앱 내부 수신기를 보호하려고 정의한다. 네트워크·위치·저장소 권한은 없다.
 
 Pleos 권한의 승인 대상 여부는 앱 마켓 심사에서 정해지며 이 저장소에서 확인하지 못했다.
 
@@ -67,13 +69,13 @@ Pleos Connect 에뮬레이터 v2.1.0에서 확인했다. `tools/demo_charge.sh`�
 
 에뮬레이터의 충전 상태 값은 충전 스위치를 켜도 바뀌지 않고 순간 충전전력은 0이므로, 시연 화면의 충전 인식과 충전전력은 배터리 잔량 변화로 계산한 값이다.
 
-버전 1.2.0은 서명한 release 빌드를 Pleos Connect v2.1.0 에뮬레이터에서 `tools/pleos_checks.sh`로 점검했다(결과는 `docs/PRODUCTION_READINESS.md`). 가상 콘솔 쓰기는 브라우저 세션 신호(`POST /browser/session?client=<id>`, 1초 간격)가 살아 있어야 200을 돌려준다. 권한 거절·SOC 미지원·내비 실패 등 나머지 상태는 JVM 테스트와 디버그 빌드 시뮬레이터로 확인했다. 저장소의 `apk/StayGo_release.apk`와 시연 영상은 서류 접수 때 낸 1.0.0이며 이 문서가 설명하는 1.2.0이 아니다. 1.2.0 APK는 저장소에 넣지 않았다.
+버전 1.2.1은 서명한 release 빌드를 Pleos Connect v2.1.0 에뮬레이터에서 `tools/pleos_checks.sh`로 점검했다(결과는 `docs/PRODUCTION_READINESS.md`). 가상 콘솔 쓰기는 브라우저 세션 신호(`POST /browser/session?client=<id>`, 1초 간격)가 살아 있어야 200을 돌려준다. 권한 거절·SOC 미지원·내비 실패 등 나머지 상태는 JVM 테스트와 디버그 빌드 시뮬레이터로 확인했다. 저장소의 `apk/StayGo_release.apk`와 시연 영상은 1.0.0이며 이 문서가 설명하는 1.2.1이 아니다. 1.2.1 APK는 저장소에 넣지 않았다.
 
 ## 출시 점검
 
 `tools/pleos_checks.sh APK OUT_DIR`은 Pleos Connect 에뮬레이터에서 release APK를 점검하고 항목마다 PASS·FAIL·INFO 한 줄을 남긴다. 서명·debuggable·공개 컴포넌트·네트워크 권한(정적), 권한 없이 설치한 뒤의 안내·거부·동의와 시스템 권한 창, 로그의 수치·장소 이름, 콜드 스타트, CPU·메모리, 주행 잠금과 해제, 주행 중 실행, 백그라운드 정지, 프로세스 재생성 뒤 세션 복원, monkey 600회, 삭제 뒤 잔여 파일을 본다. `BUILD_TOOLS`(aapt, apksigner 위치)가 필요하다.
 
-버전 1.2.0의 점검 결과와 평가 이력, 에뮬레이터로 확인할 수 없는 항목은 [`docs/PRODUCTION_READINESS.md`](docs/PRODUCTION_READINESS.md)에 있다.
+버전 1.2.1의 점검 결과와 평가 이력, 에뮬레이터로 확인할 수 없는 항목은 [`docs/PRODUCTION_READINESS.md`](docs/PRODUCTION_READINESS.md)에 있다.
 
 ## 라이선스
 
