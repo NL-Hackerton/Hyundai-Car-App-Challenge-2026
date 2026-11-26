@@ -113,7 +113,9 @@ for i in $(seq 1 30); do sleep 3; logs | grep -q 'emphasis=STAY' && break; done
 logs | grep -q 'emphasis=STAY' && res R2.stay PASS "$(logs | grep -m1 'emphasis=STAY' | grep -o 'rule=.*Pmax=[^ ]*')" || res R2.stay FAIL "no Stay decision within 90 s"
 shot charging
 # With the tag enabled for a rehearsal the log still carries numbers only, never a place name.
-names=$(logs | grep -c -P '[\x{AC00}-\x{D7A3}]')
+# The whole process is checked, not only the app's tag: the Pleos SDKs run in it and handle place names.
+pid=$($A shell pidof $PKG | tr -d '\r')
+names=$($A logcat -d --pid="$pid" | grep -c -P '[\x{AC00}-\x{D7A3}]')
 [ "$names" = 0 ] && res R7.logs.names PASS "debug-tag log has no place names" || res R7.logs.names FAIL "$names lines with place names"
 
 # R5 parked CPU and memory while charging is shown

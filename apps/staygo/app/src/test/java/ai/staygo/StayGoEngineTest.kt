@@ -284,6 +284,31 @@ class StayGoEngineTest {
         assertEquals(Screen.CONNECTING, r.state().screen)
     }
 
+    @Test fun withdrawingConsentDeletesWhatWasKept() {
+        val r = Rig()
+        r.vehicle(); r.navi()
+        r.charge(45, 230.0)
+        r.engine.adjustReserveSoc(10)
+        assertTrue(r.state().hasChargingHistory)
+        r.engine.declineConsent()
+        assertEquals(Screen.CONSENT_REQUIRED, r.state().screen)
+        assertTrue(r.bands.isEmpty())
+        assertEquals(15, r.settings.reserveSocPct)
+        val kept = r.engine.sessionState()
+        assertNull(kept.chargingSinceMs)
+        assertNull(kept.sessionMaxKw)
+        assertFalse(kept.wasCharging)
+    }
+
+    @Test fun consentAndDeletionAreIgnoredWhileLocked() {
+        val r = Rig(consent = null)
+        r.engine.acceptConsent() // restriction still unknown
+        assertFalse(r.engine.consentGiven)
+        r.engine.onDrivingRestricted(true)
+        r.engine.acceptConsent()
+        assertFalse(r.engine.consentGiven)
+    }
+
     @Test fun chargingHistoryCanBeDeleted() {
         val r = Rig()
         r.vehicle(); r.navi()
@@ -478,7 +503,10 @@ class StayGoEngineTest {
         r.engine.onChargingStopTrip(STOP, 18)
         val s = r.state()
         assertEquals(2, s.decision.rule)
-        assertEquals(GoAvailability.DIRECT, s.go)
+        // The stop is the navigation's own plan: Go keeps it instead of sending a route without charging.
+        assertEquals(GoAvailability.VIA_STOP, s.go)
+        r.engine.go()
+        assertEquals(listOf<ChargingStop?>(STOP), r.navi.routes)
         assertNull((s.route as RouteState.ViaStop).comparison)
     }
 
@@ -692,6 +720,65 @@ class StayGoEngineTest {
         assertNull(s.suspendedAtMs)
         r.vehicle()
         assertEquals(Screen.NOT_CHARGING, r.state().screen)
+    }
+
+    @Test fun carWithoutBatteryLevelRecoversAfterTheScreenComesBack() {
+        val r = Rig()
+        r.parked()
+        r.engine.onSoc(60)
+        r.navi()
+        r.now += 6_000L
+        r.engine.confirmCharging()
+        assertEquals(ChargingStatus.CHARGING, r.state().charging)
+        r.engine.suspend()
+        r.now += 60_000L
+        r.engine.resume()
+        r.engine.onSoc(62)
+        r.now += 6_000L
+        r.engine.tick()
+        // No level sample will ever settle the session: past the grace it continues on the driver's word.
+        assertEquals(ChargingStatus.CHARGING, r.state().charging)
+        assertEquals(ChargingBasis.DRIVER_CONFIRMED, r.state().chargingBasis)
+
+        // The same car with a readable charge state needs no confirmation.
+        r.engine.suspend()
+        r.now += 60_000L
+        r.engine.resume()
+        r.engine.onChargeState(1)
+        r.now += 6_000L
+        r.engine.tick()
+        assertEquals(ChargingBasis.CHARGE_STATE, r.state().chargingBasis)
+    }
+
+    @Test fun coarseLevelStepsAtLowPowerDoNotEndCharging() {
+        val r = Rig()
+        r.vehicle(); r.navi()
+        r.engine.onDestinationTrip(DestinationTrip(20, 48_800.0, 375_000, null))
+        r.charge(60, 150.0)
+        // 100 Wh steps at 20 kW: the reported level changes every 18 s.
+        var exact = r.levelWh
+        repeat(180) {
+            r.now += 1_000L
+            exact += 20.0 * 1000.0 / 3600.0
+            r.levelWh = Math.floor(exact / 100.0) * 100.0
+            r.engine.onBatteryLevelWh(r.levelWh)
+            r.engine.tick()
+            if (it > 60) assertEquals("second $it", ChargingStatus.CHARGING, r.state().charging)
+        }
+    }
+
+    @Test fun routeCancelledRightAfterGoClearsTheDestination() {
+        val r = Rig()
+        r.vehicle(); r.navi()
+        r.engine.onDestinationTrip(DestinationTrip(20, 48_800.0, 375_000, null))
+        r.charge(45, 230.0)
+        r.engine.onRouteResult(null, true, null)
+        r.engine.onDestination(null) // cancelled, and no new route follows
+        r.charge(12, 230.0)
+        val s = r.state()
+        assertNull(s.destination)
+        assertNull(s.arrival)
+        assertEquals(GoAvailability.LOCKED_NO_DESTINATION, s.go)
     }
 
     @Test fun plannedStopMatchesActiveWaypointByLeadingName() {

@@ -3,7 +3,9 @@ package ai.staygo
 import ai.staygo.core.GridStationDirectory
 import ai.staygo.core.StayGoEngine
 import ai.staygo.core.StayGoUiState
+import ai.staygo.core.Screen
 import ai.staygo.core.UiNotice
+import ai.staygo.core.VehicleLinkFailure
 import android.app.Application
 import android.content.pm.ApplicationInfo
 import android.os.Bundle
@@ -55,6 +57,7 @@ class StayGoViewModel(app: Application, private val handle: SavedStateHandle) : 
     private var visible = false
     private var watching = false
     private var ticker: Job? = null
+    private var watcher: Job? = null
 
     val state: StateFlow<StayGoUiState> get() = _state
     val notices: SharedFlow<UiNotice> = _notices
@@ -119,6 +122,16 @@ class StayGoViewModel(app: Application, private val handle: SavedStateHandle) : 
         if (visible && !watching) {
             watching = true
             sources.restrictions.start(engine::onDrivingRestricted)
+            // A restriction service that was not up yet is asked again; until it answers the screen stays locked.
+            watcher = viewModelScope.launch {
+                while (true) {
+                    delay(RETRY_EVERY_S * 1_000L)
+                    if (_state.value.screen == Screen.RESTRICTION_UNKNOWN) {
+                        sources.restrictions.stop()
+                        sources.restrictions.start(engine::onDrivingRestricted)
+                    }
+                }
+            }
         }
         val run = visible && granted && engine.consentGiven
         if (run && ticker == null) {
@@ -126,10 +139,12 @@ class StayGoViewModel(app: Application, private val handle: SavedStateHandle) : 
             sources.vehicle.start(engine)
             sources.navi.start(engine)
             ticker = viewModelScope.launch {
+                var seconds = 0
                 while (true) {
                     engine.tick()
                     publish()
                     delay(1_000L)
+                    if (++seconds % RETRY_EVERY_S == 0) retryFailedLinks()
                 }
             }
         } else if (!run && ticker != null) {
@@ -141,10 +156,25 @@ class StayGoViewModel(app: Application, private val handle: SavedStateHandle) : 
         }
         if (!visible && watching) {
             watching = false
+            watcher?.cancel()
+            watcher = null
             sources.restrictions.stop()
             engine.onRestrictionUnknown()
         }
         publish()
+    }
+
+    /** A link that failed to come up is opened again while the screen stays visible. */
+    private fun retryFailedLinks() {
+        val s = _state.value
+        if (s.vehicleLinkFailure == VehicleLinkFailure.UNAVAILABLE) {
+            sources.vehicle.stop()
+            sources.vehicle.start(engine)
+        }
+        if (!s.naviAvailable && s.screen.interactive) {
+            sources.navi.stop()
+            sources.navi.start(engine)
+        }
     }
 
     private fun publish() {
@@ -188,5 +218,6 @@ class StayGoViewModel(app: Application, private val handle: SavedStateHandle) : 
         /** Built by tools/build_station_snapshot.py; the app works without it. */
         const val STATIONS_ASSET = "stations.tsv"
         private const val KEY_SESSION = "session"
+        private const val RETRY_EVERY_S = 10
     }
 }

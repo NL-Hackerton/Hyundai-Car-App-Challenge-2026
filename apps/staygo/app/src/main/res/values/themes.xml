@@ -15,6 +15,8 @@
         <item name="android:includeFontPadding">false</item>
         <!-- Korean: break between phrases, not inside a word (API 33+) -->
         <item name="android:lineBreakWordStyle">phrase</item>
+        <!-- The copy is Korean whatever the system language is; phrase breaking follows the text locale. -->
+        <item name="android:textLocale">ko</item>
         <item name="android:breakStrategy">balanced</item>
     </style>
     <!-- Feature 112/134 ExtraBold: the three key numbers -->

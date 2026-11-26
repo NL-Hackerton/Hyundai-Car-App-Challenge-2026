@@ -140,7 +140,7 @@ class VehicleSignals(private val context: Context) : VehicleSource {
                     "hashCode" -> return@newProxyInstance System.identityHashCode(self)
                     "equals" -> return@newProxyInstance self === args?.get(0)
                     "toString" -> return@newProxyInstance "StayGoPropertyCallback"
-                    "onChangeEvent" -> {
+                    "onChangeEvent" -> try {
                         val ev = args?.getOrNull(0)
                         val pid = ev?.javaClass?.getMethod("getPropertyId")?.invoke(ev) as? Int
                         val value = availableValue(ev)
@@ -149,6 +149,8 @@ class VehicleSignals(private val context: Context) : VehicleSource {
                             stateId -> (value as? Int)?.let { emit { onChargeState(it) } }
                             rateId -> (value as? Float)?.let { emit { onInstantaneousRateKw(it / 1_000_000.0) } }
                         }
+                    } catch (t: Throwable) {
+                        // A malformed event is dropped; the binder thread must not take the app down.
                     }
                 }
                 null

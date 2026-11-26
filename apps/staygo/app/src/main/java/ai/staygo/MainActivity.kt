@@ -29,6 +29,7 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.text.TextUtils
 import android.widget.TextView
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
@@ -57,6 +58,10 @@ class MainActivity : ComponentActivity() {
     private var narrow = false
     private var compact = false
     private var toastHide: Runnable? = null
+    private var lockUnknownNote: Runnable? = null
+    private var blockedReason: String? = null
+    private var inlineNotice: String? = null
+    private var chipSlotFree = true
     private var heroAction: HeroPresenter.Action? = null
     private var infoShown = false
     /** The system no longer shows the permission dialog: the only way left is the app's settings page. */
@@ -100,8 +105,9 @@ class MainActivity : ComponentActivity() {
         setContentView(R.layout.activity_main)
         tap(R.id.infoButton) { showInfo(true) }
         tap(R.id.infoClose) { showInfo(false) }
-        tap(R.id.goButton) { viewModel.go() }
-        tap(R.id.stayButton) { viewModel.stay() }
+        // On a blocked screen neither button can act; a tap answers with why.
+        tap(R.id.goButton) { blockedReason?.let { showToast(it) } ?: viewModel.go() }
+        tap(R.id.stayButton) { blockedReason?.let { showToast(it) } ?: viewModel.stay() }
         tap(R.id.stepMinus) { viewModel.adjustTargetSoc(-STEP_PCT) }
         tap(R.id.stepPlus) { viewModel.adjustTargetSoc(STEP_PCT) }
         tap(R.id.reserveMinus) { viewModel.adjustReserveSoc(-STEP_PCT) }
@@ -133,13 +139,6 @@ class MainActivity : ComponentActivity() {
         (findViewById<View>(R.id.routeText).parent as View).visibility = if (compact) View.GONE else View.VISIBLE
         (findViewById<View>(R.id.footText).parent as View).visibility = if (compact) View.GONE else View.VISIBLE
         findViewById<TextView>(R.id.reasonText).maxLines = if (compact) 1 else 2
-        // Wide windows: the toast sits inside the hero card over its route line, clear of the key numbers and
-        // the buttons. Narrow windows have no such room, so it covers the top bar instead.
-        (findViewById<View>(R.id.toast).layoutParams as FrameLayout.LayoutParams).apply {
-            gravity = if (narrow) Gravity.TOP or Gravity.CENTER_HORIZONTAL else Gravity.BOTTOM or Gravity.START
-            topMargin = if (narrow) dp(16) else 0
-            marginStart = if (narrow) dp(24) else resources.getDimensionPixelSize(R.dimen.page_pad) + dp(24)
-        }
         show(R.id.infoOverlay, infoShown)
     }
 
@@ -182,12 +181,18 @@ class MainActivity : ComponentActivity() {
     private fun render(s: StayGoUiState) {
         val locked = s.screen == Screen.DRIVING || s.screen == Screen.RESTRICTION_UNKNOWN
         renderLock(s, locked)
+        // The data notice is modal as well: nothing under it is reachable by focus or accessibility.
+        if (s.screen == Screen.CONSENT_REQUIRED) findViewById<ViewGroup>(R.id.content).apply {
+            importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
+            descendantFocusability = ViewGroup.FOCUS_BLOCK_DESCENDANTS
+        }
         val consent = s.screen == Screen.CONSENT_REQUIRED
         show(R.id.consentOverlay, consent)
         show(R.id.consentStatus, s.consentDeclined)
         if (consent) showInfo(false)
 
         val hero = HeroPresenter.present(s)
+        blockedReason = if (s.screen.interactive) null else hero.headline
         renderTopBar(s)
         renderHero(s, hero)
         renderMetrics(s)
@@ -208,16 +213,29 @@ class MainActivity : ComponentActivity() {
         content.importantForAccessibility =
             if (locked) View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS else View.IMPORTANT_FOR_ACCESSIBILITY_AUTO
         content.descendantFocusability = if (locked) ViewGroup.FOCUS_BLOCK_DESCENDANTS else ViewGroup.FOCUS_AFTER_DESCENDANTS
-        if (!locked) return
+        if (!locked) {
+            lockUnknownNote?.let { main.removeCallbacks(it) }
+            lockUnknownNote = null
+            return
+        }
         show(R.id.toast, false)
         showInfo(false)
         show(R.id.consentOverlay, false)
         if (s.screen == Screen.DRIVING) {
+            lockUnknownNote?.let { main.removeCallbacks(it) }
+            lockUnknownNote = null
             text(R.id.drivingTitle, getString(R.string.lock_driving))
             text(R.id.drivingSummary, "Stay·Go 판단은 정차 중에 보여 줍니다")
-        } else {
+        } else if (lockUnknownNote == null) {
             text(R.id.drivingTitle, getString(R.string.lock_checking))
             text(R.id.drivingSummary, " ")
+            // Still unknown after a few seconds: say so, and that the lock lifts by itself.
+            lockUnknownNote = Runnable {
+                if (viewModel.state.value.screen == Screen.RESTRICTION_UNKNOWN) {
+                    text(R.id.drivingTitle, getString(R.string.lock_unknown))
+                    text(R.id.drivingSummary, getString(R.string.lock_unknown_note))
+                }
+            }.also { main.postDelayed(it, 5_000L) }
         }
     }
 
@@ -237,14 +255,22 @@ class MainActivity : ComponentActivity() {
             s.charging == ChargingStatus.UNKNOWN -> "확인 중"
             else -> if (narrow) "충전 전" else "충전 전 · 정차"
         })
-        text(R.id.destChip, s.destination?.let { "${it.name} · ${(it.remainDistanceM / 1000.0).roundToInt()} km" } ?: "목적지 없음")
+        val d = s.destination
+        // Narrow chip: the name alone, so no number is ever cut mid-digit; the distance needs the wide bar.
+        text(R.id.destChip, when {
+            d != null -> if (narrow) d.name else "${d.name} · ${(d.remainDistanceM / 1000.0).roundToInt()} km"
+            !linked || !s.naviAvailable -> "목적지 미확인"
+            else -> "목적지 없음"
+        })
     }
 
     private fun renderHero(s: StayGoUiState, hero: HeroPresenter.Hero) {
         val pill = findViewById<TextView>(R.id.verdictPill)
+        // The pill and the Stay button always agree: a Stay the button highlights is drawn filled here too.
+        val filled = hero.strong || (hero.verdict == HeroPresenter.Verdict.STAY && s.stayEmphasized)
         val (bg, fg) = when (hero.verdict) {
-            HeroPresenter.Verdict.GO -> (if (hero.strong) R.color.sg_go else R.color.sg_card_high) to (if (hero.strong) R.color.sg_on_go else R.color.sg_go_text)
-            HeroPresenter.Verdict.STAY -> (if (hero.strong) R.color.sg_stay else R.color.sg_card_high) to (if (hero.strong) R.color.sg_on_stay else R.color.sg_text)
+            HeroPresenter.Verdict.GO -> (if (filled) R.color.sg_go else R.color.sg_card_high) to (if (filled) R.color.sg_on_go else R.color.sg_go_text)
+            HeroPresenter.Verdict.STAY -> (if (filled) R.color.sg_stay else R.color.sg_card_high) to (if (filled) R.color.sg_on_stay else R.color.sg_text)
             HeroPresenter.Verdict.CHOICE, HeroPresenter.Verdict.WAIT -> R.color.sg_card_high to R.color.sg_text_2
         }
         text(R.id.verdictPill, hero.label)
@@ -254,8 +280,16 @@ class MainActivity : ComponentActivity() {
         text(R.id.reasonText, hero.reason)
         val chip = findViewById<TextView>(R.id.heroChip)
         // Short windows: the chip gives way to the action or the stepper the driver needs.
-        show(R.id.heroChip, hero.chip != null && !(narrow && (hero.action != null || s.usesTargetSoc())))
-        if (hero.chip != null) {
+        val chipSlot = !(narrow && (hero.action != null || s.usesTargetSoc()))
+        chipSlotFree = chipSlot
+        // Narrow windows have no free strip for a toast, so a notice takes the chip's place for a few seconds.
+        val notice = inlineNotice.takeIf { narrow && chipSlot }
+        show(R.id.heroChip, chipSlot && (hero.chip != null || notice != null))
+        if (notice != null) {
+            chip.text = notice
+            setPill(chip, color(R.color.sg_toast))
+            chip.setTextColor(color(R.color.sg_on_toast))
+        } else if (hero.chip != null) {
             chip.text = hero.chip
             // A met reserve under a GO verdict takes the Go color, so the chip never looks like the Stay button.
             val (cbg, cfg) = when {
@@ -275,6 +309,8 @@ class MainActivity : ComponentActivity() {
         // SOC is a preference and lives in the settings sheet (settings button or the arrival tile).
         val target = s.usesTargetSoc() && s.charging == ChargingStatus.CHARGING && hero.action == null
         show(R.id.stepRow, target)
+        // The shortest window has room for the headline and the stepper, not for a reason line between them.
+        show(R.id.reasonText, !(compact && target))
         text(R.id.stepLabel, s.manualTargetSoc?.let { "목표 SOC $it%" } ?: "목표 SOC 정하기")
         findViewById<View>(R.id.stepMinus).contentDescription = "목표 SOC 5% 낮추기"
         findViewById<View>(R.id.stepPlus).contentDescription = "목표 SOC 5% 높이기"
@@ -297,8 +333,8 @@ class MainActivity : ComponentActivity() {
             val c = r.comparison
             when {
                 r.arrivalSocPct == null -> "내비 경로 · $name 경유 충전"
-                c != null && c.gainMinutes <= 0 -> "여기서 ${"%.1f".format(c.hereMinutes)}분 / $name ${"%.1f".format(c.candidateMinutes)}분(정차 ${s.stopOverheadMin.roundToInt()}분 포함)"
-                else -> "내비 경로 · $name 경유 충전 · 경유지 도착 SOC ${r.arrivalSocPct.roundToInt()}%"
+                c != null && c.gainMinutes <= 0 -> "여기서 ${HeroPresenter.minutes(c.hereMinutes)}분 / $name ${HeroPresenter.minutes(c.candidateMinutes)}분(정차 ${s.stopOverheadMin.roundToInt()}분 포함)"
+                else -> "경유지 도착 SOC ${r.arrivalSocPct.roundToInt()}% · 내비 경로 $name 경유"
             }
         }
     }
@@ -321,11 +357,17 @@ class MainActivity : ComponentActivity() {
         text(R.id.powerText, power?.kw?.roundToInt()?.toString() ?: "--")
         val history = s.powerHistory.map { it.elapsedMs to it.kw }
         val trend = if (power != null) HeroPresenter.trend(history) else null
-        text(R.id.powerTrend, when (trend) { HeroPresenter.Trend.DOWN -> "↓"; HeroPresenter.Trend.UP -> "↑"; HeroPresenter.Trend.FLAT -> "→"; null -> " " })
-        // "추정" never disappears: a tag in wide windows, part of the label where there is no room for the tag.
+        val arrow = when (trend) { HeroPresenter.Trend.DOWN -> "↓"; HeroPresenter.Trend.UP -> "↑"; HeroPresenter.Trend.FLAT -> "→"; null -> "" }
+        // Narrow tiles have no room for the arrow next to the number, so it joins the label; "추정" never
+        // disappears either: a tag in wide windows, part of the label where there is no room for the tag.
+        show(R.id.powerTrend, !narrow)
+        text(R.id.powerTrend, arrow.ifEmpty { " " })
         val estimated = power?.estimated == true
         show(R.id.powerTag, !narrow && estimated)
-        text(R.id.powerLabel, getString(if (narrow && estimated) R.string.label_power_estimated else R.string.label_power))
+        text(R.id.powerLabel, when {
+            !narrow -> getString(R.string.label_power)
+            else -> getString(if (estimated) R.string.label_power_estimated_short else R.string.label_power_short) + if (arrow.isNotEmpty()) " $arrow" else ""
+        })
         val pmax = power?.sessionMaxKw
         text(R.id.powerNote, when {
             !charging -> " "
@@ -354,7 +396,7 @@ class MainActivity : ComponentActivity() {
             !s.screen.interactive -> " "
             target || s.screen == Screen.TARGET_SOC_NEEDED -> "도착 SOC 계산 불가 · 목표 SOC로 판단"
             a?.socPct != null && a.reserveMet -> "예비 SOC ${s.reserveSocPct}% 충족"
-            a?.socPct != null -> "예비 SOC ${s.reserveSocPct}%까지 ${"%.1f".format(a.deficitPct ?: 0.0)}%p 부족"
+            a?.socPct != null -> "예비 SOC ${s.reserveSocPct}%까지 ${HeroPresenter.deficit(a.socPct, s.reserveSocPct)}%p 부족"
             s.destination == null -> "내비 목적지 없음"
             else -> "내비 경로 계산 중"
         })
@@ -373,8 +415,9 @@ class MainActivity : ComponentActivity() {
         styleButton(R.id.goButton, R.id.goIcon, R.id.goTitle, R.id.goSub, goPrimary, goOn, R.color.sg_go, R.color.sg_on_go)
         val via = s.route as? RouteState.ViaStop
         text(R.id.staySub, when {
+            !s.screen.interactive -> " "
             !stayOn -> "충전 중에만 사용"
-            choice -> s.decision.extraWaitMinutes?.let { "여기서 최소 ${"%.1f".format(it)}분" } ?: "여기서 계속 충전"
+            choice -> s.decision.extraWaitMinutes?.let { "여기서 최소 ${HeroPresenter.minutes(it)}분" } ?: "여기서 계속 충전"
             else -> s.power?.secondsPerPercent?.let { "1%p당 약 ${it.roundToInt()}초" } ?: "계속 충전"
         })
         text(R.id.goSub, when {
@@ -471,9 +514,27 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun showToast(message: String, icon: Int? = null) {
+        toastHide?.let { main.removeCallbacks(it) }
+        if (narrow && chipSlotFree) {
+            inlineNotice = message
+            render(viewModel.state.value)
+            toastHide = Runnable { inlineNotice = null; render(viewModel.state.value) }.also { main.postDelayed(it, 4_000L) }
+            return
+        }
         val t = findViewById<TextView>(R.id.toast)
-        // In wide windows the toast stays inside the hero card so it never covers the key numbers.
-        if (!narrow) t.maxWidth = (findViewById<View>(R.id.heroCard).width - dp(48)).coerceAtLeast(dp(320))
+        // Pleos toasts sit at the bottom: inside the hero card, over its route line, never over the verdict,
+        // the numbers or the buttons. A narrow window whose chip slot is taken shows it under the hero text.
+        val root = t.parent as View
+        val anchor = findViewById<View>(R.id.heroCard)
+        val at = IntArray(2).also { anchor.getLocationInWindow(it) }
+        val origin = IntArray(2).also { root.getLocationInWindow(it) }
+        (t.layoutParams as FrameLayout.LayoutParams).apply {
+            gravity = Gravity.BOTTOM or Gravity.START
+            bottomMargin = (root.height - (at[1] - origin[1] + anchor.height) + dp(24)).coerceAtLeast(dp(16))
+            marginStart = at[0] - origin[0] + dp(24)
+            marginEnd = dp(24)
+        }
+        t.maxWidth = (anchor.width - dp(48)).coerceAtLeast(dp(320))
         t.text = message
         t.setCompoundDrawablesRelativeWithIntrinsicBounds(icon ?: 0, 0, 0, 0)
         t.visibility = View.VISIBLE

@@ -19,7 +19,8 @@ class HeroPresenterTest {
         assertEquals(Verdict.STAY, h.verdict)
         assertTrue(h.strong)
         assertEquals("지금 가면 목적지 도착 SOC 12% · 예비 15% 미달", h.reason)
-        assertEquals("3.0%p 부족 · 최소 1.4분", h.chip)
+        // Whole numbers that add up with the arrival SOC on the same screen; a lower bound rounds up.
+        assertEquals("3%p 부족 · 최소 2분", h.chip)
         assertEquals(HeroPresenter.Tone.WARNING, h.chipTone)
     }
 
@@ -64,7 +65,7 @@ class HeroPresenterTest {
         val h = HeroPresenter.present(Decision(1, Emphasis.NONE, Decision.State.CHARGE_STOPPED_SHORT, deficitPct = 6.0), 9.0, 60)
         assertEquals(Verdict.WAIT, h.verdict)
         assertEquals("충전이 멈췄습니다", h.headline)
-        assertEquals("6.0%p 부족", h.chip)
+        assertEquals("6%p 부족", h.chip)
         val unknown = HeroPresenter.present(Decision(1, Emphasis.NONE, Decision.State.CHARGE_FINISHED), null, 80)
         assertEquals(Verdict.WAIT, unknown.verdict)
     }

@@ -54,9 +54,9 @@ Pleos 권한의 승인 대상 여부는 앱 마켓 심사에서 정해지며 이
 JDK 17과 Android SDK(compileSdk 34)가 필요하다. Pleos SDK는 `nexus-playground.pleos.ai` Maven 저장소에서 받는다.
 
 ```bash
-./gradlew :app:testDebugUnitTest      # 판단 규칙·전력 추정·엔진 상태·화면 문구·충전소 목록·시나리오 재생 테스트(88건)
+./gradlew :app:testDebugUnitTest      # 판단 규칙·전력 추정·엔진 상태·화면 문구·충전소 목록·시나리오 재생 테스트(93건)
 ./gradlew :app:assembleDebug
-./gradlew :app:assembleRelease        # keystore.properties가 있으면 서명
+./gradlew :app:assembleRelease        # keystore.properties가 없으면 실패한다
 ```
 
 release 서명 정보는 `apps/staygo/keystore.properties`(storeFile, storePassword, keyAlias, keyPassword)에서 읽는다. 이 파일과 키 저장소는 git에 넣지 않는다.
@@ -67,7 +67,7 @@ Pleos Connect 에뮬레이터 v2.1.0에서 확인했다. `tools/demo_charge.sh`�
 
 에뮬레이터의 충전 상태 값은 충전 스위치를 켜도 바뀌지 않고 순간 충전전력은 0이므로, 시연 화면의 충전 인식과 충전전력은 배터리 잔량 변화로 계산한 값이다.
 
-버전 1.1.0은 서명한 release 빌드로 Pleos Connect v2.1.0 에뮬레이터에서 `tools/demo_charge.sh`를 실행해 충전 인식, 규칙 2 → 4 전환, Go의 경로 전달, 주행 중 화면 제한을 확인했다(2026-11-26). 가상 콘솔 쓰기는 브라우저 세션 신호(`POST /browser/session?client=<id>`, 1초 간격)가 살아 있어야 200을 돌려준다. 권한 거절·SOC 미지원·내비 실패 등 나머지 상태는 JVM 테스트와 디버그 빌드 시뮬레이터로 확인했다. `apk/StayGo_release.apk`와 시연 영상은 1.0.0이다.
+버전 1.2.0은 서명한 release 빌드를 Pleos Connect v2.1.0 에뮬레이터에서 `tools/pleos_checks.sh`로 점검했다(결과는 `docs/PRODUCTION_READINESS.md`). 가상 콘솔 쓰기는 브라우저 세션 신호(`POST /browser/session?client=<id>`, 1초 간격)가 살아 있어야 200을 돌려준다. 권한 거절·SOC 미지원·내비 실패 등 나머지 상태는 JVM 테스트와 디버그 빌드 시뮬레이터로 확인했다. 저장소의 `apk/StayGo_release.apk`와 시연 영상은 서류 접수 때 낸 1.0.0이며 이 문서가 설명하는 1.2.0이 아니다. 1.2.0 APK는 저장소에 넣지 않았다.
 
 ## 출시 점검
 

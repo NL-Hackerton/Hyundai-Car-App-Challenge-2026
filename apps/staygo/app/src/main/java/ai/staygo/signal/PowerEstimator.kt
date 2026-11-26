@@ -18,6 +18,7 @@ class PowerEstimator(
     private val trustWindowMs: Long = 60_000L,
     private val chargingRiseMs: Long = 30_000L,
     private val stallToleranceMs: Long = 10_000L,
+    private val maxStallToleranceMs: Long = 45_000L,
     private val signalLostMs: Long = 60_000L,
     private val maxPlausibleKw: Double = 400.0,
     private val sustainMs: Long = 10_000L,
@@ -41,6 +42,10 @@ class PowerEstimator(
     private var lastLevel: Double? = null
     private var lastSampleMs: Long? = null
     private var stalled = false
+    // Longest time between two rises with unchanged samples in between: the car's reporting step at the
+    // current power. A coarse step at low power must not read as the end of charging.
+    private var longestStepMs = 0L
+    private var flatSinceRise = false
 
     /**
      * True when the battery level kept rising for 30 s (charging fallback when EV_CHARGE_STATE is unusable).
@@ -89,13 +94,22 @@ class PowerEstimator(
         if (prev != null) {
             when {
                 wh > prev + 1e-6 -> {
-                    // A rise after a pause in the samples continues the same rise; only a stall restarts it.
-                    if (riseStartMs == null || stalled) riseStartMs = nowMs
+                    val last = lastRiseMs
+                    val gap = if (last != null && flatSinceRise) nowMs - last else 0L
+                    // A rise soon after a "stall" shows the stall was one reporting step: the same rise goes
+                    // on, and the step is remembered. A rise after a longer stop starts a new one.
+                    val sameRise = riseStartMs != null && (!stalled || gap <= maxStallToleranceMs)
+                    if (sameRise) longestStepMs = maxOf(longestStepMs, gap) else { riseStartMs = nowMs; longestStepMs = 0L }
+                    flatSinceRise = false
                     stalled = false
                     lastRiseMs = nowMs
                 }
-                wh < prev - 1e-6 -> { riseStartMs = null; lastRiseMs = null; stalled = false }
-                else -> if (lastRiseMs?.let { nowMs - it > stallToleranceMs } == true) stalled = true
+                wh < prev - 1e-6 -> { riseStartMs = null; lastRiseMs = null; stalled = false; longestStepMs = 0L }
+                else -> {
+                    flatSinceRise = true
+                    val tolerance = maxOf(stallToleranceMs, minOf(3 * longestStepMs, maxStallToleranceMs))
+                    if (lastRiseMs?.let { nowMs - it > tolerance } == true) stalled = true
+                }
             }
         }
         lastLevel = wh

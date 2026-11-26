@@ -32,7 +32,6 @@ class DrivingRestrictions(private val context: Context) : RestrictionSource {
             val name = carClass.getField("CAR_UX_RESTRICTION_SERVICE").get(null) as String
             val m = carClass.getMethod("getCarManager", String::class.java).invoke(c, name) ?: error("no UX restriction service")
             manager = m
-            emit(requiresDo(m.javaClass.getMethod("getCurrentCarUxRestrictions").invoke(m)))
             val lClass = Class.forName("android.car.drivingstate.CarUxRestrictionsManager\$OnUxRestrictionsChangedListener")
             val l = Proxy.newProxyInstance(lClass.classLoader, arrayOf(lClass)) { self, method, args ->
                 when (method.name) {
@@ -45,7 +44,10 @@ class DrivingRestrictions(private val context: Context) : RestrictionSource {
                     }
                 }
             }
+            // Listener first, then the current value: a failed registration leaves the screen locked instead
+            // of unlocked on a value that would never be updated.
             m.javaClass.getMethod("registerListener", lClass).invoke(m, l)
+            emit(requiresDo(m.javaClass.getMethod("getCurrentCarUxRestrictions").invoke(m)))
         } catch (t: Throwable) {
             val cause = (t as? InvocationTargetException)?.targetException ?: t
             Log.w(TAG, "UX restrictions unavailable: ${cause.javaClass.simpleName}")

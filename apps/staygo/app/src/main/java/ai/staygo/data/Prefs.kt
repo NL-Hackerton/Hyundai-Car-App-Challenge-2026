@@ -65,7 +65,9 @@ class PrefsSettingsStore(context: Context, io: Executor, private val onLoaded: (
     init {
         io.execute {
             val storedReserve = prefs.getInt(KEY_RESERVE, DEFAULT_RESERVE)
-            val storedConsent = if (prefs.contains(KEY_CONSENT)) prefs.getBoolean(KEY_CONSENT, false) else null
+            // An answer given to an earlier version of the notice does not cover this one: ask again.
+            val current = prefs.getInt(KEY_NOTICE_VERSION, 0) == NOTICE_VERSION
+            val storedConsent = if (current && prefs.contains(KEY_CONSENT)) prefs.getBoolean(KEY_CONSENT, false) else null
             if (!reserveChanged) reserve = storedReserve
             if (!consentChanged) consentValue = storedConsent
             loaded = true
@@ -86,12 +88,17 @@ class PrefsSettingsStore(context: Context, io: Executor, private val onLoaded: (
         set(value) {
             consentChanged = true
             consentValue = value
-            prefs.edit().apply { if (value == null) remove(KEY_CONSENT) else putBoolean(KEY_CONSENT, value) }.apply()
+            prefs.edit().apply {
+                if (value == null) remove(KEY_CONSENT) else putBoolean(KEY_CONSENT, value).putInt(KEY_NOTICE_VERSION, NOTICE_VERSION)
+            }.apply()
         }
 
     private companion object {
         const val KEY_RESERVE = "reserve_soc_pct"
         const val KEY_CONSENT = "data_notice_accepted"
+        const val KEY_NOTICE_VERSION = "data_notice_version"
+        /** Raised whenever the notice changes what it says is read, kept or handed over. */
+        const val NOTICE_VERSION = 2
         const val DEFAULT_RESERVE = 15
     }
 }

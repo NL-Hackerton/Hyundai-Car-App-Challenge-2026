@@ -5,7 +5,8 @@ plugins {
     id("org.jetbrains.kotlin.android")
 }
 
-// Release signing is read from keystore.properties (not committed). Without it, release stays unsigned.
+// Release signing is read from keystore.properties (not committed). Without it a release build fails rather
+// than produce an unsigned APK; -PallowUnsignedRelease builds one on purpose (e.g. for a size check).
 val keystoreProps = Properties().apply {
     val f = rootProject.file("keystore.properties")
     if (f.exists()) f.inputStream().use { load(it) }
@@ -52,6 +53,12 @@ android {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+    }
+}
+
+if (keystoreProps.isEmpty() && !project.hasProperty("allowUnsignedRelease")) {
+    tasks.matching { it.name == "packageRelease" }.configureEach {
+        doFirst { throw GradleException("keystore.properties is missing: the release APK would be unsigned") }
     }
 }
 

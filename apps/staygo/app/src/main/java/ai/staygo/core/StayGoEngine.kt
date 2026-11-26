@@ -11,6 +11,7 @@ import ai.staygo.signal.PowerEstimator
 import ai.staygo.signal.PowerTrend
 import kotlin.math.abs
 import kotlin.math.ceil
+import kotlin.math.roundToInt
 
 /**
  * Session state of the app: consumes the driving restriction and the vehicle and navigation events, produces
@@ -79,6 +80,7 @@ class StayGoEngine(
     private var lastTripRequestMs: Long? = null
     private var tripFailures = 0
     private var routeSentAtMs: Long? = null
+    private var destinationClearPending = false
 
     private var lastDecision: Decision? = null
     private var goNoticeSent = false
@@ -183,16 +185,32 @@ class StayGoEngine(
     // ---- Driver actions ----
 
     fun acceptConsent() {
+        if (!unlocked) return
         settings.consent = true
         onChange()
     }
 
+    /**
+     * Declining, or withdrawing an earlier consent. Withdrawal deletes what the notice says is kept: the
+     * charging history, the session and the reserve setting.
+     */
     fun declineConsent() {
+        if (!unlocked) return
+        if (settings.consent == true) {
+            bands.clear()
+            endSession()
+            suspendedAtMs = null
+            levelAtSuspendWh = null
+            chargingAtSuspend = false
+            resumePending = false
+            settings.reserveSocPct = Params().reserveSocPct.roundToInt()
+        }
         settings.consent = false
         onChange()
     }
 
     fun clearChargingHistory() {
+        if (!unlocked) return
         bands.clear()
         notify(UiNotice.HistoryCleared)
         onChange()
@@ -353,7 +371,12 @@ class StayGoEngine(
 
     override fun onDestination(destination: Destination?) {
         // The navigation clears the destination for a moment while it replaces the route the app just requested.
-        if (destination == null && routeSentAtMs?.let { clock() - it < REROUTE_GRACE_MS } == true) return
+        // If no new destination follows, the clearing was real and is applied when the grace ends (see advance).
+        if (destination == null && routeSentAtMs?.let { clock() - it < REROUTE_GRACE_MS } == true) {
+            destinationClearPending = true
+            return
+        }
+        destinationClearPending = false
         val changed = if (destination == null) this.destination != null else !destination.samePlaceAs(this.destination)
         this.destination = destination
         if (changed) clearTrip()
@@ -554,12 +577,27 @@ class StayGoEngine(
         charging != ChargingStatus.CHARGING && charging != ChargingStatus.FINISHED -> GoAvailability.LOCKED_NOT_CHARGING
         naviUnavailable || !naviReady -> GoAvailability.LOCKED_NAVI_UNAVAILABLE
         destination == null -> GoAvailability.LOCKED_NO_DESTINATION
-        !arrivalUnavailable && d.rule == 5 && d.emphasis != Emphasis.NONE && destinationTrip?.chargingStop != null -> GoAvailability.VIA_STOP
+        // A charging stop on the route is the navigation's own plan: Go keeps it, whichever rule applies.
+        !arrivalUnavailable && destinationTrip?.chargingStop != null -> GoAvailability.VIA_STOP
         else -> GoAvailability.DIRECT
     }
 
     /** Recomputes the charging status and keeps the session markers in step with it. */
     private fun advance(now: Long) {
+        if (destinationClearPending && routeSentAtMs?.let { now - it >= REROUTE_GRACE_MS } != false) {
+            destinationClearPending = false
+            destination = null
+            clearTrip()
+        }
+        // A car that reports no battery level never delivers the sample that settles the session after a gap:
+        // past the connection grace the session is settled on elapsed time alone.
+        if (resumePending && unlocked && levelWh == null && !connecting(now)) {
+            resumePending = false
+            val since = suspendedAtMs
+            suspendedAtMs = null
+            levelAtSuspendWh = null
+            if (since != null && now - since > SESSION_MAX_GAP_MS) endSession() else trend.resume()
+        }
         val signalsReadable = chargeState != null || levelWh != null
         if (signalsReadable) driverConfirmedCharging = false
         val (status, basis) = when {
@@ -598,7 +636,7 @@ class StayGoEngine(
     }
 
     private fun requestTrip() {
-        if (destination == null || !naviReady) return
+        if (destination == null || !naviReady || !unlocked) return
         lastTripSoc = soc
         lastTripRequestMs = clock()
         navi.requestDestinationTrip()
