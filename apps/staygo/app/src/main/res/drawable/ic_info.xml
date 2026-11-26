@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 48dp icon (Pleos base grid), outline: data and advice notice -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="48dp" android:height="48dp" android:viewportWidth="48" android:viewportHeight="48" android:tint="?android:attr/textColorPrimary">
+    <path android:fillColor="#FFFFFF" android:pathData="M24,5C13.5,5 5,13.5 5,24s8.5,19 19,19 19,-8.500 19,-19S34.5,5 24,5zM24,39c-8.300,0 -15,-6.700 -15,-15S15.700,9 24,9s15,6.700 15,15 -6.700,15 -15,15zM22,21h4v13h-4zM22,14h4v4h-4z" />
+</vector>

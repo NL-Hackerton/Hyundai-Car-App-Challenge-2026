@@ -1,13 +1,16 @@
 package ai.staygo
 
+import ai.staygo.core.Destination
 import ai.staygo.navi.NaviClient
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class NaviRouteTest {
     /** Go must hand the navi the same POI it is guiding to; an empty poiId makes the navi show an error dialog. */
     @Test fun goKeepsThePoiIdentityOfTheDestination() {
-        val d = NaviClient.Destination(
+        val d = Destination(
             "부산시청", 35.1796, 129.0756, 375_000,
             poiId = "1234567", poiSubId = "0", address = "부산 연제구 중앙대로 1001", poiProvider = "n42",
             displayLatitude = 35.1799, displayLongitude = 129.0750,
@@ -21,5 +24,17 @@ class NaviRouteTest {
         assertEquals(35.1796, r.latitude, 1e-9)
         assertEquals(129.0756, r.longitude, 1e-9)
         assertEquals(35.1799, r.displayLatitude!!, 1e-9)
+    }
+
+    /** Measured on the emulator: the stop at 82.2 % of the 375 km route is 308.5 km away. */
+    @Test fun stopAnswerMustBeAboutTheStopsShareOfTheRoute() {
+        assertTrue(NaviClient.plausibleStopDistance(308_479, 0.822, 375_000))
+        assertTrue(NaviClient.plausibleStopDistance(308_479, 82.2, 375_000))
+        // A late answer to the destination request has the whole route's distance.
+        assertFalse(NaviClient.plausibleStopDistance(375_000, 0.822, 375_000))
+        assertFalse(NaviClient.plausibleStopDistance(372_000, 0.939, 375_000))
+        // Without a destination distance or a usable ratio there is nothing to compare with.
+        assertTrue(NaviClient.plausibleStopDistance(308_479, 0.822, 0))
+        assertTrue(NaviClient.plausibleStopDistance(308_479, 0.0, 375_000))
     }
 }

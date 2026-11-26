@@ -20,6 +20,7 @@
     <dimen name="btn_primary">100dp</dimen>        <!-- buttons/basic/large/height (short windows) -->
     <dimen name="btn_radius">32dp</dimen>          <!-- buttons/basic/large/radius -->
     <dimen name="btn_pad_h">40dp</dimen>           <!-- buttons/basic/large/padding_horizontal -->
+    <dimen name="step_size">80dp</dimen>           <!-- stepper and hero action touch target -->
     <dimen name="icon">48dp</dimen>                <!-- icon base grid -->
     <dimen name="icon_s">40dp</dimen>
     <dimen name="topbar">80dp</dimen>              <!-- page_navigation/container_height -->

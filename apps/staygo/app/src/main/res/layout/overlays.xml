@@ -41,6 +41,123 @@
             android:textSize="40sp" />
     </LinearLayout>
 
+    <!-- Reserve SOC setting, and what the app reads, stores and sends and how far its advice can be trusted. -->
+    <FrameLayout
+        android:id="@+id/infoOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/sg_bg"
+        android:clickable="true"
+        android:padding="@dimen/page_pad"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/bg_card"
+            android:orientation="vertical"
+            android:padding="@dimen/card_pad">
+
+            <TextView
+                style="@style/T.Title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/reserve_title" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/reserveMinus"
+                    style="@style/T.Title"
+                    android:layout_width="@dimen/btn_large"
+                    android:layout_height="@dimen/step_size"
+                    android:background="@drawable/bg_chip_outline"
+                    android:clickable="true"
+                    android:contentDescription="@string/reserve_lower"
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:text="−" />
+
+                <TextView
+                    android:id="@+id/reserveLabel"
+                    style="@style/T.Title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="32dp"
+                    android:layout_marginEnd="32dp"
+                    android:minWidth="120dp"
+                    android:gravity="center"
+                    android:text="15%" />
+
+                <TextView
+                    android:id="@+id/reservePlus"
+                    style="@style/T.Title"
+                    android:layout_width="@dimen/btn_large"
+                    android:layout_height="@dimen/step_size"
+                    android:background="@drawable/bg_chip_outline"
+                    android:clickable="true"
+                    android:contentDescription="@string/reserve_raise"
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:text="+" />
+
+                <TextView
+                    style="@style/T.Caption"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="32dp"
+                    android:layout_weight="1"
+                    android:maxLines="2"
+                    android:text="@string/reserve_help"
+                    android:textSize="28sp" />
+            </LinearLayout>
+
+            <TextView
+                style="@style/T.Label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="28dp"
+                android:text="@string/info_title"
+                android:textColor="@color/sg_text_2" />
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginTop="12dp"
+                android:layout_weight="1">
+
+                <TextView
+                    android:id="@+id/infoBody"
+                    style="@style/T.BodyL"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:lineSpacingExtra="10sp"
+                    android:text="@string/info_body"
+                    android:textSize="28sp" />
+            </ScrollView>
+
+            <TextView
+                android:id="@+id/infoClose"
+                style="@style/T.Label"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/step_size"
+                android:layout_gravity="end"
+                android:background="@drawable/bg_chip_outline"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:paddingStart="@dimen/btn_pad_h"
+                android:paddingEnd="@dimen/btn_pad_h"
+                android:text="@string/info_close"
+                android:textColor="@color/sg_go_text" />
+        </LinearLayout>
+    </FrameLayout>
+
     <!-- Pleos toast (24dp side margin, max width 792dp, padding 40/24, 48dp icon), lifted above the
          Stay/Go action row so it never covers the buttons. -->
     <TextView

@@ -1,5 +1,11 @@
 package ai.staygo.ui
 
+import ai.staygo.core.ArrivalBasis
+import ai.staygo.core.OutputSource
+import ai.staygo.core.RouteState
+import ai.staygo.core.Screen
+import ai.staygo.core.StayGoUiState
+import ai.staygo.core.VehicleLinkFailure
 import ai.staygo.decision.Decision
 import ai.staygo.decision.Emphasis
 import ai.staygo.decision.Params
@@ -24,9 +30,96 @@ object HeroPresenter {
         val reason: String,
         val chip: String?,
         val chipTone: Tone,
+        /** The one thing the driver can do about a blocked state; null when Stay/Go are the actions. */
+        val action: Action? = null,
     )
 
+    enum class Action(val label: String) {
+        GRANT_PERMISSION("권한 허용"),
+        CONFIRM_CHARGING("충전 중입니다"),
+    }
+
     enum class Trend { UP, FLAT, DOWN }
+
+    /** Hero for the whole screen state: blocked states first, then the Stay/Go decision. */
+    fun present(s: StayGoUiState): Hero = when (s.screen) {
+        Screen.VEHICLE_LINK_UNAVAILABLE -> when (s.vehicleLinkFailure) {
+            VehicleLinkFailure.PERMISSION_DENIED -> Hero(
+                Verdict.WAIT, false, "차량 정보 권한이 필요합니다", "배터리 잔량·충전 상태를 읽어 Stay·Go를 판단합니다 · 기기 밖으로 보내지 않습니다",
+                "차량 값 표시 안 함", Tone.WARNING, Action.GRANT_PERMISSION,
+            )
+            VehicleLinkFailure.SOC_UNSUPPORTED -> Hero(
+                Verdict.WAIT, false, "이 차량은 SOC 조회를 지원하지 않습니다", "차량 연동을 멈췄습니다", "차량 값 표시 안 함", Tone.WARNING,
+            )
+            else -> Hero(
+                Verdict.WAIT, false, "차량과 연결할 수 없습니다", "차량 연동을 멈췄습니다 · 연결되면 다시 판단합니다", "차량 값 표시 안 함", Tone.WARNING,
+            )
+        }
+        Screen.CONNECTING -> Hero(Verdict.WAIT, false, "차량 정보를 확인하는 중", "잠시만 기다려 주세요", null, Tone.NEUTRAL)
+        Screen.CHARGING_UNCONFIRMED -> Hero(
+            Verdict.WAIT, false, "충전 상태를 확인할 수 없습니다", "지금 급속충전 중이면 직접 확인해 주세요",
+            "충전 신호 없음", Tone.WARNING, Action.CONFIRM_CHARGING,
+        )
+        Screen.TARGET_SOC_NEEDED -> Hero(
+            Verdict.WAIT, false, "목표 SOC를 정해 주세요", "내비에서 도착 예상 SOC를 받지 못해 목표 SOC로 판단합니다",
+            "내비 응답 없음", Tone.WARNING,
+        )
+        else -> {
+            val a = s.arrival
+            val via = s.route as? RouteState.ViaStop
+            val gain = via?.comparison?.gainMinutes ?: 0.0
+            when {
+                a?.basis == ArrivalBasis.DRIVER_TARGET -> presentTarget(s)
+                s.decision.rule == 5 && via != null && gain > 0.0 -> presentFasterStop(s, via, gain)
+                else -> present(s.decision, a?.socPct, s.socPercent, Params(reserveSocPct = s.reserveSocPct.toDouble()))
+            }
+        }
+    }
+
+    /**
+     * Rule 5: filling the deficit at the stop the navigation planned is faster than staying. It is offered next
+     * to Stay, not instead of it, and always with what is unknown: the stop's queue and faults.
+     */
+    private fun presentFasterStop(s: StayGoUiState, via: RouteState.ViaStop, gainMinutes: Double): Hero {
+        val d = s.decision
+        val source = when {
+            via.outputSource == OutputSource.SNAPSHOT -> " (${via.snapshotAsOf ?: "이전"} 자료)"
+            via.comparison?.expectedPowerEstimated == true -> " (추정)"
+            else -> ""
+        }
+        return Hero(
+            Verdict.STAY, false,
+            "경유 충전이 약 ${gainMinutes.roundToInt()}분 빠릅니다",
+            "${shortStopName(via.stopName)} 최대 ${via.maxPowerKw?.roundToInt() ?: "--"} kW · ${via.chargerCount ?: "--"}기$source · 대기·고장은 알 수 없습니다",
+            "${"%.1f".format(d.deficitPct ?: 0.0)}%p 부족" + (d.extraWaitMinutes?.let { " · 여기서 최소 ${"%.1f".format(it)}분" } ?: ""),
+            Tone.WARNING,
+        )
+    }
+
+    /** POI names arrive as "청도새마을휴게소(부산방향) 전기차충전소"; the screen shows the rest area only. */
+    fun shortStopName(poi: String) = poi.replace("전기차충전소", "").replace(Regex("\\(.*?\\)"), "").trim()
+
+    /** The navigation gives no arrival estimate: the verdict compares the current SOC with the driver's target. */
+    private fun presentTarget(s: StayGoUiState): Hero {
+        val target = s.manualTargetSoc
+        val soc = s.socPercent
+        val a = s.arrival
+        val strong = s.decision.emphasis != Emphasis.NONE
+        return when {
+            a?.reserveMet == true && s.decision.emphasis == Emphasis.GO -> Hero(
+                Verdict.GO, strong, "목표 SOC에 도달했습니다", "현재 ${soc ?: "--"}% · 목표 ${target ?: "--"}% · 충전 속도가 느려졌습니다",
+                "목표 SOC 충족", Tone.POSITIVE,
+            )
+            a?.reserveMet == true -> Hero(
+                Verdict.STAY, false, "목표 도달 · 아직 빠르게 충전 중", "현재 ${soc ?: "--"}% · 목표 ${target ?: "--"}%", "목표 SOC 충족", Tone.POSITIVE,
+            )
+            else -> Hero(
+                Verdict.STAY, strong, "목표까지 더 충전하세요", "현재 ${soc ?: "--"}% · 목표 ${target ?: "--"}% (내비 도착 예상 없음)",
+                "${a?.deficitPct?.roundToInt() ?: "--"}%p 남음" + (a?.extraWaitMinutes?.let { " · 최소 ${"%.1f".format(it)}분" } ?: ""),
+                Tone.WARNING,
+            )
+        }
+    }
 
     fun present(d: Decision, arrivalSoc: Double?, soc: Int?, params: Params = Params()): Hero {
         val a = arrivalSoc?.roundToInt()
@@ -50,10 +143,11 @@ object HeroPresenter {
                 val deficit = d.deficitPct ?: 0.0
                 val viaFaster = d.rule == 5 && (d.comparison?.gainMinutes ?: 0.0) > 0.0
                 Hero(
-                    Verdict.STAY, true,
-                    if (viaFaster) "경유지에서 채우는 편이 빠릅니다" else "조금 더 충전하세요",
+                    // A faster stop ahead is offered next to Stay, not instead of it: its queue and faults are unknown.
+                    Verdict.STAY, !viaFaster,
+                    if (viaFaster) "경유 충전이 약 ${d.comparison!!.gainMinutes.roundToInt()}분 빠릅니다" else "조금 더 충전하세요",
                     "지금 가면 목적지에 ${a ?: "--"}%로 도착 · 예비 $reserve% 미달",
-                    "${"%.1f".format(deficit)}%p 부족" + (d.extraWaitMinutes?.let { " · 약 ${"%.1f".format(it)}분 더" } ?: ""),
+                    "${"%.1f".format(deficit)}%p 부족" + (d.extraWaitMinutes?.let { " · 최소 ${"%.1f".format(it)}분" } ?: ""),
                     Tone.WARNING,
                 )
             }

@@ -69,4 +69,17 @@
         android:singleLine="true"
         android:text="목적지 확인 중"
         android:textSize="30sp" />
+
+    <ImageView
+        android:id="@+id/infoButton"
+        android:layout_width="@dimen/step_size"
+        android:layout_height="@dimen/step_size"
+        android:layout_marginStart="8dp"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:clickable="true"
+        android:contentDescription="@string/info_open"
+        android:focusable="true"
+        android:padding="16dp"
+        android:src="@drawable/ic_info"
+        android:tint="@color/sg_text_2" />
 </LinearLayout>

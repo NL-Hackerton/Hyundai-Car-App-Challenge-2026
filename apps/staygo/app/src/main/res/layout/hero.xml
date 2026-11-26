@@ -62,6 +62,67 @@
         android:textSize="30sp"
         android:visibility="gone" />
 
+    <!-- The one action of a blocked state (permission settings, confirm charging). -->
+    <TextView
+        android:id="@+id/heroAction"
+        style="@style/T.Label"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/step_size"
+        android:layout_marginTop="24dp"
+        android:background="@drawable/bg_chip_outline"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center"
+        android:paddingStart="@dimen/btn_pad_h"
+        android:paddingEnd="@dimen/btn_pad_h"
+        android:text=" "
+        android:textColor="@color/sg_go_text"
+        android:visibility="gone" />
+
+    <!-- Reserve SOC (or the target SOC while the navigation gives no estimate), 5 %p per tap. -->
+    <LinearLayout
+        android:id="@+id/stepRow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/stepMinus"
+            style="@style/T.Title"
+            android:layout_width="@dimen/step_size"
+            android:layout_height="@dimen/step_size"
+            android:background="@drawable/bg_chip_outline"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:text="−" />
+
+        <TextView
+            android:id="@+id/stepLabel"
+            style="@style/T.Label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:layout_marginEnd="24dp"
+            android:singleLine="true"
+            android:text=" "
+            android:textColor="@color/sg_text_2" />
+
+        <TextView
+            android:id="@+id/stepPlus"
+            style="@style/T.Title"
+            android:layout_width="@dimen/step_size"
+            android:layout_height="@dimen/step_size"
+            android:background="@drawable/bg_chip_outline"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:text="+" />
+    </LinearLayout>
+
     <Space
         android:layout_width="match_parent"
         android:layout_height="0dp"

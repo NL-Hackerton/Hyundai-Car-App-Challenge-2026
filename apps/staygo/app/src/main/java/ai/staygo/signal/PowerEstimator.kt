@@ -46,6 +46,32 @@ class PowerEstimator(
         return nowMs - start >= chargingRiseMs && nowMs - last <= stallToleranceMs
     }
 
+    /** Restores what a recreated process still needs from the session: the maximum and whether it is trusted. */
+    fun restore(sessionMaxKw: Double?, pmaxTrusted: Boolean) {
+        this.sessionMaxKw = sessionMaxKw
+        this.pmaxTrusted = pmaxTrusted
+        trustDecided = true
+    }
+
+    /**
+     * Continues after a gap without samples (the screen was away). The windows are stale and start over; the
+     * session maximum stays. [rose] tells whether the level grew over the gap, i.e. charging went on meanwhile.
+     */
+    fun resume(nowMs: Long, wh: Double, rose: Boolean) {
+        levels.clear(); raws.clear(); medians.clear()
+        powerKw = null
+        trustDecided = true
+        lastLevel = wh
+        levels.addLast(nowMs to wh)
+        if (rose) {
+            if (riseStartMs == null) riseStartMs = nowMs - chargingRiseMs
+            lastRiseMs = nowMs
+        } else {
+            riseStartMs = null
+            lastRiseMs = null
+        }
+    }
+
     fun addLevel(nowMs: Long, wh: Double) {
         val prev = lastLevel
         if (prev != null) {
@@ -84,6 +110,8 @@ class PowerEstimator(
         }
         medians.addLast(nowMs to p)
         while (nowMs - medians.first().first > sustainMs) medians.removeFirst()
+        // After resume() the sustain window restarts from the first new estimate.
+        if (medians.size < 2 && sessionMaxKw != null) return
         if (nowMs - first >= sustainMs) {
             val held = medians.minOf { it.second }
             if (sessionMaxKw == null || held > sessionMaxKw!!) sessionMaxKw = held

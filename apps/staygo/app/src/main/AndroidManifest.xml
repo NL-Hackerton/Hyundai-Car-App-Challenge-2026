@@ -19,6 +19,10 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.StayGo">
+        <!-- Every task can be completed by touch; the central control (rotary) is not supported. -->
+        <meta-data
+            android:name="com.hmg.rotary.ROTARY_SUPPORTED"
+            android:value="false" />
         <activity
             android:name=".MainActivity"
             android:exported="true"

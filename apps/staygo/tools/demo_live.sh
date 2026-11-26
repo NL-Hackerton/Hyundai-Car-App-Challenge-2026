@@ -61,6 +61,7 @@ case "${1:-}" in
     put "ev-battery?field=charge_port_open&value=false"
     put "ev-battery?field=battery_level&value=$START_KWH"
     put "ev-battery?field=soc&value=$(python3 -c "print(int($START_KWH/$CAP*100))")"
+    $A shell setprop log.tag.StayGo DEBUG   # release builds log decisions only while this tag is enabled
     $A shell am force-stop ai.staygo.app
     $A shell run-as ai.staygo.app rm -rf shared_prefs >/dev/null 2>&1
     $A shell am start -W -n ai.staygo.app/ai.staygo.MainActivity >/dev/null

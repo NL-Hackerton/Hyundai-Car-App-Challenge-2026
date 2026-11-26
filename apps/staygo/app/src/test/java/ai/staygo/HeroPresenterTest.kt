@@ -19,7 +19,7 @@ class HeroPresenterTest {
         assertEquals(Verdict.STAY, h.verdict)
         assertTrue(h.strong)
         assertEquals("지금 가면 목적지에 12%로 도착 · 예비 15% 미달", h.reason)
-        assertEquals("3.0%p 부족 · 약 1.4분 더", h.chip)
+        assertEquals("3.0%p 부족 · 최소 1.4분", h.chip)
         assertEquals(HeroPresenter.Tone.WARNING, h.chipTone)
     }
 

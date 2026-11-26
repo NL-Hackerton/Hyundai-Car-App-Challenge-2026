@@ -5,4 +5,14 @@
     <string name="label_soc">SOC</string>
     <string name="label_power">충전 전력</string>
     <string name="label_arrival">도착 SOC</string>
+
+    <string name="reserve_title">도착 예비 SOC</string>
+    <string name="reserve_help">목적지에 도착할 때 남길 배터리 여유입니다. 도착 예상 SOC가 이 값 이상일 때 Go를 권합니다.</string>
+    <string name="reserve_lower">예비 SOC 5% 낮추기</string>
+    <string name="reserve_raise">예비 SOC 5% 높이기</string>
+
+    <string name="info_open">예비 SOC 설정과 정보 처리 안내 열기</string>
+    <string name="info_title">스테이고가 쓰는 정보</string>
+    <string name="info_close">닫기</string>
+    <string name="info_body">읽는 값 · 배터리 잔량(SOC·Wh), 충전 상태와 충전전력, 내비 목적지와 도착 예상 SOC\n\n저장 · 예비 SOC 설정과 SOC 구간별 최대 충전전력만 이 기기에 저장합니다. 위치·시각·충전소는 저장하지 않습니다.\n\n전송 · 기기 밖으로 보내는 정보가 없습니다.\n\n안내 기준 · Stay·Go는 추정값으로 판단하며 실제와 다를 수 있습니다. 도착 예상 SOC는 내비 계산값이고, 「추정」 표시 전력은 배터리 잔량 변화로 계산한 값입니다.\n\n알 수 없는 것 · 다음 충전소의 대기와 고장 여부는 알 수 없습니다. 출발 여부는 운전자가 결정합니다.</string>
 </resources>
