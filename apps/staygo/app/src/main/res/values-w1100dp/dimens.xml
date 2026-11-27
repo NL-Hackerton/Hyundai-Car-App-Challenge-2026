@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Landscape windows >= 1100dp wide (Connect-S full / 1:1, Connect-W 2:1 main). -->
+<resources>
+    <dimen name="t_feature">96sp</dimen>
+    <dimen name="t_verdict">64sp</dimen>
+    <dimen name="t_unit">40sp</dimen>
+    <dimen name="tile_pad">36dp</dimen>
+    <dimen name="t_btn">48sp</dimen>
+    <dimen name="btn_icon">48dp</dimen>
+    <dimen name="btn_icon_gap">24dp</dimen>
+    <dimen name="tile_label_icon">40dp</dimen>
+    <dimen name="tile_label_gap">14dp</dimen>
+    <!-- 1100-1500dp (e.g. Connect-S 1:1 split): give the key-number column as much width as the hero -->
+    <item name="hero_weight" format="float" type="dimen">1.0</item>
+    <dimen name="t_headline">60sp</dimen>
+    <dimen name="dest_max">720dp</dimen>
+</resources>

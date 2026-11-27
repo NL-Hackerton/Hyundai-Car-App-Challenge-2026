@@ -312,6 +312,9 @@ class MainActivity : ComponentActivity() {
                 val lat = intent.getDoubleExtra("destLat", 37.5665)
                 val lng = intent.getDoubleExtra("destLng", 126.9780)
                 val destName = intent.getStringExtra("destName") ?: "ProbeDest"
+                // A real POI id (from the navi's own search) avoids the navi's POI-details error dialog.
+                val destPoiId = intent.getStringExtra("destPoiId") ?: ""
+                val destAddress = intent.getStringExtra("destAddress") ?: ""
                 try {
                     helper.requestTrip(ai.pleos.playground.navi.data.TripRequest(lat, lng, "", destName, ""))
                     log("NAV requestTrip sent lat=$lat lng=$lng")
@@ -322,7 +325,7 @@ class MainActivity : ComponentActivity() {
                     try {
                         helper.requestRoute(
                             ai.pleos.playground.navi.data.RouteInfo(
-                                lat, lng, null, null, destName, "", "", "",
+                                lat, lng, null, null, destName, destPoiId, destAddress, "",
                                 ai.pleos.playground.navi.constants.RouteOption.RECOMMENDED, "", false
                             )
                         )

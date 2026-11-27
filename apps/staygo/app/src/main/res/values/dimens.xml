@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Connect-S values from the Pleos 2.1.5 form_factor variables (dp/sp). Compact windows override in values-*. -->
+<resources>
+    <dimen name="t_feature">64sp</dimen>     <!-- key numbers; Feature 112/134 on tall wide windows -->
+    <dimen name="t_headline">48sp</dimen>     <!-- short narrow windows; 60sp (Headline) where taller/wider -->
+    <dimen name="t_title">48sp</dimen>
+    <dimen name="t_body_l">36sp</dimen>
+    <dimen name="t_label">32sp</dimen>
+    <dimen name="t_caption">26sp</dimen>
+    <dimen name="t_verdict">48sp</dimen>
+    <dimen name="t_unit">30sp</dimen>
+    <dimen name="tile_pad">24dp</dimen>
+
+    <dimen name="page_pad">40dp</dimen>            <!-- page_navigation/padding_extralarge -->
+    <dimen name="gap">24dp</dimen>                 <!-- page_navigation/gap_large -->
+    <dimen name="card_pad">40dp</dimen>
+    <dimen name="radius_card">32dp</dimen>         <!-- radius level9 -->
+    <dimen name="radius_chip">999dp</dimen>
+    <dimen name="btn_large">100dp</dimen>          <!-- buttons/basic/large/height -->
+    <dimen name="btn_primary">100dp</dimen>        <!-- buttons/basic/large/height (short windows) -->
+    <dimen name="btn_radius">32dp</dimen>          <!-- buttons/basic/large/radius -->
+    <dimen name="btn_pad_h">40dp</dimen>           <!-- buttons/basic/large/padding_horizontal -->
+    <dimen name="icon">48dp</dimen>                <!-- icon base grid -->
+    <dimen name="icon_s">40dp</dimen>
+    <dimen name="topbar">80dp</dimen>              <!-- page_navigation/container_height -->
+    <dimen name="spark_h">88dp</dimen>
+    <dimen name="toast_pad_h">40dp</dimen>         <!-- popup/toast/padding_horizontal -->
+    <dimen name="toast_pad_v">24dp</dimen>         <!-- popup/toast/padding_vertical -->
+    <dimen name="toast_radius">16dp</dimen>        <!-- popup/toast/radius -->
+    <dimen name="toast_max">792dp</dimen>          <!-- popup/toast/max_width -->
+    <dimen name="toast_margin">24dp</dimen>        <!-- popup/toast/margin_horizontal / margin_bottom -->
+    <dimen name="toast_above_actions">220dp</dimen> <!-- action row 128 + gaps + footer + toast margin 24 -->
+    <dimen name="hero_pad">32dp</dimen>
+    <dimen name="hero_gap">20dp</dimen>
+    <dimen name="t_btn">40sp</dimen>
+    <dimen name="btn_icon">0dp</dimen>             <!-- narrow: label only so "Stay · 더 충전" fits -->
+    <dimen name="btn_icon_gap">0dp</dimen>
+    <dimen name="tile_label_icon">0dp</dimen>
+    <dimen name="tile_label_gap">0dp</dimen>
+    <item name="hero_weight" format="float" type="dimen">1.25</item>
+    <dimen name="dest_max">400dp</dimen>           <!-- destination chip ellipsizes in narrow windows -->
+</resources>

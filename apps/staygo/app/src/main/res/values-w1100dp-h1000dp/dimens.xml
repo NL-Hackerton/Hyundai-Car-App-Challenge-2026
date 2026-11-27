@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Wide and tall (e.g. the Connect-S app area 1706x1210dp): Pleos Feature 112sp for the key numbers. -->
+<resources>
+    <dimen name="t_feature">112sp</dimen>
+    <dimen name="t_verdict">72sp</dimen>
+    <dimen name="t_unit">44sp</dimen>
+</resources>

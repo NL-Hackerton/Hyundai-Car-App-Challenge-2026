@@ -16,3 +16,9 @@ apps/pleos-stayorgo-probe/**/*.jks
 apps/pleos-stayorgo-probe/**/*.keystore
 apps/pleos-stayorgo-probe/**/.env
 apps/pleos-stayorgo-probe/**/.env.*
+
+# Figma 3x slide export: visual reference only (icons are cropped into pt/assets/icons; the PPTX is native)
+pt/slides/
+
+# PT build output (pt/tools/build_deck.py -> finalize.ps1)
+pt/build/

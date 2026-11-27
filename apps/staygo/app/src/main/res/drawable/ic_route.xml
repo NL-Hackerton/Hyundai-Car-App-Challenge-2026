@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 48dp icon (Pleos base grid), outlined: navi route -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="48dp" android:height="48dp" android:viewportWidth="48" android:viewportHeight="48" android:tint="?android:attr/textColorPrimary">
+    <path android:strokeColor="#FFFFFF" android:strokeWidth="4" android:strokeLineCap="round" android:strokeLineJoin="round" android:fillColor="#00000000" android:pathData="M12,42V27c0,-5.5 3.5,-9 9,-9h15M30,12l6,6 -6,6" />
+    <path android:fillColor="#FFFFFF" android:pathData="M12,6a4,4 0,1 1,0 8a4,4 0,1 1,0 -8z" />
+</vector>

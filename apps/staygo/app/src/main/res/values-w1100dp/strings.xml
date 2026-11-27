@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="label_soc">현재 SOC</string>
+    <string name="label_power">충전 전력</string>
+    <string name="label_arrival">도착 예상 SOC</string>
+</resources>

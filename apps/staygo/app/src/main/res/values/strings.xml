@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">스테이고</string>
+    <!-- Tile labels: short in narrow windows (three tiles share ~760dp), full in wide ones -->
+    <string name="label_soc">SOC</string>
+    <string name="label_power">충전 전력</string>
+    <string name="label_arrival">도착 SOC</string>
 </resources>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 48dp icon (Pleos base grid), outlined: SOC -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="48dp" android:height="48dp" android:viewportWidth="48" android:viewportHeight="48" android:tint="?android:attr/textColorPrimary">
+    <path android:strokeColor="#FFFFFF" android:strokeWidth="4" android:fillColor="#00000000" android:strokeLineJoin="round" android:pathData="M6,14h32v20h-32z" />
+    <path android:fillColor="#FFFFFF" android:pathData="M40,20h4v8h-4z M10,18h14v12h-14z" />
+</vector>

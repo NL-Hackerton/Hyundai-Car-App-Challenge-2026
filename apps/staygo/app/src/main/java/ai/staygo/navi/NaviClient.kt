@@ -23,7 +23,13 @@ import android.os.Looper
  */
 class NaviClient(context: Context, private val listener: Listener) {
 
-    data class Destination(val name: String, val latitude: Double, val longitude: Double, val remainDistanceM: Int)
+    /** POI fields are kept so Go can hand the same place back: with an empty poiId the navi looks up POI details
+     *  for no id and shows a "경로 탐색 오류" dialog over the route screen (Pleos Connect 2.1 emulator, 2026-11-25). */
+    data class Destination(
+        val name: String, val latitude: Double, val longitude: Double, val remainDistanceM: Int,
+        val poiId: String = "", val poiSubId: String = "", val address: String = "", val poiProvider: String = "",
+        val displayLatitude: Double? = null, val displayLongitude: Double? = null,
+    )
     data class ChargingStop(val name: String, val latitude: Double, val longitude: Double, val ratioOnRoute: Double)
     data class DestinationTrip(val estimatedSoc: Int, val energyWh: Double, val distanceM: Int, val chargingStop: ChargingStop?)
     data class ActiveWaypoint(val name: String, val maxPowerKw: Int, val chargerCount: Int)
@@ -52,7 +58,13 @@ class NaviClient(context: Context, private val listener: Listener) {
     private val events = object : NaviHelperEventListener {
         override fun onDestinationInfo(destinationInfo: DestinationInfo) = post {
             val d = destinationInfo.takeIf { it.latitude != 0.0 || it.longitude != 0.0 }
-                ?.let { Destination(it.name, it.latitude, it.longitude, it.remainDistance) }
+                ?.let {
+                    Destination(
+                        it.name, it.latitude, it.longitude, it.remainDistance,
+                        it.poiId.orEmpty(), it.poiSubId.orEmpty(), it.address.orEmpty(), it.poiProvider.orEmpty(),
+                        it.displayLatitude, it.displayLongitude,
+                    )
+                }
             destination = d
             listener.onDestination(d)
         }
@@ -118,7 +130,7 @@ class NaviClient(context: Context, private val listener: Listener) {
     /** Send the destination (optionally via the charging stop) to the navigation; it opens its own route screen. */
     fun go(viaStop: ChargingStop?) {
         val d = destination ?: return listener.onNaviError("목적지 없음")
-        val route = RouteInfo(d.latitude, d.longitude, null, null, d.name, "", "", "", RouteOption.RECOMMENDED, "", false)
+        val route = routeFor(d)
         try {
             if (viaStop == null) {
                 helper.requestRoute(route)
@@ -158,5 +170,11 @@ class NaviClient(context: Context, private val listener: Listener) {
 
     companion object {
         private const val REQUEST_TIMEOUT_MS = 5_000L
+
+        /** The navi route request for [d], carrying its POI identity (see [Destination]). */
+        fun routeFor(d: Destination) = RouteInfo(
+            d.latitude, d.longitude, d.displayLatitude, d.displayLongitude,
+            d.name, d.poiId, d.address, d.poiSubId, RouteOption.RECOMMENDED, d.poiProvider, false,
+        )
     }
 }

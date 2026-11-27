@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Stay (left) and Go (right) keep their places; the recommended one is the filled primary action. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/buttons"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/btn_primary"
+    android:orientation="horizontal">
+
+    <LinearLayout
+        android:id="@+id/stayButton"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/btn_pad_h"
+        android:paddingEnd="@dimen/btn_pad_h">
+
+        <ImageView
+            android:id="@+id/stayIcon"
+            android:layout_width="@dimen/btn_icon"
+            android:layout_height="@dimen/icon"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_plug" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/btn_icon_gap"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/stayTitle"
+                style="@style/T.Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:text="Stay · 더 충전"
+                android:textSize="@dimen/t_btn" />
+
+            <TextView
+                android:id="@+id/staySub"
+                style="@style/T.Caption"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:singleLine="true"
+                android:text=" "
+                android:textSize="28sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/goButton"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_marginStart="24dp"
+        android:layout_weight="1"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/btn_pad_h"
+        android:paddingEnd="@dimen/btn_pad_h">
+
+        <ImageView
+            android:id="@+id/goIcon"
+            android:layout_width="@dimen/btn_icon"
+            android:layout_height="@dimen/icon"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_navigate" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/btn_icon_gap"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/goTitle"
+                style="@style/T.Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:text="Go · 지금 출발"
+                android:textSize="@dimen/t_btn" />
+
+            <TextView
+                android:id="@+id/goSub"
+                style="@style/T.Caption"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:singleLine="true"
+                android:text="목적지 경로를 내비로"
+                android:textSize="28sp" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

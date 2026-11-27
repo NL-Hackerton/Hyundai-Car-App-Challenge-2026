@@ -9,6 +9,7 @@ import ai.staygo.decision.Inputs
 import ai.staygo.decision.Params
 import ai.staygo.navi.NaviClient
 import ai.staygo.signal.PowerEstimator
+import ai.staygo.ui.HeroPresenter
 import ai.staygo.ui.PowerChart
 import ai.staygo.ui.SocBar
 import ai.staygo.vehicle.VehicleSignals
@@ -19,9 +20,9 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
-import android.text.Html
 import android.util.Log
 import android.view.View
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.ComponentActivity
@@ -58,6 +59,9 @@ class MainActivity : ComponentActivity(), VehicleSignals.Listener, NaviClient.Li
     private var lastTripSoc: Int? = null
 
     private var lastDecision: Decision? = null
+    private var narrow = false
+    /** The Go toast is shown once per charging session (the verdict can flicker while the navi re-routes). */
+    private var goToastShown = false
     private var toastHide: Runnable? = null
 
     private val permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { startSignals() }
@@ -68,15 +72,39 @@ class MainActivity : ComponentActivity(), VehicleSignals.Listener, NaviClient.Li
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        inflate()
         bands = BandHistory(this)
         vehicle = VehicleSignals(this, this)
         navi = NaviClient(this, this)
-        findViewById<View>(R.id.goButton).setOnClickListener { onGo() }
-        findViewById<View>(R.id.stayButton).setOnClickListener { onStay() }
         val needed = listOf("pleos.car.permission.CAR_ENERGY", "android.car.permission.CAR_ENERGY", "pleos.car.permission.CAR_INFO", "android.car.permission.CAR_INFO")
             .filter { ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED }
         if (needed.isEmpty()) startSignals() else permissionLauncher.launch(needed.toTypedArray())
+        render()
+    }
+
+    /** Picks the layout for the current window (narrow/portrait vs wide) and day/night colors. */
+    private fun inflate() {
+        setContentView(R.layout.activity_main)
+        findViewById<View>(R.id.goButton).setOnClickListener { onGo() }
+        findViewById<View>(R.id.stayButton).setOnClickListener { onStay() }
+        // Narrow windows (three tiles share the width): no tile notes or "추정" tag; the hero carries the reason.
+        // Short narrow windows (e.g. Connect-W wide window 1040x850dp) also drop the tile visuals, the route
+        // line and the footer, and keep the reason to one line, so the hero is never squeezed.
+        val c = resources.configuration
+        narrow = c.screenWidthDp < 1100
+        val compact = narrow && c.screenHeightDp < 1000
+        fun show(id: Int, on: Boolean) { findViewById<View>(id).visibility = if (on) View.VISIBLE else View.GONE }
+        listOf(R.id.socNote, R.id.powerNote, R.id.arrivalNote).forEach { show(it, !narrow) }
+        listOf(R.id.socBar, R.id.powerChart, R.id.arrivalBar).forEach { show(it, !compact) }
+        (findViewById<View>(R.id.routeText).parent as View).visibility = if (compact) View.GONE else View.VISIBLE
+        (findViewById<View>(R.id.footText).parent as View).visibility = if (compact) View.GONE else View.VISIBLE
+        findViewById<TextView>(R.id.reasonText).maxLines = if (compact) 1 else 2
+    }
+
+    override fun onConfigurationChanged(newConfig: android.content.res.Configuration) {
+        super.onConfigurationChanged(newConfig)
+        lastDecision?.let { Log.i(TAG, "config ${newConfig.screenWidthDp}x${newConfig.screenHeightDp}dp night=${newConfig.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK}") }
+        inflate()
         render()
     }
 
@@ -230,103 +258,138 @@ class MainActivity : ComponentActivity(), VehicleSignals.Listener, NaviClient.Li
             bandPowerKw = cand?.arrivalSoc?.let { bands.max(it.toInt()) }, capacityKwh = capacityWh / 1000.0, params = params,
         )
         val d = DecisionModel.decide(inputs)
-        if (d.rule != lastDecision?.rule || d.emphasis != lastDecision?.emphasis) {
+        val previous = lastDecision
+        if (d.rule != previous?.rule || d.emphasis != previous?.emphasis) {
             Log.i(TAG, "DECISION rule=${d.rule} emphasis=${d.emphasis} state=${d.state} soc=$soc A=${a?.let { "%.1f".format(it) }} P=${power?.let { "%.1f".format(it) }} Pmax=${pmax?.let { "%.1f".format(it) }} cand=${cand?.name}/${cand?.arrivalSoc}/${cand?.maxPowerKw}")
         }
         lastDecision = d
+        val hero = HeroPresenter.present(d, a, soc, params)
 
         findViewById<View>(R.id.drivingOverlay).visibility = if (requiresDo) View.VISIBLE else View.GONE
         text(R.id.drivingSummary, a?.let { "목적지 도착 예상 SOC ${it.roundToInt()}% · ${if (destinationTrip?.chargingStop == null) "충전 경유 없음" else "경유 충전 포함 경로"}" } ?: "Stay·Go 판단은 정차 중에 보여 줍니다")
 
-        val dot = findViewById<View>(R.id.statusDot)
-        (dot.background.mutate() as GradientDrawable).setColor(color(when (charging) { ChargingStatus.CHARGING -> R.color.green; ChargingStatus.FINISHED -> R.color.blue; else -> R.color.muted }))
-        text(R.id.statusText, when (charging) {
-            ChargingStatus.CHARGING -> "급속충전 중 · 정차(조작 가능)"
-            ChargingStatus.FINISHED -> "충전 종료 · 정차"
-            else -> "충전 중이 아닙니다 · 정차"
-        })
-        text(R.id.destChip, destination?.let { "목적지 ${it.name} · ${(it.remainDistanceM / 1000.0).roundToInt()} km" } ?: "목적지 없음")
+        renderTopBar(charging)
+        renderHero(hero, d, cand)
+        renderMetrics(charging, power, pmax, a)
+        renderButtons(d, hero, power)
+        renderFooter(d, charging)
 
-        findViewById<TextView>(R.id.socText).text = soc?.let { "$it%" } ?: "--%"
+        // Optional Go toast: once, when the recommendation turns to Go while charging (not while driving).
+        if (charging == ChargingStatus.NOT_CHARGING) goToastShown = false
+        if (!goToastShown && hero.verdict == HeroPresenter.Verdict.GO && hero.strong && previous != null && previous.emphasis != Emphasis.GO && !requiresDo) {
+            goToastShown = true
+            showToast("지금 출발해도 됩니다 · ${a?.let { "목적지 ${it.roundToInt()}% 도착" } ?: "충전 후반"}", R.drawable.ic_navigate)
+        }
+    }
+
+    private fun renderTopBar(charging: ChargingStatus) {
+        val dot = findViewById<View>(R.id.statusDot)
+        (dot.background.mutate() as GradientDrawable).setColor(color(when (charging) {
+            ChargingStatus.CHARGING -> R.color.sg_stay
+            ChargingStatus.FINISHED -> R.color.sg_go
+            else -> R.color.sg_text_3
+        }))
+        text(R.id.statusText, when (charging) {
+            ChargingStatus.CHARGING -> "급속충전 중 · 정차"
+            ChargingStatus.FINISHED -> "충전 종료 · 정차"
+            else -> "충전 중 아님 · 정차"
+        })
+        text(R.id.destChip, destination?.let { "${it.name} · ${(it.remainDistanceM / 1000.0).roundToInt()} km" } ?: "목적지 없음")
+    }
+
+    private fun renderHero(hero: HeroPresenter.Hero, d: Decision, cand: Candidate?) {
+        val pill = findViewById<TextView>(R.id.verdictPill)
+        val (label, bg, fg) = when (hero.verdict) {
+            HeroPresenter.Verdict.GO -> Triple("GO", if (hero.strong) R.color.sg_go else R.color.sg_card_high, if (hero.strong) R.color.sg_on_go else R.color.sg_go_text)
+            HeroPresenter.Verdict.STAY -> Triple("STAY", if (hero.strong) R.color.sg_stay else R.color.sg_card_high, if (hero.strong) R.color.sg_on_stay else R.color.sg_text)
+            HeroPresenter.Verdict.WAIT -> Triple("대기", R.color.sg_card_high, R.color.sg_text_2)
+        }
+        pill.text = label
+        pill.background = pillDrawable(color(bg))
+        pill.setTextColor(color(fg))
+        text(R.id.headlineText, hero.headline)
+        text(R.id.reasonText, hero.reason)
+        val chip = findViewById<TextView>(R.id.heroChip)
+        if (hero.chip == null) chip.visibility = View.GONE else {
+            chip.visibility = View.VISIBLE
+            chip.text = hero.chip
+            val (cbg, cfg) = when (hero.chipTone) {
+                HeroPresenter.Tone.WARNING -> R.color.sg_warn to R.color.sg_on_warn
+                HeroPresenter.Tone.POSITIVE -> R.color.sg_stay to R.color.sg_on_stay
+                HeroPresenter.Tone.NEUTRAL -> R.color.sg_card_high to R.color.sg_text_2
+            }
+            chip.background = pillDrawable(color(cbg))
+            chip.setTextColor(color(cfg))
+        }
+        text(R.id.routeText, routeLine(d, cand))
+    }
+
+    /** One line about the navi route (charging stop or direct), replacing the former route card. */
+    private fun routeLine(d: Decision, cand: Candidate?): String {
+        val trip = destinationTrip
+        return when {
+            destination == null || trip == null -> "내비 경로 정보를 기다리는 중"
+            trip.chargingStop == null -> "내비 경로 · 충전 경유 없이 목적지 직행"
+            else -> {
+                val name = shortName(trip.chargingStop.name)
+                val c = d.comparison
+                when {
+                    cand?.arrivalSoc == null -> "내비 경로 · 경유 충전 $name · 경유지 도착 SOC 계산 중"
+                    c != null && c.gainMinutes > 0 -> "내비 경로 · $name 에서 채우면 약 ${"%.1f".format(c.gainMinutes)}분 빠름"
+                    c != null -> "내비 경로 · 여기서 ${"%.1f".format(c.hereMinutes)}분 / $name ${"%.1f".format(c.candidateMinutes)}분"
+                    else -> "내비 경로 · 경유 충전 $name (도착 SOC ${cand.arrivalSoc.roundToInt()}%)"
+                }
+            }
+        }
+    }
+
+    private fun renderMetrics(charging: ChargingStatus, power: Double?, pmax: Double?, a: Double?) {
+        text(R.id.socText, soc?.let { "$it%" } ?: "--%")
         findViewById<SocBar>(R.id.socBar).apply { socPercent = soc; this.charging = charging == ChargingStatus.CHARGING }
-        text(R.id.powerText, power?.let { "충전전력 ${it.roundToInt()} kW" } ?: "충전전력 확인 중")
-        findViewById<View>(R.id.powerTag).visibility = if (power != null && powerEstimated()) View.VISIBLE else View.GONE
+        text(R.id.socNote, when (charging) {
+            ChargingStatus.CHARGING -> "${levelWh?.let { "%.1f".format(it / 1000) } ?: "--"} / ${(capacityWh / 1000).roundToInt()} kWh"
+            ChargingStatus.FINISHED -> "충전이 끝났습니다"
+            else -> "충전을 시작하면 판단합니다"
+        })
+
+        text(R.id.powerText, power?.roundToInt()?.toString() ?: "--")
+        val trend = if (power != null) HeroPresenter.trend(powerHistory) else null
+        text(R.id.powerTrend, when (trend) { HeroPresenter.Trend.DOWN -> "↓"; HeroPresenter.Trend.UP -> "↑"; HeroPresenter.Trend.FLAT -> "→"; null -> " " })
+        findViewById<View>(R.id.powerTag).visibility = if (!narrow && power != null && powerEstimated()) View.VISIBLE else View.GONE
         text(R.id.powerNote, when {
             power == null || pmax == null -> "배터리 잔량 변화로 전력을 계산합니다"
             !estimator.pmaxTrusted -> "세션 최대를 믿을 수 없어 SOC 기준으로 판단"
-            else -> "세션 최대 ${pmax.roundToInt()} kW의 ${(power / pmax * 100).roundToInt()}%"
+            else -> "최대 ${pmax.roundToInt()} kW의 ${(power / pmax * 100).roundToInt()}%"
         })
         findViewById<PowerChart>(R.id.powerChart).update(powerHistory, pmax, params.lateRatio)
 
-        renderArrival(d, a)
-        renderRoute(d, cand)
-        renderButtons(d, power)
-        renderFooter(d, charging)
-    }
-
-    private fun renderArrival(d: Decision, a: Double?) {
-        val arrival = findViewById<TextView>(R.id.arrivalText)
-        val note = findViewById<TextView>(R.id.arrivalNote)
-        when {
-            destination == null -> { arrival.text = "목적지를 설정하면 계산합니다"; note.text = "내비에 목적지가 없어 Go를 잠갔습니다"; note.setTextColor(color(R.color.muted)) }
-            a == null -> { arrival.text = "내비 계산을 기다리는 중"; note.text = " " }
-            else -> {
-                val ok = a >= params.reserveSocPct
-                val hex = if (ok) "#1F6FD1" else "#B26A00"
-                arrival.text = Html.fromHtml("목적지에 <b><font color='$hex'>${a.roundToInt()}%</font></b>로 도착", Html.FROM_HTML_MODE_LEGACY)
-                val basis = if (destinationTrip?.chargingStop != null) "충전 경유 없이 갈 때 · " else ""
-                if (ok) {
-                    note.text = "${basis}예비 SOC ${params.reserveSocPct.roundToInt()}%p 충족"
-                    note.setTextColor(color(R.color.green_text))
-                } else {
-                    val wait = d.extraWaitMinutes?.let { " · 현재 전력으로 약 ${"%.1f".format(it)}분 더" } ?: ""
-                    note.text = "${basis}예비 SOC까지 ${"%.1f".format(params.reserveSocPct - a)}%p 부족$wait"
-                    note.setTextColor(color(R.color.amber))
-                }
-            }
+        val reserve = params.reserveSocPct.roundToInt()
+        text(R.id.arrivalText, a?.let { "${it.roundToInt()}%" } ?: "--%")
+        findViewById<SocBar>(R.id.arrivalBar).apply {
+            socPercent = a?.roundToInt()
+            markerPercent = reserve
+            fillColor = color(if (a != null && a >= params.reserveSocPct) R.color.sg_stay else R.color.sg_warn)
         }
+        text(R.id.arrivalNote, when {
+            destination == null -> "내비에 목적지를 설정하면 계산합니다"
+            a == null -> "내비 계산을 기다리는 중"
+            a >= params.reserveSocPct -> "예비 $reserve% 충족"
+            else -> "예비 $reserve%까지 ${"%.1f".format(params.reserveSocPct - a)}%p"
+        })
     }
 
-    private fun renderRoute(d: Decision, cand: Candidate?) {
-        val title = findViewById<TextView>(R.id.routeText)
-        val note = findViewById<TextView>(R.id.routeNote)
-        val trip = destinationTrip
-        when {
-            destination == null || trip == null -> { title.text = " "; note.text = " " }
-            trip.chargingStop == null -> {
-                title.text = "충전 경유 없이 목적지 직행"
-                note.text = "직행 도착 SOC가 10% 이상이라 경유 충전안이 없습니다"
-                note.setTextColor(color(R.color.muted))
-            }
-            else -> {
-                title.text = "경유 충전 · ${shortName(trip.chargingStop.name)}"
-                val c = d.comparison
-                note.setTextColor(color(if (c != null && c.gainMinutes > 0) R.color.blue else R.color.muted))
-                note.text = when {
-                    cand?.arrivalSoc == null -> "경유지 도착 SOC를 계산하는 중"
-                    c != null && c.gainMinutes > 0 -> "지금 출발해 경유지에서 채우면 약 ${"%.1f".format(c.gainMinutes)}분 빠름 (최대 ${cand.maxPowerKw?.roundToInt()} kW · ${cand.chargerCount}기)"
-                    c != null -> "여기서 채우면 ${"%.1f".format(c.hereMinutes)}분, 경유지는 ${"%.1f".format(c.candidateMinutes)}분 (정차 ${params.stopOverheadMin.roundToInt()}분 포함)"
-                    cand.maxPowerKw == null -> "경유지 도착 SOC ${cand.arrivalSoc.roundToInt()}% · 최대 출력 미확인으로 비교 생략"
-                    else -> "경유지 도착 SOC ${cand.arrivalSoc.roundToInt()}% · 예비 SOC 미만이라 비교 생략"
-                }
-            }
-        }
-    }
-
-    private fun renderButtons(d: Decision, power: Double?) {
-        val stayFilled = d.emphasis == Emphasis.STAY || d.emphasis == Emphasis.BOTH_STAY
-        val goFilled = d.emphasis == Emphasis.GO
-        styleButton(R.id.stayButton, R.id.stayTitle, R.id.staySub, stayFilled, R.color.green)
-        styleButton(R.id.goButton, R.id.goTitle, R.id.goSub, goFilled, R.color.blue)
-        text(R.id.stayTitle, if (stayFilled) "Stay · 더 충전  권장" else "Stay · 더 충전")
-        text(R.id.goTitle, if (goFilled) "Go · 지금 출발  권장" else "Go · 지금 출발")
-        text(R.id.staySub, power?.let { "1%p당 약 ${DecisionModel.secondsPerPercent(capacityWh / 1000.0, it).roundToInt()}초 (현재 전력 기준)" } ?: " ")
+    private fun renderButtons(d: Decision, hero: HeroPresenter.Hero, power: Double?) {
+        val stayPrimary = hero.verdict == HeroPresenter.Verdict.STAY && hero.strong
+        val goPrimary = hero.verdict == HeroPresenter.Verdict.GO && hero.strong
+        styleButton(R.id.stayButton, R.id.stayIcon, R.id.stayTitle, R.id.staySub, stayPrimary, R.color.sg_stay, R.color.sg_on_stay)
+        styleButton(R.id.goButton, R.id.goIcon, R.id.goTitle, R.id.goSub, goPrimary, R.color.sg_go, R.color.sg_on_go)
+        text(R.id.staySub, power?.let { "1%p당 약 ${DecisionModel.secondsPerPercent(capacityWh / 1000.0, it).roundToInt()}초" } ?: "현재 전력으로 계속 충전")
         text(R.id.goSub, when {
             destination == null -> "목적지가 없어 잠김"
-            d.rule == 5 -> "${shortName(destinationTrip?.chargingStop?.name ?: "")}을 거치는 경로를 내비에 전달"
-            else -> "목적지 경로를 내비에 전달"
+            d.rule == 5 -> "${shortName(destinationTrip?.chargingStop?.name ?: "")} 경유 경로를 내비로"
+            else -> "목적지 경로를 내비로"
         })
-        findViewById<View>(R.id.goButton).alpha = if (destination == null) 0.45f else 1f
+        findViewById<View>(R.id.goButton).apply { isEnabled = destination != null; alpha = if (destination == null) 0.4f else 1f }
     }
 
     private fun renderFooter(d: Decision, charging: ChargingStatus) {
@@ -334,12 +397,12 @@ class MainActivity : ComponentActivity(), VehicleSignals.Listener, NaviClient.Li
         val foot = findViewById<TextView>(R.id.footText)
         if (since == null || charging != ChargingStatus.CHARGING) {
             foot.text = "앱은 충전 중에만 Stay·Go를 판단합니다"
-            foot.setTextColor(color(R.color.muted))
+            foot.setTextColor(color(R.color.sg_text_3))
         } else {
             val min = ((SystemClock.elapsedRealtime() - since) / 60_000L).toInt()
             val warn = min >= 50
-            foot.text = if (warn) "충전 확인 후 ${min}분 · 급속충전구역 1시간 점유 제한까지 ${60 - min}분" else "충전 확인 후 ${min}분 경과 · 급속충전구역 1시간 점유 제한 안내"
-            foot.setTextColor(color(if (warn) R.color.amber else R.color.muted))
+            foot.text = if (warn) "충전 ${min}분 · 급속충전구역 1시간 점유 제한까지 ${60 - min}분" else "충전 확인 후 ${min}분 · 급속충전구역 1시간 점유 제한 안내"
+            foot.setTextColor(color(if (warn) R.color.sg_text else R.color.sg_text_3))
         }
         text(R.id.ruleText, when (d.rule) {
             1 -> "판단 규칙 1 · 충전 상태"
@@ -352,24 +415,37 @@ class MainActivity : ComponentActivity(), VehicleSignals.Listener, NaviClient.Li
         })
     }
 
-    private fun styleButton(container: Int, title: Int, sub: Int, filled: Boolean, accent: Int) {
-        val bg = GradientDrawable().apply {
-            cornerRadius = 32f
-            if (filled) { setColor(color(accent)); setStroke(4, color(accent)) } else { setColor(Color.WHITE); setStroke(4, color(R.color.line)) }
+    /** Pleos basic (tonal) vs filled button; ripple gives pressed feedback well under the 0.25 s response rule. */
+    private fun styleButton(container: Int, icon: Int, title: Int, sub: Int, primary: Boolean, fill: Int, onFill: Int) {
+        val radius = resources.getDimension(R.dimen.btn_radius)
+        val shape = GradientDrawable().apply {
+            cornerRadius = radius
+            setColor(color(if (primary) fill else R.color.sg_basic))
+            if (!primary) setStroke(dp(2), color(R.color.sg_line))
         }
-        findViewById<LinearLayout>(container).background = bg
-        findViewById<TextView>(title).setTextColor(if (filled) Color.WHITE else color(R.color.ink))
-        findViewById<TextView>(sub).setTextColor(if (filled) 0xE6FFFFFF.toInt() else color(R.color.ink_soft))
+        val mask = GradientDrawable().apply { cornerRadius = radius; setColor(Color.WHITE) }
+        val ripple = android.graphics.drawable.RippleDrawable(
+            android.content.res.ColorStateList.valueOf(color(R.color.sg_basic_pressed)), shape, mask,
+        )
+        findViewById<LinearLayout>(container).background = ripple
+        val fg = color(if (primary) onFill else R.color.sg_text)
+        findViewById<TextView>(title).setTextColor(fg)
+        findViewById<TextView>(sub).setTextColor(if (primary) fg else color(R.color.sg_text_3))
+        findViewById<ImageView>(icon).imageTintList = android.content.res.ColorStateList.valueOf(if (primary) fg else color(if (fill == R.color.sg_go) R.color.sg_go_text else R.color.sg_text_2))
     }
 
-    private fun showToast(message: String) {
+    private fun pillDrawable(fill: Int) = GradientDrawable().apply { cornerRadius = dp(999).toFloat(); setColor(fill) }
+
+    private fun dp(v: Int) = (v * resources.displayMetrics.density).roundToInt()
+
+    private fun showToast(message: String, icon: Int? = null) {
         val t = findViewById<TextView>(R.id.toast)
         t.text = message
+        t.setCompoundDrawablesRelativeWithIntrinsicBounds(icon ?: 0, 0, 0, 0)
         t.visibility = View.VISIBLE
         toastHide?.let { main.removeCallbacks(it) }
-        toastHide = Runnable { t.visibility = View.GONE }.also { main.postDelayed(it, 2_500L) }
+        toastHide = Runnable { t.visibility = View.GONE }.also { main.postDelayed(it, 4_000L) }
     }
-
     private fun text(id: Int, value: CharSequence) { findViewById<TextView>(id).text = value }
     private fun color(id: Int) = ContextCompat.getColor(this, id)
 

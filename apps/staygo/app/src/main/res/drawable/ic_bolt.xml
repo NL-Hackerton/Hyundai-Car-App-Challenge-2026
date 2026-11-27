@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 48dp icon (Pleos base grid), filled: charging -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="48dp" android:height="48dp" android:viewportWidth="48" android:viewportHeight="48" android:tint="?android:attr/textColorPrimary">
+    <path android:fillColor="#FFFFFF" android:pathData="M27,4 L10,27 L22,27 L19,44 L38,20 L26,20 Z" />
+</vector>

@@ -33,4 +33,4 @@ Pleos Connect 에뮬레이터 v2.1.0에서 확인했다. `tools/demo_charge.sh`�
 
 ## 라이선스
 
-글꼴 Pretendard는 SIL Open Font License 1.1을 따른다(`licenses/Pretendard-OFL.txt`).
+글꼴 Asta Sans(Pleos Connect 시스템 글꼴, 가변 글꼴 한 파일)는 SIL Open Font License 1.1을 따른다(`licenses/AstaSans-OFL.txt`). 화면 색·크기는 Pleos Connect 2.1.5 디자인 토큰을 따른다(`pt/ui/README.md`).

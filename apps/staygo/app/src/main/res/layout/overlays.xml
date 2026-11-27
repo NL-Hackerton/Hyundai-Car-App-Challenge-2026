@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- CarUxRestrictions: while distraction optimization is required, only one summary line remains. -->
+    <LinearLayout
+        android:id="@+id/drivingOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/color_overlay_driving"
+        android:clickable="true"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="@dimen/page_pad"
+        android:visibility="gone">
+
+        <ImageView
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_lock"
+            android:tint="#A3FFFFFF" />
+
+        <TextView
+            style="@style/T.Headline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:gravity="center"
+            android:text="주행 중에는 조작할 수 없습니다"
+            android:textColor="@color/color_static_light_100" />
+
+        <TextView
+            android:id="@+id/drivingSummary"
+            style="@style/T.BodyL"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:gravity="center"
+            android:text=" "
+            android:textColor="#D6FFFFFF"
+            android:textSize="40sp" />
+    </LinearLayout>
+
+    <!-- Pleos toast (24dp side margin, max width 792dp, padding 40/24, 48dp icon), lifted above the
+         Stay/Go action row so it never covers the buttons. -->
+    <TextView
+        android:id="@+id/toast"
+        style="@style/T.Label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginStart="@dimen/toast_margin"
+        android:layout_marginEnd="@dimen/toast_margin"
+        android:layout_marginBottom="@dimen/toast_above_actions"
+        android:background="@drawable/bg_toast"
+        android:drawablePadding="20dp"
+        android:drawableTint="@color/sg_on_toast"
+        android:elevation="8dp"
+        android:gravity="center_vertical"
+        android:maxWidth="@dimen/toast_max"
+        android:paddingStart="@dimen/toast_pad_h"
+        android:paddingTop="@dimen/toast_pad_v"
+        android:paddingEnd="@dimen/toast_pad_h"
+        android:paddingBottom="@dimen/toast_pad_v"
+        android:textColor="@color/sg_on_toast"
+        android:textSize="34sp"
+        android:visibility="gone" />
+</merge>

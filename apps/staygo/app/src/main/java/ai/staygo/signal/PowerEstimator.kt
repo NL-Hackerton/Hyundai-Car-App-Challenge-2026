@@ -5,8 +5,11 @@ package ai.staygo.signal
  *
  * A raw estimate uses a 10 s window (at least 5 s of span). Console or VHAL step changes make the raw value
  * spike to thousands of kW, so the reported power is the median of raw estimates over the last 30 s.
- * The session maximum Pmax is the largest median seen. Pmax is not trusted when, during the first 60 s
+ * The session maximum Pmax is the largest power the median held for [sustainMs] (the maximum over time of the
+ * rolling minimum), so a short burst of delayed level updates cannot raise it. Pmax is not trusted when, during the first 60 s
  * after the first estimate, the median only fell: the app was opened after the taper had already started.
+ * Raw estimates above [maxPlausibleKw] are dropped: when level updates stall and the backlog then arrives in a
+ * burst, the burst dominates the 30 s median, and no passenger-EV charge session exceeds that power.
  */
 class PowerEstimator(
     private val windowMs: Long = 10_000L,
@@ -15,7 +18,10 @@ class PowerEstimator(
     private val trustWindowMs: Long = 60_000L,
     private val chargingRiseMs: Long = 30_000L,
     private val stallToleranceMs: Long = 6_000L,
+    private val maxPlausibleKw: Double = 400.0,
+    private val sustainMs: Long = 10_000L,
 ) {
+    private val medians = ArrayDeque<Pair<Long, Double>>()
     private val levels = ArrayDeque<Pair<Long, Double>>()
     private val raws = ArrayDeque<Pair<Long, Double>>()
     private val trustMedians = mutableListOf<Double>()
@@ -59,8 +65,9 @@ class PowerEstimator(
         val span = nowMs - t0
         if (span < minSpanMs) return
         val raw = (wh - e0) / (span / 3_600_000.0) / 1000.0
-        raws.addLast(nowMs to raw)
+        if (raw <= maxPlausibleKw) raws.addLast(nowMs to raw)
         while (raws.isNotEmpty() && nowMs - raws.first().first > medianMs) raws.removeFirst()
+        if (raws.isEmpty()) return
         val median = median(raws.map { it.second })
         powerKw = median.takeIf { it > 0.0 }
 
@@ -75,7 +82,12 @@ class PowerEstimator(
                 pmaxTrusted = !onlyFell
             }
         }
-        if (sessionMaxKw == null || p > sessionMaxKw!!) sessionMaxKw = p
+        medians.addLast(nowMs to p)
+        while (nowMs - medians.first().first > sustainMs) medians.removeFirst()
+        if (nowMs - first >= sustainMs) {
+            val held = medians.minOf { it.second }
+            if (sessionMaxKw == null || held > sessionMaxKw!!) sessionMaxKw = held
+        }
     }
 
     companion object {

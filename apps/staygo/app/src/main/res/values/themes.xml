@@ -1,8 +1,32 @@
 <resources>
-    <style name="Theme.StayGo" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="android:windowBackground">@color/bg</item>
-        <item name="android:fontFamily">@font/pretendard</item>
-        <item name="fontFamily">@font/pretendard</item>
-        <item name="android:textColor">@color/ink</item>
+    <!-- DayNight: follows the head unit's day/night setting (Pleos colors auto light/dark). -->
+    <style name="Theme.StayGo" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="android:windowBackground">@color/sg_bg</item>
+        <item name="android:statusBarColor">@color/sg_bg</item>
+        <item name="android:fontFamily">@font/asta_sans</item>
+        <item name="fontFamily">@font/asta_sans</item>
+        <item name="android:textColor">@color/sg_text</item>
     </style>
+
+    <!-- Pleos Connect type scale (Asta Sans, Connect-S sizes from the 2.1.5 kit: size/line height in sp). -->
+    <style name="T" parent="android:Widget.TextView">
+        <item name="android:fontFamily">@font/asta_sans</item>
+        <item name="android:textColor">@color/sg_text</item>
+        <item name="android:includeFontPadding">false</item>
+        <!-- Korean: break between phrases, not inside a word (API 33+) -->
+        <item name="android:lineBreakWordStyle">phrase</item>
+        <item name="android:breakStrategy">balanced</item>
+    </style>
+    <!-- Feature 112/134 ExtraBold: the three key numbers -->
+    <style name="T.Feature"><item name="android:textSize">@dimen/t_feature</item><item name="android:textFontWeight">800</item><item name="android:letterSpacing">-0.02</item></style>
+    <!-- Headline 60/80 Bold: hero headline -->
+    <style name="T.Headline"><item name="android:textSize">@dimen/t_headline</item><item name="android:textFontWeight">700</item><item name="android:lineSpacingExtra">8sp</item></style>
+    <!-- Title 48/64 Bold: verdict pill, primary action -->
+    <style name="T.Title"><item name="android:textSize">@dimen/t_title</item><item name="android:textFontWeight">700</item></style>
+    <!-- Body L 36/44 Regular: reason line -->
+    <style name="T.BodyL"><item name="android:textSize">@dimen/t_body_l</item><item name="android:textColor">@color/sg_text_2</item><item name="android:lineSpacingExtra">8sp</item></style>
+    <!-- Label 32/40 Bold: card labels, chips, secondary action -->
+    <style name="T.Label"><item name="android:textSize">@dimen/t_label</item><item name="android:textFontWeight">700</item></style>
+    <!-- Caption 26/34 Regular: footnotes (never below the guide's 3 mm secondary text) -->
+    <style name="T.Caption"><item name="android:textSize">@dimen/t_caption</item><item name="android:textColor">@color/sg_text_3</item></style>
 </resources>
